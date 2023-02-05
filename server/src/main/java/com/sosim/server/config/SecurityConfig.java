@@ -18,6 +18,8 @@ public class SecurityConfig {
                 // CSRF
                 .csrf().disable()
 
+                .httpBasic().disable()
+
                 // 세션 STATELESS 설정
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
