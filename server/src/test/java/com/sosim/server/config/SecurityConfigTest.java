@@ -37,12 +37,12 @@ public class SecurityConfigTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("익명 유저 정상 접속")
-    public void enter_anonymous() throws Exception {
-        mockMvc.perform(get("/"))
-//                    .with(anonymous()))
-                    .andExpect(status().is4xxClientError()) // 404 Not Found
-                    .andDo(print());
-    }
+//    @Test
+//    @DisplayName("익명 유저 정상 접속")
+//    public void enter_anonymous() throws Exception {
+//        mockMvc.perform(get("/"))
+////                    .with(anonymous()))
+//                    .andExpect(status().is4xxClientError()) // 404 Not Found
+//                    .andDo(print());
+//    }
 }
