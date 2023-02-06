@@ -30,8 +30,11 @@ jobs:
           mysql password: '1234'
 
       - name: move directory
-        run: cd server/server/
+        run: cd server/
       
+      - name: move directory
+        run: cd server/
+
       - name: move directory
         run: ls
 
