@@ -36,7 +36,7 @@ jobs:
         run: cd server/
 
       - name: move directory
-        run: ls
+        run: ls -al
 
       - name: move directory
         run: pwd
