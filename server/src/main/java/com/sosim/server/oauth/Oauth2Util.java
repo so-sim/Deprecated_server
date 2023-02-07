@@ -1,10 +1,10 @@
-package com.sosim.server.oauth.util;
+package com.sosim.server.oauth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sosim.server.oauth.util.dto.OauthProfileDto;
-import com.sosim.server.oauth.util.dto.OauthTokenDto;
+import com.sosim.server.oauth.dto.OauthProfileDto;
+import com.sosim.server.oauth.dto.OauthTokenDto;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
