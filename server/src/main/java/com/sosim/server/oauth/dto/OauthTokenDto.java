@@ -1,4 +1,4 @@
-package com.sosim.server.oauth.util.dto;
+package com.sosim.server.oauth.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
