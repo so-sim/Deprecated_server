@@ -40,3 +40,7 @@ spring:
 
     hibernate:
       ddl-auto: create #update
+
+  redis:
+    host: localhost
+    port: 6379
