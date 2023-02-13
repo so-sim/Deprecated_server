@@ -1,7 +1,9 @@
 package com.sosim.server.jwt;
 
 import com.sosim.server.jwt.dao.JwtDao;
+import com.sosim.server.jwt.dao.RedisUser;
 import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.user.UserRepository;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +19,20 @@ public class JwtServiceImpl implements JwtService{
     // TODO injection error fix
 
     private final JwtRepository jwtRepository;
+    private final UserRepository userRepository;
+    private final RedisUserRepository redisUserRepository;
     private final JwtProperties jwtProperties;
     private final JwtFactory jwtFactory;
+
+    public void addRedisUser() {
+        RedisUser redisUser = new RedisUser("jan", 99);
+        redisUserRepository.save(redisUser);
+    }
+
+    public String practiceRedis() {
+//        String refreshToken = jwtFactory.createRefreshToken();
+        return new String();
+    }
 
     @Override
     public String verifyRefreshToken(HttpServletResponse response, String refreshToken) {
