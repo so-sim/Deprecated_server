@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class JwtServiceImpl implements JwtService{
     // TODO injection error fix
-
     private final JwtRepository jwtRepository;
     private final UserRepository userRepository;
     private final RedisUserRepository redisUserRepository;

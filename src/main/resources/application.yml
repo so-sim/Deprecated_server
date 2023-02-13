@@ -1,6 +1,8 @@
 sys:
   version: 0.1.0
 
+
+
 spring:
   profiles:
     group:
@@ -11,6 +13,10 @@ spring:
     import:
       - classpath:/application-jwt.yml
       - classpath:/application-oauth.yml
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 ---
 spring:
@@ -42,7 +48,7 @@ spring:
         show_sql: true
 
     hibernate:
-      ddl-auto: create #update
+      ddl-auto: #create #update
 
   redis:
     host: localhost

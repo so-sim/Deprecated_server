@@ -12,7 +12,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @RequiredArgsConstructor
 @Configuration
-@EnableRedisRepositories
+@EnableRedisRepositories(basePackages = "com.sosim.server.jwt")
 public class RedisConfig {
 
     @Value("${spring.redis.host}")
