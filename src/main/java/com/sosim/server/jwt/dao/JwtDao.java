@@ -1,4 +1,4 @@
-package com.sosim.server.user.redis.dao;
+package com.sosim.server.jwt.dao;
 
 import java.time.Duration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -6,10 +6,10 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RedisDao {
+public class JwtDao {
     private final RedisTemplate<String, String> redisTemplate;
 
-    public RedisDao(RedisTemplate<String, String> redisTemplate) {
+    public JwtDao(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
