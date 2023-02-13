@@ -1,6 +1,6 @@
 package com.sosim.server.security;
 
-import com.sosim.server.user.Users;
+import com.sosim.server.user.User;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -65,15 +65,15 @@ public class AuthUser implements UserDetails, OAuth2User {
         return id;
     }
 
-    public static AuthUser create(Users user) {
+    public static AuthUser create(User user) {
         return AuthUser.builder()
-                .id(user.getSocialId())
-                .socialType(user.getSocialType())
+//                .id(user.getSocialId())
+//                .socialType(user.getSocialType())
                 .authorities(Collections.singleton(new SimpleGrantedAuthority("USER")))
                 .build();
     }
 
-    public static AuthUser create(Users user, Map<String, Object> attributes) {
+    public static AuthUser create(User user, Map<String, Object> attributes) {
         AuthUser authUser = create(user);
         authUser.setAttributes(attributes);
 
