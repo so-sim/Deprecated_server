@@ -6,28 +6,17 @@ import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_SU
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.sosim.server.jwt.util.property.JwtProperties;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@RequiredArgsConstructor
 public class JwtFactoryImpl implements JwtFactory {
 
-    @Value("${jwt.secretKey}")
-    private String secretKey;
-
-    @Value("${jwt.access.expiration}")
-    private Long accessTokenExpirationPeriod;
-
-    @Value("${jwt.refresh.expiration}")
-    private Long refreshTokenExpirationPeriod;
-
-    @Value("${jwt.access.header}")
-    private String accessHeader;
-
-    @Value("${jwt.refresh.header}")
-    private String refreshHeader;
+    private final JwtProperties jwtProperties;
 
     @Override
     public String createAccessToken(String providerId) {
@@ -35,9 +24,9 @@ public class JwtFactoryImpl implements JwtFactory {
         return
             JWT.create()
             .withSubject(ACCESS_TOKEN_SUBJECT)
-            .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod))
+            .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpirationPeriod()))
             .withClaim(PROVIDER_ID_CLAIM, providerId)
-            .sign(Algorithm.HMAC512(secretKey));
+            .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
     @Override
@@ -45,7 +34,7 @@ public class JwtFactoryImpl implements JwtFactory {
         Date now = new Date();
         return JWT.create()
             .withSubject(REFRESH_TOKEN_SUBJECT)
-            .withExpiresAt(new Date(now.getTime() + refreshTokenExpirationPeriod))
-            .sign(Algorithm.HMAC512(secretKey));
+            .withExpiresAt(new Date(now.getTime() + jwtProperties.getRefreshTokenExpirationPeriod()))
+            .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 }
