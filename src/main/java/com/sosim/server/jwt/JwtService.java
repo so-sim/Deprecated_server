@@ -1,6 +1,13 @@
 package com.sosim.server.jwt;
 
+import com.sosim.server.jwt.dao.JwtDao;
+import javax.servlet.http.HttpServletResponse;
+
 public interface JwtService {
 
-    String refresh(String refreshToken);
+
+    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
+
+    String verifyRefreshToken(HttpServletResponse response, String refreshToken);
+    String refreshRefreshToken(JwtDao jwtDao);
 }

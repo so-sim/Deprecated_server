@@ -1,7 +1,11 @@
 package com.sosim.server.jwt;
 
-import org.springframework.stereotype.Repository;
+import com.sosim.server.jwt.dao.JwtDao;
+import java.util.Optional;
+import org.springframework.data.repository.CrudRepository;
 
+// TODO redis repository
+public interface JwtRepository extends CrudRepository<JwtDao, String> {
 
-public interface JwtRepository {
+    Optional<JwtDao> findByRefreshToken(String refreshToken);
 }
