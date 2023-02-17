@@ -1,9 +1,12 @@
 package com.sosim.server.jwt;
 
+import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.jwt.dao.JwtDao;
-import com.sosim.server.jwt.dao.RedisUser;
 import com.sosim.server.jwt.util.property.JwtProperties;
 import com.sosim.server.user.UserRepository;
+import java.time.Duration;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,21 +19,18 @@ import org.springframework.stereotype.Service;
 @Getter
 @Slf4j
 public class JwtServiceImpl implements JwtService{
-    // TODO injection error fix
     private final JwtRepository jwtRepository;
     private final UserRepository userRepository;
     private final RedisUserRepository redisUserRepository;
     private final JwtProperties jwtProperties;
     private final JwtFactory jwtFactory;
+    private final JwtDao jwtDao;
+    private final ObjectMapper objectMapper;
 
-    public void addRedisUser() {
-        RedisUser redisUser = new RedisUser("jan", 99);
-        redisUserRepository.save(redisUser);
-    }
-
-    public String practiceRedis() {
-//        String refreshToken = jwtFactory.createRefreshToken();
-        return new String();
+    @Override
+    public void saveRefreshToken(String accessToken) {
+        jwtDao.setValues(REFRESH_TOKEN_KEY, jwtFactory.createRefreshToken(accessToken), Duration.ofMillis(
+            jwtProperties.getRefreshTokenExpirationPeriod()));
     }
 
     @Override

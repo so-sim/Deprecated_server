@@ -7,7 +7,7 @@ public interface JwtService {
 
 
     void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
-
+    void saveRefreshToken(String accessToken);
     String verifyRefreshToken(HttpServletResponse response, String refreshToken);
     String refreshRefreshToken(JwtDao jwtDao);
 }
