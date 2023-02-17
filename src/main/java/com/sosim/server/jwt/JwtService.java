@@ -1,13 +1,11 @@
 package com.sosim.server.jwt;
 
-import com.sosim.server.jwt.dao.JwtDao;
-import javax.servlet.http.HttpServletResponse;
-
 public interface JwtService {
 
+    void practiceRedis();
 
-    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
+//    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
 
-    String verifyRefreshToken(HttpServletResponse response, String refreshToken);
-    String refreshRefreshToken(JwtDao jwtDao);
+//    String verifyRefreshToken(HttpServletResponse response, String refreshToken);
+//    String refreshRefreshToken(JwtDao jwtDao);
 }

@@ -1,23 +1,31 @@
 package com.sosim.server.redis;
 
 import com.sosim.server.jwt.JwtFactory;
-import com.sosim.server.jwt.JwtFactoryImpl;
 import com.sosim.server.jwt.util.property.JwtProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-
+@SpringBootTest(properties = "spring.config.location=" +
+    "classpath:/application.yml" +
+    ",classpath:/application-jwt.yml"
+)
+@Slf4j
 class RedisTemplateTest {
-    JwtProperties jwtProperties = new JwtProperties();
-
-    JwtFactory jwtFactory = new JwtFactoryImpl(jwtProperties);
-    RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+    @Autowired
+    private JwtProperties jwtProperties;
+    @Autowired
+    private JwtFactory jwtFactory;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
 
     // redis 동작 테스트
     @Test
-    void test1() {
+    void redisTest() {
         // given
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String accessToken = jwtFactory.createAccessToken("1");
@@ -30,7 +38,7 @@ class RedisTemplateTest {
         // then
         String value = valueOperations.get(refreshTokenKey);
         Assertions.assertThat(value).isEqualTo(refreshToken);
-        System.out.println("redis RefreshTokenKey : " + valueOperations.get(refreshTokenKey));
+        log.info("redis RefreshTokenKey : {}",  valueOperations.get(refreshTokenKey));
     }
 
 }
