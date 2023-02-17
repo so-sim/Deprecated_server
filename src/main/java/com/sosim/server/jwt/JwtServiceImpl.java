@@ -38,7 +38,8 @@ public class JwtServiceImpl implements JwtService{
         jwtRepository.findByRefreshToken(refreshToken)
             .ifPresent(jwtDao -> {
                 String reIssuedRefreshToken = refreshRefreshToken(jwtDao);
-                sendAccessAndRefreshToken(response, jwtFactory.createAccessToken(jwtDao.getValues("todo")),
+                // 찾아서 id랑 email가져올것
+                sendAccessAndRefreshToken(response, jwtFactory.createAccessToken(1L, new String()),
                     reIssuedRefreshToken);
             });
 
