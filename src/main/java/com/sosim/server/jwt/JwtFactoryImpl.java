@@ -20,7 +20,7 @@ public class JwtFactoryImpl implements JwtFactory {
     private final JwtProperties jwtProperties;
 
     @Override
-    public String createAccessToken(long id, String email) {
+    public String createAccessToken(String id, String email) {
         Date now = new Date();
 
         return
@@ -32,7 +32,7 @@ public class JwtFactoryImpl implements JwtFactory {
     }
 
     @Override
-    public String createRefreshToken(String accessToken) {
+    public String createRefreshToken() {
         Date now = new Date();
         return JWT.create()
             .withSubject(REFRESH_TOKEN_SUBJECT)
