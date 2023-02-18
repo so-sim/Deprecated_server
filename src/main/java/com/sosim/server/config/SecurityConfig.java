@@ -1,10 +1,9 @@
 package com.sosim.server.config;
 
 import com.sosim.server.jwt.JwtProvider;
-import com.sosim.server.jwt.JwtRepository;
 import com.sosim.server.jwt.JwtService;
-import com.sosim.server.jwt.filter.JwtAuthenticationFilter;
 import com.sosim.server.oauth.CustomOAuth2UserService;
+import com.sosim.server.security.authentication.AuthenticationFilter;
 import com.sosim.server.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +42,7 @@ public class SecurityConfig {
 
         // Jwt 인증 필터
         http
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .oauth2Login()
@@ -54,9 +53,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, jwtProvider, userRepository);
-        return jwtAuthenticationFilter;
+    public AuthenticationFilter authenticationFilter() {
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(jwtProvider, jwtService);
+        return authenticationFilter;
     }
 
 }
