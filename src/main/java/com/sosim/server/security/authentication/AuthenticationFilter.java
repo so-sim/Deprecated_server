@@ -28,7 +28,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return; // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
         }
 
-        //TODO 이부분도 따로 메서드로 뺄지?
         String refreshToken = jwtProvider.extractRefreshToken(request)
             .filter(jwtProvider::isTokenValid)
             .orElse(null);
@@ -41,11 +40,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return; // AccessToken을 재발급하고 인증 처리 방지를 위해 return으로 필터 진행 막기
         }
 
-        // RefreshToken이 없거나 유효하지 않다면, AccessToken을 검사하고 인증을 처리하는 로직 수행
-        // AccessToken이 없거나 유효하지 않다면, 인증 객체가 담기지 않은 상태로 다음 필터로 넘어가기 때문에 403 에러 발생
-        // AccessToken이 유효하다면, 인증 객체가 담긴 상태로 다음 필터로 넘어가기 때문에 인증 성공
+        // AccessToken을 검사하고 인증해서 AccessToken이 유효하다면, 인증 객체가 담긴 상태로 다음 필터로 넘어감
+        // 인증 객체가 담기지 않은 상태로 다음 필터로 넘어가면 403 에러 발생
         if (refreshToken == null) {
-//            checkAccessTokenAndAuthentication(request, response, filterChain);
+            jwtService.checkAccessTokenAndAuthentication(request, response, filterChain);
         }
     }
 }

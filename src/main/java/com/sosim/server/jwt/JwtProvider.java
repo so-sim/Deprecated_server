@@ -8,6 +8,7 @@ public interface JwtProvider {
 
     Optional<String> extractAccessToken(HttpServletRequest request);
     Optional<String> extractRefreshToken(HttpServletRequest request);
+    Optional<String> extractId(String AccessToken);
     boolean isTokenValid(String token);
     String reIssueRefreshToken(String id, String email, String refreshTokenValue);
     String verifyAccessToken(String accessToken);

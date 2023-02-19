@@ -1,7 +1,7 @@
 package com.sosim.server.jwt;
 
 import static com.sosim.server.jwt.util.constant.CustomConstant.BEARER;
-import static com.sosim.server.jwt.util.constant.CustomConstant.EMAIL_CLAIM;
+import static com.sosim.server.jwt.util.constant.CustomConstant.ID_CLAIM;
 import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
 
 import com.auth0.jwt.JWT;
@@ -89,19 +89,20 @@ public class JwtProviderImpl implements JwtProvider {
     }
 
     /**
-     * AccessToken에서 Email 추출
+     * AccessToken에서 Id추출
      * 추출 전에 JWT.require()로 검증기 생성
      * verify로 AceessToken 검증 후
-     * 유효하다면 getClaim()으로 이메일 추출
+     * 유효하다면 getClaim()으로 Id 추출
      * 유효하지 않다면 빈 Optional 객체 반환
      */
-    public Optional<String> extractEmail(String accessToken) {
+    @Override
+    public Optional<String> extractId(String accessToken) {
         try {
             // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
                 .build() // 반환된 빌더로 JWT verifier 생성
                 .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-                .getClaim(EMAIL_CLAIM) // claim(Emial) 가져오기
+                .getClaim(ID_CLAIM) // claim(Emial) 가져오기
                 .asString());
         } catch (Exception e) {
             log.error("액세스 토큰이 유효하지 않습니다.");

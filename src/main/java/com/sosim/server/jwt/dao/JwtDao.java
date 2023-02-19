@@ -13,9 +13,10 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 @Component
-// TODO id, email, refreshTokenValue 얘네를 세트로 묶어보자
 public class JwtDao {
     private final RedisTemplate<String, String> redisTemplate;
+    private String refreshToken;
+
 
     public JwtDao(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -58,7 +59,6 @@ public class JwtDao {
 
     // TODO 이게 맞나? 뭔가 이상함을 느끼고있음..테스트 필요
     public List<String> getHashes(String key, String hashKey) {
-        Map<String, List<String>> hashMap = new HashMap<>();
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         List<String> list = (List) hashOperations.get(key, hashKey);
         return list;
