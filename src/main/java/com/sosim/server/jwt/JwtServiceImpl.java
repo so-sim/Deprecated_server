@@ -28,7 +28,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-// DB와 관련된 부분들 - redis
 @Service
 @RequiredArgsConstructor
 @Getter
@@ -64,31 +63,14 @@ public class JwtServiceImpl implements JwtService{
         // : id와 email로 accessToken을 만들어야 하니 레디스에 해당 값이 있어야 할듯
         // 1. 간단하게 refreshToken값을 id로 해서 value에 id를 저장하고 id로 email을 꺼내오거나
         // 2. refreshToken, id, email이렇게 일렬로 된 데이터를 저장 :
-        // 맵 형태로 저장 : key-id, value-[refreshToken, email]
+        // 맵 형태로 저장 : key-hashKey-List, refreshToken-[id, email]
 
         // 1.
 //        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 //        String refreshTokenValue = valueOperations.get(REFRESH_TOKEN_KEY);
 //        log.info("redis RefreshTokenKey : {}", valueOperations.get(refreshTokenValue));
 
-        // TODO 2. 실험한 내용, test code로 이동시킬것(브랜치 이동해서)
-        // 이런식으로 만든 곳에서 꺼내서
-//        HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
-//        Map<String, Object> map = new HashMap<>();
-//        List<String> list1 = new ArrayList<>();
-//        list1.add("id1");
-//        list1.add( "email1");
-//        map.put(refreshTokenValue, list1);
-//        List<String> list2 = new ArrayList<>();
-//        list2.add("id2");
-//        list2.add( "email2");
-//        map.put("refreshTokenValue2", list2);
-//        hashOperations.putAll(REFRESH_TOKEN_KEY, map);
-
-//        List<String> idEmailList = new ArrayList<>();
-//        idEmailList = (List) redisTemplate.opsForHash().get(REFRESH_TOKEN_KEY, refreshToken);
-
-
+        // 2.
         List<String> idEmailList = jwtDao.getHashes(REFRESH_TOKEN_KEY, refreshToken);
         String id = idEmailList.get(0);
         String email = idEmailList.get(1);
@@ -155,5 +137,4 @@ public class JwtServiceImpl implements JwtService{
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-
 }
