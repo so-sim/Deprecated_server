@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,10 +27,4 @@ public class UserController {
 //        //userServer.getUser(String userId);
 //    }
 
-    // Redis Test
-    @GetMapping("/redis/test")
-    public void RedisTest() {
-        log.info("is it here?");
-        jwtService.practiceRedis();
-    }
 }
