@@ -7,12 +7,10 @@ import java.util.Map;
 public class KakaoOAuth2UserInfoDto extends OAuth2UserInfoDto {
 
     private Map<String, Object> kakaoAccountAttributes;
-    private Map<String, Object> profileAttributes;
 
     public KakaoOAuth2UserInfoDto(Map<String, Object> attributes) {
         super(attributes);
         kakaoAccountAttributes = (Map<String, Object>) attributes.get("kakao_account");
-        profileAttributes = (Map<String, Object>) kakaoAccountAttributes.get("profile");
     }
 
     @Override
@@ -23,11 +21,6 @@ public class KakaoOAuth2UserInfoDto extends OAuth2UserInfoDto {
     @Override
     public String getEmail() {
         return (String) kakaoAccountAttributes.get("email");
-    }
-
-    @Override
-    public String getNickname() {
-        return (String) profileAttributes.get("nickname");
     }
 
     @Override

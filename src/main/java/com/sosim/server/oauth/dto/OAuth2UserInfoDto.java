@@ -15,8 +15,6 @@ public abstract class OAuth2UserInfoDto {
 
     public abstract String getEmail();
 
-    public abstract String getNickname();
-
     public abstract Provider getOAuth2Provider();
 
     public Map<String, Object> getAttributes() {

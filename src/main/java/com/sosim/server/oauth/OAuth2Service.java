@@ -33,7 +33,7 @@ public class OAuth2Service {
         ClientRegistration type = inMemoryRepository.findByRegistrationId(provider.name().toLowerCase());
         OAuth2TokenResponseDto oAuth2Token = getToken(type, authorizationCode);
         User user = getUserProfile(provider, oAuth2Token, type);
-        String accessToken = jwtFactory.createAccessToken(String.valueOf(user.getId()));
+        String accessToken = jwtFactory.createAccessToken(String.valueOf(user.getId()), user.getEmail());
         return accessToken;
     }
 
@@ -72,8 +72,7 @@ public class OAuth2Service {
         User user = userRepository.findByProviderAndSocialId(provider, oAuth2UserInfoDto.getOAuth2Id()).get();
 
         if (user == null) {
-            user = User.createUser(oAuth2UserInfoDto.getNickname(), oAuth2UserInfoDto.getEmail(),
-                    provider, oAuth2UserInfoDto.getOAuth2Id());
+            user = User.createUser(oAuth2UserInfoDto.getEmail(), provider, oAuth2UserInfoDto.getOAuth2Id());
             userRepository.save(user);
         } else {
 //            user.update(oAuth2UserInfoDto);
