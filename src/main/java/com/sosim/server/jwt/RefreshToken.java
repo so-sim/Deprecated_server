@@ -14,10 +14,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RefreshToken {
 
-    private String userId;
-
-    private String userEmail;
-
     private String refreshToken;
+
+    // User
+    private String id;
+
+    private String socialType;
+
+    private String socialId;
 
 }

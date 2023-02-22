@@ -1,5 +1,9 @@
 package com.sosim.server.jwt;
 
+import static com.sosim.server.jwt.util.constant.CustomConstant.CREATE_DATE;
+import static com.sosim.server.jwt.util.constant.CustomConstant.EMAIL;
+import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
+import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN;
 import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,12 +47,13 @@ public class JwtServiceImpl implements JwtService{
     private final ObjectMapper objectMapper;
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
+    // TODO change
     /**
      * refreshToken redis에 저장
      */
     @Override
     public void saveRefreshToken(RefreshToken refreshToken) {
-        jwtDao.setHashes(refreshToken.getRefreshToken(), refreshToken.getUserId(), refreshToken.getUserEmail());
+        jwtDao.setHashes(refreshToken);
     }
 
     /**
@@ -70,14 +75,17 @@ public class JwtServiceImpl implements JwtService{
 //        String refreshTokenValue = valueOperations.get(REFRESH_TOKEN_KEY);
 //        log.info("redis RefreshTokenKey : {}", valueOperations.get(refreshTokenValue));
 
+        // TODO change
         // 2.
-        List<String> idEmailList = jwtDao.getHashes(REFRESH_TOKEN_KEY, refreshToken);
-        String id = idEmailList.get(0);
-        String email = idEmailList.get(1);
+        // 여기서, 현재 로그인을 시도하는 사용자의 id를 받아올순 없는 것인지
+        Map<String, String> map = jwtDao.getHashes(refreshToken);
+        String id = map.get(ID);
+        String createDate = map.get(CREATE_DATE);
+        String refreshTokenValue = map.get(REFRESH_TOKEN);
 
         if (refreshToken != null) {
-            String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id, email, refreshToken);
-            sendAccessAndRefreshToken(response, jwtFactory.createAccessToken(id, email), reIssuedRefreshToken);
+            String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id, createDate, refreshToken);
+            sendAccessAndRefreshToken(response, jwtFactory.createAccessToken(id, createDate), reIssuedRefreshToken);
         }
 
         Map<HttpServletRequest, HttpServletResponse> requestAndResponse = new HashMap<>();
@@ -106,7 +114,7 @@ public class JwtServiceImpl implements JwtService{
         filterChain.doFilter(request, response);
     }
 
-    // TODO service에 놓을지 provider에 놓을지
+    // TODO service에 놓을지 provider에 놓을지 : 서비스에 놓는걸로(그리고 헤더가 아니라 바디 리스펀스로 전달)
 //    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
 //        response.setHeader(jwtProperties.getAccessHeader(), accessToken);
 //    }

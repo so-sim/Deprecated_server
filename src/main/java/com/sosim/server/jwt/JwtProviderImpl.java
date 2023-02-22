@@ -1,11 +1,12 @@
 package com.sosim.server.jwt;
 
 import static com.sosim.server.jwt.util.constant.CustomConstant.BEARER;
-import static com.sosim.server.jwt.util.constant.CustomConstant.ID_CLAIM;
+import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
 import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.util.property.JwtProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class JwtProviderImpl implements JwtProvider {
 
     private final JwtProperties jwtProperties;
     private final JwtFactory jwtFactory;
+    private final JwtDao jwtDao;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
@@ -60,21 +62,28 @@ public class JwtProviderImpl implements JwtProvider {
     /**
      * 리프레시 토큰 재발급 + Redis에 DB에 재발급한 리프레시 토큰 업데이트
      */
+    // 1.
     @Override
-    public String reIssueRefreshToken(String id, String email, String refreshTokenValue) {
-        String reIssuedRefreshToken = jwtFactory.createRefreshToken();
+    public String reIssueRefreshToken(String id) {
         // 1.
-//      ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String reIssuedRefreshToken = jwtFactory.createRefreshToken();
+        // TODO Duration 사용 고려해서 다시
+        jwtDao.setValues(reIssuedRefreshToken, id);
+        return reIssuedRefreshToken;
+    }
+
+    public String reIssueRefreshToken(RefreshToken refreshToken) {
         // 2.
+        String reIssuedRefreshToken = jwtFactory.createRefreshToken();
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         Map<String, Object> map = new HashMap<>();
         List<String> list = new ArrayList<>();
-        list.add(id);
-        list.add(email);
-        map.put(refreshTokenValue, list);
+        list.add(refreshToken.getId());
+        list.add(refreshToken.getSocialType());
+        list.add(refreshToken.getSocialId());
+        map.put(refreshToken.getRefreshToken(), list);
         // TODO data 덮어씌워 지는지 확인 필요
-        hashOperations.put(REFRESH_TOKEN_KEY, refreshTokenValue, map);
-//        valueOperations.set(REFRESH_TOKEN_KEY, reIssuedRefreshToken);
+        hashOperations.putAll(REFRESH_TOKEN_KEY, map);
         return reIssuedRefreshToken;
     }
 
@@ -102,7 +111,7 @@ public class JwtProviderImpl implements JwtProvider {
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
                 .build() // 반환된 빌더로 JWT verifier 생성
                 .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-                .getClaim(ID_CLAIM) // claim(Emial) 가져오기
+                .getClaim(ID) // claim(id) 가져오기
                 .asString());
         } catch (Exception e) {
             log.error("액세스 토큰이 유효하지 않습니다.");

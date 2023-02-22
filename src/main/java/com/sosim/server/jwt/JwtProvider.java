@@ -10,7 +10,8 @@ public interface JwtProvider {
     Optional<String> extractRefreshToken(HttpServletRequest request);
     Optional<String> extractId(String AccessToken);
     boolean isTokenValid(String token);
-    String reIssueRefreshToken(String id, String email, String refreshTokenValue);
+    String reIssueRefreshToken(String id);
+    String reIssueRefreshToken(RefreshToken refreshToken);
     String verifyAccessToken(String accessToken);
     String refresh(String refreshToken);
     void setAccessTokenHeader(HttpServletResponse response, String accessToken);
