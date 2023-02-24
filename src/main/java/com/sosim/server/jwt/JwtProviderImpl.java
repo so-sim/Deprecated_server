@@ -2,23 +2,16 @@ package com.sosim.server.jwt;
 
 import static com.sosim.server.jwt.util.constant.CustomConstant.BEARER;
 import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.util.property.JwtProperties;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -72,6 +65,7 @@ public class JwtProviderImpl implements JwtProvider {
         return reIssuedRefreshToken;
     }
 
+    /*
     public String reIssueRefreshToken(RefreshToken refreshToken) {
         // 2.
         String reIssuedRefreshToken = jwtFactory.createRefreshToken();
@@ -86,6 +80,7 @@ public class JwtProviderImpl implements JwtProvider {
         hashOperations.putAll(REFRESH_TOKEN_KEY, map);
         return reIssuedRefreshToken;
     }
+     */
 
     @Override
     public String verifyAccessToken(String accessToken) {
@@ -117,19 +112,5 @@ public class JwtProviderImpl implements JwtProvider {
             log.error("액세스 토큰이 유효하지 않습니다.");
             return Optional.empty();
         }
-    }
-    /**
-     * AccessToken 헤더 설정
-     */
-    @Override
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(jwtProperties.getAccessHeader(), accessToken);
-    }
-    /**
-     * RefreshToken 헤더 설정
-     */
-    @Override
-    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        response.setHeader(jwtProperties.getRefreshHeader(), refreshToken);
     }
 }

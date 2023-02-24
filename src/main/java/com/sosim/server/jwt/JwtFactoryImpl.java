@@ -19,7 +19,7 @@ public class JwtFactoryImpl implements JwtFactory {
     private final JwtProperties jwtProperties;
 
     @Override
-    public String createAccessToken(String id, String createDate) {
+    public String createAccessToken(String id) {
         Date now = new Date();
 
         return

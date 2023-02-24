@@ -1,11 +1,5 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.CREATE_DATE;
-import static com.sosim.server.jwt.util.constant.CustomConstant.EMAIL;
-import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN;
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.util.PasswordUtil;
@@ -14,7 +8,6 @@ import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -24,13 +17,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 @RequiredArgsConstructor
@@ -64,28 +57,22 @@ public class JwtServiceImpl implements JwtService{
     @Override
     public Map<HttpServletRequest, HttpServletResponse> verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest request, HttpServletResponse response, String refreshToken) {
 
-        // TODO 이렇게 하는것이 맞는지 고찰-레디스에 집어넣는 데이터 이런식이 맞을지?
-        // : id와 email로 accessToken을 만들어야 하니 레디스에 해당 값이 있어야 할듯
-        // 1. 간단하게 refreshToken값을 id로 해서 value에 id를 저장하고 id로 email을 꺼내오거나
-        // 2. refreshToken, id, email이렇게 일렬로 된 데이터를 저장 :
-        // 맵 형태로 저장 : key-hashKey-List, refreshToken-[id, email]
-
+        String id = null;
+        // TODO change
         // 1.
 //        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 //        String refreshTokenValue = valueOperations.get(REFRESH_TOKEN_KEY);
 //        log.info("redis RefreshTokenKey : {}", valueOperations.get(refreshTokenValue));
 
-        // TODO change
         // 2.
         // 여기서, 현재 로그인을 시도하는 사용자의 id를 받아올순 없는 것인지
-        Map<String, String> map = jwtDao.getHashes(refreshToken);
-        String id = map.get(ID);
-        String createDate = map.get(CREATE_DATE);
-        String refreshTokenValue = map.get(REFRESH_TOKEN);
-
+//        Map<String, String> map = jwtDao.getHashes(refreshToken);
+//        String id = map.get(ID);
+//        String refreshTokenValue = map.get(REFRESH_TOKEN);
+        // TODO
         if (refreshToken != null) {
-            String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id, createDate, refreshToken);
-            sendAccessAndRefreshToken(response, jwtFactory.createAccessToken(id, createDate), reIssuedRefreshToken);
+            String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);
+            sendAccessAndRefreshToken(response, jwtFactory.createAccessToken(id), reIssuedRefreshToken);
         }
 
         Map<HttpServletRequest, HttpServletResponse> requestAndResponse = new HashMap<>();
@@ -96,8 +83,8 @@ public class JwtServiceImpl implements JwtService{
     @Override
     public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
         response.setStatus(HttpServletResponse.SC_OK);
-        jwtProvider.setAccessTokenHeader(response, accessToken);
-        jwtProvider.setRefreshTokenHeader(response, refreshToken);
+        setAccessTokenHeader(response, accessToken);
+        setRefreshTokenHeader(response, refreshToken);
         log.info("Access Token, Refresh Token 헤더 설정 완료");
     }
 
@@ -114,14 +101,16 @@ public class JwtServiceImpl implements JwtService{
         filterChain.doFilter(request, response);
     }
 
-    // TODO service에 놓을지 provider에 놓을지 : 서비스에 놓는걸로(그리고 헤더가 아니라 바디 리스펀스로 전달)
-//    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-//        response.setHeader(jwtProperties.getAccessHeader(), accessToken);
-//    }
+    // TODO 헤더가 아니라 바디 리스펀스로 전달
+    @Override
+    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
+        response.setHeader(jwtProperties.getAccessHeader(), accessToken);
+    }
     // TODO service에 놓을지 provider에 놓을지
-//    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-//        response.setHeader(jwtProperties.getRefreshHeader(), refreshToken);
-//    }
+    @Override
+    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+        response.setHeader(jwtProperties.getRefreshHeader(), refreshToken);
+    }
 
     /**
      * User 매개변수 : 회원 entity / builder()의 유저 : UserDetails의 User
