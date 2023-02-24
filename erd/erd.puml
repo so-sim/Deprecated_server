@@ -1,0 +1,62 @@
+@startuml
+
+entity User  {
+  + id (PK)
+  --
+  email
+  create_date
+  withdrawal_date
+  social_type
+  social_id
+  user_type
+  withdrawal_grounds_type
+}
+
+
+entity Participant  {
+  + id (PK)
+  --
+  # group_id (FK:Group)
+  # user_id (FK:User)
+  participant_name
+  join_date
+  withdrawal_date
+  status_type
+}
+
+entity Group  {
+  + id (PK)
+  --
+  # admin_id (FK:Participant)
+  name
+  create_date
+  update_date
+  delete_date
+  cover_color_type
+  group_type
+  status_type
+}
+
+User -left-|{ Participant
+Participant }|-left- Group
+
+entity Event {
+  + id (PK)
+  --
+  # group_id (FK:Group)
+  # user_id (FK:User)
+  create_date
+  grounds_date
+  update_date
+  delete_date
+  payment
+  grounds
+  payment_type
+  status_type
+  event_type
+}
+
+User -right-|{ Event
+Group -left-|{ Event
+
+@enduml
