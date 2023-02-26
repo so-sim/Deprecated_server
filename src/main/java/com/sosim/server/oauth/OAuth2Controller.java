@@ -16,10 +16,10 @@ public class OAuth2Controller {
 
     private final OAuth2Service oAuth2Service;
 
-    @GetMapping("/login/oauth2/code/{provider}")
-    public ResponseEntity<?> login(@PathVariable("provider") String provider, @RequestParam("code") String code,
+    @GetMapping("/login/oauth2/code/{socialType}")
+    public ResponseEntity<?> login(@PathVariable("socialType") String socialType, @RequestParam("code") String code,
                                    HttpServletResponse response) throws JsonProcessingException {
-        OAuth2JwtResponseDto tokens = oAuth2Service.login(Provider.getProvider(provider), code);
+        OAuth2JwtResponseDto tokens = oAuth2Service.login(SocialType.getProvider(socialType), code);
 
         // Cookie RefreshToken 설정 - HttpOnly
         ResponseCookie cookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken().getRefreshToken())

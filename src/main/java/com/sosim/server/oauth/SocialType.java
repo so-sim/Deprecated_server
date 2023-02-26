@@ -1,6 +1,6 @@
 package com.sosim.server.oauth;
 
-public enum Provider {
+public enum SocialType {
     KAKAO("KAKAO", "id"),
     NAVER("NAVER", "response"),
     GOOGLE("GOOGLE", "sub");
@@ -8,13 +8,13 @@ public enum Provider {
     private String providerName;
     private String attributeKey;
 
-    Provider(String providerName, String attributeKey) {
+    SocialType(String providerName, String attributeKey) {
         this.providerName = providerName;
         this.attributeKey = attributeKey;
     }
 
-    public static Provider getProvider(String providerName) {
-        return Provider.valueOf(providerName.toUpperCase());
+    public static SocialType getProvider(String providerName) {
+        return SocialType.valueOf(providerName.toUpperCase());
     }
 
     public String getAttributeKey() {

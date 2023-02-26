@@ -1,6 +1,6 @@
 package com.sosim.server.oauth.dto;
 
-import com.sosim.server.oauth.Provider;
+import com.sosim.server.oauth.SocialType;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class KakaoOAuth2UserInfoDto extends OAuth2UserInfoDto {
     }
 
     @Override
-    public Provider getOAuth2Provider() {
-        return Provider.KAKAO;
+    public SocialType getOAuth2SocialType() {
+        return SocialType.KAKAO;
     }
 }

@@ -7,8 +7,8 @@ import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
 import java.util.Map;
 
 public class OAuth2UserInfoFactory {
-    public static OAuth2UserInfoDto getOAuth2UserInfo(Provider provider, Map<String, Object> attributes) {
-        switch (provider) {
+    public static OAuth2UserInfoDto getOAuth2UserInfo(SocialType socialType, Map<String, Object> attributes) {
+        switch (socialType) {
             case GOOGLE: return new GoogleOAuth2UserInfoDto(attributes);
 //            case NAVER: return new NaverOAuth2UserInfo(attributes);
             case KAKAO: return new KakaoOAuth2UserInfoDto(attributes);
