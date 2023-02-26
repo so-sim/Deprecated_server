@@ -1,12 +1,20 @@
 package com.sosim.server.oauth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.jwt.JwtFactory;
+import com.sosim.server.jwt.JwtService;
+import com.sosim.server.oauth.dto.OAuth2JwtResponseDto;
 import com.sosim.server.oauth.dto.OAuth2TokenResponseDto;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
@@ -14,41 +22,61 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OAuth2Service {
+    private final ObjectMapper OBJECT_MAPPER = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
     private final InMemoryClientRegistrationRepository inMemoryRepository;
     private final UserRepository userRepository;
     private final JwtFactory jwtFactory;
+    private final JwtService jwtService;
 
     @Transactional
-    public String login(Provider provider, String authorizationCode) {
+    public OAuth2JwtResponseDto login(Provider provider, String authorizationCode) throws JsonProcessingException {
+        // provider(kakao,google,naver) 에 따라 다른 inMemory 사용
         ClientRegistration type = inMemoryRepository.findByRegistrationId(provider.name().toLowerCase());
+
+        // OAuth2.0 Authorization Server -> Access, Refresh Token 발급
         OAuth2TokenResponseDto oAuth2Token = getToken(type, authorizationCode);
+
+        // Access Token 으로 User 정보 획득
         User user = getUserProfile(provider, oAuth2Token, type);
-        String accessToken = jwtFactory.createAccessToken(String.valueOf(user.getId()), user.getEmail());
-        return accessToken;
+
+        // Sever 자체 JWT 생성 및 Refresh Token 저장
+        OAuth2JwtResponseDto oAuth2JwtResponseDto = OAuth2JwtResponseDto.createOAuth2JwtResponseDto(user,
+                jwtFactory.createAccessToken(String.valueOf(user.getId()), user.getEmail()),
+                jwtFactory.createRefreshToken());
+        jwtService.saveRefreshToken(oAuth2JwtResponseDto.getRefreshToken());
+
+        return oAuth2JwtResponseDto;
     }
 
-    private OAuth2TokenResponseDto getToken(ClientRegistration type, String authorizationCode) {
-        return WebClient.create()
-                .post()
-                .uri(type.getProviderDetails().getTokenUri())
-                .headers(httpHeaders -> {
-                    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                    httpHeaders.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
-                })
-                .bodyValue(tokenRequest(authorizationCode, type))
-                .retrieve()
-                .bodyToMono(OAuth2TokenResponseDto.class)
-                .block();
+    private OAuth2TokenResponseDto getToken(ClientRegistration type, String authorizationCode) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        HttpEntity<?> request =
+                new HttpEntity<>(tokenRequest(authorizationCode, type), headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        String responseBody = restTemplate.exchange(
+                type.getProviderDetails().getTokenUri(),
+                HttpMethod.POST,
+                request,
+                String.class
+        ).getBody();
+
+        return OBJECT_MAPPER.readValue(responseBody, OAuth2TokenResponseDto.class);
     }
 
     private MultiValueMap<String, String> tokenRequest(String authorizationCode, ClientRegistration type) {
@@ -61,7 +89,7 @@ public class OAuth2Service {
         return formData;
     }
 
-    private User getUserProfile(Provider provider, OAuth2TokenResponseDto token, ClientRegistration type) {
+    private User getUserProfile(Provider provider, OAuth2TokenResponseDto token, ClientRegistration type) throws JsonProcessingException {
         Map<String, Object> userAttributes = getUserAttributes(type, token);
         OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, userAttributes);
 
@@ -69,26 +97,37 @@ public class OAuth2Service {
     }
 
     private User saveOrUpdate(Provider provider, OAuth2UserInfoDto oAuth2UserInfoDto) {
-        User user = userRepository.findByProviderAndSocialId(provider, oAuth2UserInfoDto.getOAuth2Id()).get();
+        Optional<User> user = userRepository.findByProviderAndSocialId(provider, oAuth2UserInfoDto.getOAuth2Id());
 
-        if (user == null) {
-            user = User.createUser(oAuth2UserInfoDto.getEmail(), provider, oAuth2UserInfoDto.getOAuth2Id());
-            userRepository.save(user);
+        if (user.isEmpty()) {
+            user = Optional.ofNullable(User.createUser(oAuth2UserInfoDto.getEmail(), provider, oAuth2UserInfoDto.getOAuth2Id()));
+            userRepository.save(user.get());
         } else {
 //            user.update(oAuth2UserInfoDto);
         }
 
-        return user;
+        return user.get();
     }
 
-    private Map<String, Object> getUserAttributes(ClientRegistration type, OAuth2TokenResponseDto token) {
-        return WebClient.create()
-                .get()
-                .uri(type.getProviderDetails().getUserInfoEndpoint().getUri())
-                .headers(httpHeaders -> httpHeaders.setBearerAuth(token.getAccessToken()))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String,Object>>() {})
-                .block();
+    private Map<String, Object> getUserAttributes(ClientRegistration type, OAuth2TokenResponseDto token) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+        headers.add("Authorization", "Bearer " + token.getAccessToken());
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<?> request =
+                new HttpEntity<>(null, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        String responseBody = restTemplate.exchange(
+                type.getProviderDetails().getUserInfoEndpoint().getUri(),
+                HttpMethod.GET,
+                request,
+                String.class
+        ).getBody();
+
+        return OBJECT_MAPPER.readValue(responseBody,Map.class);
     }
 
 }
