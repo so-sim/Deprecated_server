@@ -1,5 +1,7 @@
 package com.sosim.server.oauth.dto;
 
+import com.sosim.server.oauth.Provider;
+
 import java.util.Map;
 
 public class GoogleOAuth2UserInfoDto extends OAuth2UserInfoDto {
@@ -9,17 +11,17 @@ public class GoogleOAuth2UserInfoDto extends OAuth2UserInfoDto {
     }
 
     @Override
-    public String getId() {
+    public String getOAuth2Id() {
         return (String) attributes.get("sub");
-    }
-
-    @Override
-    public String getName() {
-        return (String) attributes.get("name");
     }
 
     @Override
     public String getEmail() {
         return (String) attributes.get("email");
+    }
+
+    @Override
+    public Provider getOAuth2Provider() {
+        return Provider.GOOGLE;
     }
 }

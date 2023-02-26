@@ -1,37 +1,30 @@
 package com.sosim.server.oauth.dto;
 
+import com.sosim.server.oauth.Provider;
+
 import java.util.Map;
 
 public class KakaoOAuth2UserInfoDto extends OAuth2UserInfoDto {
 
+    private Map<String, Object> kakaoAccountAttributes;
+
     public KakaoOAuth2UserInfoDto(Map<String, Object> attributes) {
         super(attributes);
+        kakaoAccountAttributes = (Map<String, Object>) attributes.get("kakao_account");
     }
 
     @Override
-    public String getId() {
-        return attributes.get("id").toString();
-    }
-
-    @Override
-    public String getName() {
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-
-        if (properties == null) {
-            return null;
-        }
-
-        return (String) properties.get("nickname");
+    public String getOAuth2Id() {
+        return String.valueOf(super.attributes.get("id"));
     }
 
     @Override
     public String getEmail() {
-        Map<String, Object> account = (Map<String, Object>) attributes.get("kakao_account");
+        return (String) kakaoAccountAttributes.get("email");
+    }
 
-        if (account == null) {
-            return null;
-        }
-
-        return (String) account.get("email");
+    @Override
+    public Provider getOAuth2Provider() {
+        return Provider.KAKAO;
     }
 }
