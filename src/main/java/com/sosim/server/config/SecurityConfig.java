@@ -1,5 +1,6 @@
 package com.sosim.server.config;
 
+import com.sosim.server.config.exception.CustomAuthenticationEntryPoint;
 import com.sosim.server.jwt.JwtProvider;
 import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.CustomOAuth2UserService;
@@ -48,6 +49,9 @@ public class SecurityConfig {
                 .oauth2Login()
                 .userInfoEndpoint()
                 .userService(customOAuth2UserService);
+
+        http
+                .exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint());
 
         return http.build();
     }

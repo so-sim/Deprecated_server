@@ -1,5 +1,6 @@
 package com.sosim.server.oauth.dto;
 
+import com.sosim.server.type.Provider;
 import java.util.Map;
 
 public abstract class OAuth2UserInfoDto {
@@ -8,14 +9,13 @@ public abstract class OAuth2UserInfoDto {
     public OAuth2UserInfoDto(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    public abstract String getId();
-
-    public abstract String getName();
+    public abstract String getOAuth2Id();
 
     public abstract String getEmail();
+
+    public abstract Provider getOAuth2Provider();
+
+    public Map<String, Object> getAttributes() {return this.attributes;}
+
+
 }
