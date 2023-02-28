@@ -19,7 +19,4 @@ public class RefreshToken {
     // User
     private String id;
 
-//    private String socialType;
-//    private String socialId;
-
 }

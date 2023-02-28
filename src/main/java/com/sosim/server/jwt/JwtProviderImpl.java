@@ -60,7 +60,7 @@ public class JwtProviderImpl implements JwtProvider {
     public String reIssueRefreshToken(String id) {
         // 1.
         String reIssuedRefreshToken = jwtFactory.createRefreshToken();
-        // TODO Duration 사용 고려해서 다시
+        // TODO Duration 사용 고려해서 다시 -> 추후에 진행하기로
         jwtDao.setValues(reIssuedRefreshToken, id);
         return reIssuedRefreshToken;
     }
@@ -76,7 +76,7 @@ public class JwtProviderImpl implements JwtProvider {
         list.add(refreshToken.getSocialType());
         list.add(refreshToken.getSocialId());
         map.put(refreshToken.getRefreshToken(), list);
-        // TODO data 덮어씌워 지는지 확인 필요
+        // data 덮어씌워 지는지 확인 필요
         hashOperations.putAll(REFRESH_TOKEN_KEY, map);
         return reIssuedRefreshToken;
     }
