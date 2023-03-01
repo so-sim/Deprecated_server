@@ -1,5 +1,8 @@
 package com.sosim.server.jwt;
 
+import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN;
+import static com.sosim.server.jwt.util.constant.CustomConstant.SET_COOKIE;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.util.PasswordUtil;
@@ -17,6 +20,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -30,7 +34,6 @@ import org.springframework.stereotype.Service;
 @Getter
 @Slf4j
 public class JwtServiceImpl implements JwtService{
-    private final JwtRepository jwtRepository;
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtProperties jwtProperties;
@@ -40,13 +43,12 @@ public class JwtServiceImpl implements JwtService{
     private final ObjectMapper objectMapper;
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
-    // TODO change
     /**
      * refreshToken redis에 저장
      */
     @Override
     public void saveRefreshToken(RefreshToken refreshToken) {
-        jwtDao.setHashes(refreshToken);
+        jwtDao.setValues(refreshToken.getRefreshToken(), refreshToken.getId());
     }
 
     /**
@@ -83,7 +85,6 @@ public class JwtServiceImpl implements JwtService{
     @Override
     public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
         response.setStatus(HttpServletResponse.SC_OK);
-        setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
         log.info("Access Token, Refresh Token 헤더 설정 완료");
     }
@@ -101,15 +102,18 @@ public class JwtServiceImpl implements JwtService{
         filterChain.doFilter(request, response);
     }
 
-    // TODO 헤더가 아니라 바디 리스펀스로 전달
-    @Override
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(jwtProperties.getAccessHeader(), accessToken);
-    }
-    // TODO service에 놓을지 provider에 놓을지
     @Override
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        response.setHeader(jwtProperties.getRefreshHeader(), refreshToken);
+
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN , refreshToken)
+            .maxAge(jwtProperties.getAccessTokenMaxAge())
+            .path("/")
+            .secure(true)
+            .sameSite("None")
+            .httpOnly(true)
+            .build();
+
+        response.setHeader(SET_COOKIE, cookie.toString());
     }
 
     /**

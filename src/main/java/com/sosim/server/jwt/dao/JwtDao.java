@@ -25,8 +25,8 @@ public class JwtDao {
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         Map<String, Object> map = new HashMap<>();
         map.put(ID, refreshToken.getId());
-        map.put(SOCIAL_TYPE, refreshToken.getSocialType());
-        map.put(SOCIAL_ID, refreshToken.getSocialId());
+//        map.put(SOCIAL_TYPE, refreshToken.getSocialType());
+//        map.put(SOCIAL_ID, refreshToken.getSocialId());
         hashOperations.putAll(refreshToken.getRefreshToken(), map);
     }
 
@@ -34,8 +34,8 @@ public class JwtDao {
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         Map<String, Object> map = new HashMap<>();
         map.put(ID, refreshToken.getId());
-        map.put(SOCIAL_TYPE, refreshToken.getSocialType());
-        map.put(SOCIAL_ID, refreshToken.getSocialId());
+//        map.put(SOCIAL_TYPE, refreshToken.getSocialType());
+//        map.put(SOCIAL_ID, refreshToken.getSocialId());
         hashOperations.putAll(refreshToken.getRefreshToken(), map);
     }
 

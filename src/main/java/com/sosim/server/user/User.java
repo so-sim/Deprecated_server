@@ -1,6 +1,5 @@
 package com.sosim.server.user;
 
-import com.sosim.server.type.Provider;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
 import java.time.LocalDateTime;
@@ -39,8 +38,7 @@ public class User {
     // nullable
     private LocalDateTime withdrawalDate;
 
-    // 넘겨줄땐 String으로 줄것
-    private Provider socialType;
+    private String socialType;
 
     // TODO long으로 넘어오는지 String으로 넘어오는지 확인
     @NotNull

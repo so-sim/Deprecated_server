@@ -3,7 +3,6 @@ package com.sosim.server.user;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
 import com.sosim.server.type.ErrorCodeType;
-import com.sosim.server.type.Provider;
 import com.sosim.server.type.UserType;
 import com.sosim.server.user.dto.UserEmailUpdateReq;
 import com.sosim.server.user.dto.UserWithdrawalReq;
@@ -23,7 +22,7 @@ public class UserServiceImpl implements UserService{
 
         User user = User.builder()
             .createDate(LocalDateTime.now())
-            .socialType(Provider.valueOf(socialType))
+            .socialType(socialType)
             .socialId(oAuth2UserInfoDto.getOAuth2Id())
             .userType(UserType.ACTIVE).build();
 
