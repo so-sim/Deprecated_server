@@ -23,6 +23,9 @@ public class Group {
     @Column(name = "ADMIN_ID")
     private Long adminId;
 
+    @Column(name = "ADMIN_NICKNAME")
+    private String adminNickname;
+
     @Column(name = "CREATE_DATE")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createDate;
