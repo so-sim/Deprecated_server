@@ -2,6 +2,7 @@ package com.sosim.server.group;
 
 import com.sosim.server.common.response.Response;
 import com.sosim.server.group.dto.CreateGroupDto;
+import com.sosim.server.group.dto.CreatedGroupDto;
 import com.sosim.server.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,8 @@ public class GroupController {
             return getResponseEntityFromBindingException(bindingResult);
         }
 
-        groupService.createGroup(Long.valueOf(authUser.getId()), createGroupDto);
-        Response<?> response = Response.createResponse("모임이 성공적으로 생성되었습니다.", null);
+        CreatedGroupDto createdGroupDto = groupService.createGroup(Long.valueOf(authUser.getId()), createGroupDto);
+        Response<?> response = Response.createResponse("모임이 성공적으로 생성되었습니다.", createdGroupDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
