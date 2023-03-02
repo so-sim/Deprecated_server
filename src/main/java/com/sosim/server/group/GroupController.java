@@ -23,13 +23,12 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping("/group")
-    public ResponseEntity<?> createGroup(@AuthenticationPrincipal AuthUser authUser, @Validated @RequestBody CreateGroupDto createGroupDto,
-                                         BindingResult bindingResult) {
+    public ResponseEntity<?> createGroup(@Validated @RequestBody CreateGroupDto createGroupDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return getResponseEntityFromBindingException(bindingResult);
         }
 
-        CreatedGroupDto createdGroupDto = groupService.createGroup(Long.valueOf(authUser.getId()), createGroupDto);
+        CreatedGroupDto createdGroupDto = groupService.createGroup(createGroupDto);
         Response<?> response = Response.createResponse("모임이 성공적으로 생성되었습니다.", createdGroupDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

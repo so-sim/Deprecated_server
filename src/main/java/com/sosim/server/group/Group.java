@@ -50,8 +50,7 @@ public class Group {
     private List<Participant> participantList;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Group(Long adminId, String title, String coverColorType, String groupType) {
-        this.adminId = adminId;
+    private Group(String title, String coverColorType, String groupType) {
         this.title = title;
         this.coverColorType = CoverColorType.valueOf(coverColorType);
         this.groupType = GroupType.of(groupType);
@@ -59,11 +58,15 @@ public class Group {
         updateDate = LocalDateTime.now();
     }
 
-    public static Group createGroup(Long adminId, String title, String groupType, String coverColorType) {
+    public static Group createGroup(String title, String groupType, String coverColorType) {
         return Group.builder()
-                .adminId(adminId)
                 .title(title)
                 .groupType(groupType)
                 .coverColorType(coverColorType).build();
+    }
+
+    public void setAdmin(Participant participant) {
+        adminId = participant.getId();
+        adminNickname = participant.getParticipantName();
     }
 }
