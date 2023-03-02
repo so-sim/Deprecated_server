@@ -46,7 +46,7 @@ public class Group {
     @Enumerated(EnumType.STRING)
     private GroupType groupType;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<Participant> participantList;
 
     @Builder(access = AccessLevel.PRIVATE)
