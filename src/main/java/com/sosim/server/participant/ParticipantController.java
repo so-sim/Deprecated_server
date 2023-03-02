@@ -20,13 +20,13 @@ public class ParticipantController {
 
     @PostMapping("participant/{groupId}")
     public ResponseEntity<?> setNickname(
-            @AuthenticationPrincipal AuthUser authUser, @PathVariable("groupId") String groupId,
+            @AuthenticationPrincipal AuthUser authUser, @PathVariable("groupId") Long groupId,
             @Validated @RequestBody ParticipantNicknameDto participantNicknameDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return getResponseEntityFromBindingException(bindingResult);
         }
 
-        participantService.createParticipant(Long.valueOf(authUser.getId()), Long.valueOf(groupId), participantNicknameDto);
+        participantService.createParticipant(Long.valueOf(authUser.getId()), groupId, participantNicknameDto);
         Response<?> response = Response.createResponse("참가자가 정상적으로 설정되었습니다.", null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
