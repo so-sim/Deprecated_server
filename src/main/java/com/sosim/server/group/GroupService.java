@@ -21,9 +21,18 @@ public class GroupService {
         Group group = Group.createGroup(adminId, createGroupDto.getTitle(), createGroupDto.getGroupType(),
                 createGroupDto.getCoverColorType());
 
-        Group groupEntity = groupRepository.save(group);
+        Group groupEntity = saveGroupEntity(group);
         CreatedGroupDto createdGroupDto = CreatedGroupDto.builder().groupId(groupEntity.getId()).build();
 
         return createdGroupDto;
+    }
+
+    public Group getGroupEntity(Long groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 모임을 찾을 수 없습니다."));
+    }
+
+    public Group saveGroupEntity(Group group) {
+        return groupRepository.save(group);
     }
 }
