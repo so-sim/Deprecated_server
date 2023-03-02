@@ -1,8 +1,12 @@
 package com.sosim.server.group;
 
+import com.sosim.server.common.auditing.BaseTimeEntity;
+import com.sosim.server.group.dto.CreateUpdateGroupDto;
+import com.sosim.server.group.dto.CreatedUpdatedGroupDto;
 import com.sosim.server.participant.Participant;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Group {
+public class Group extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GROUP_ID")
@@ -26,16 +30,7 @@ public class Group {
     @Column(name = "ADMIN_NICKNAME")
     private String adminNickname;
 
-    @Column(name = "CREATE_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime createDate;
-
-    @Column(name = "UPDATE_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime updateDate;
-
     @Column(name = "DELETE_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime deleteDate;
 
     @Column(name = "COVER_COLOR_TYPE")
@@ -54,19 +49,24 @@ public class Group {
         this.title = title;
         this.coverColorType = CoverColorType.valueOf(coverColorType);
         this.groupType = GroupType.of(groupType);
-        createDate = LocalDateTime.now();
-        updateDate = LocalDateTime.now();
     }
 
-    public static Group createGroup(String title, String groupType, String coverColorType) {
+    public static Group createGroup(CreateUpdateGroupDto createUpdateGroupDto) {
         return Group.builder()
-                .title(title)
-                .groupType(groupType)
-                .coverColorType(coverColorType).build();
+                .title(createUpdateGroupDto.getTitle())
+                .groupType(createUpdateGroupDto.getGroupType())
+                .coverColorType(createUpdateGroupDto.getCoverColorType())
+                .build();
     }
 
     public void setAdmin(Participant participant) {
         adminId = participant.getId();
         adminNickname = participant.getParticipantName();
+    }
+
+    public void update(CreateUpdateGroupDto createUpdateGroupDto) {
+        title = createUpdateGroupDto.getTitle();
+        coverColorType = CoverColorType.valueOf(createUpdateGroupDto.getCoverColorType());
+        groupType = GroupType.of(createUpdateGroupDto.getGroupType());
     }
 }
