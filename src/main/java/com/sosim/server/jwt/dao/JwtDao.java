@@ -1,11 +1,12 @@
 package com.sosim.server.jwt.dao;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
+import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
+import static com.sosim.server.jwt.util.constant.CustomConstant.SOCIAL_ID;
+import static com.sosim.server.jwt.util.constant.CustomConstant.SOCIAL_TYPE;
 
+import com.sosim.server.jwt.RefreshToken;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,7 +14,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 @Component
-// TODO id, email, refreshTokenValue 얘네를 세트로 묶어보자
 public class JwtDao {
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -21,34 +21,32 @@ public class JwtDao {
         this.redisTemplate = redisTemplate;
     }
 
-    public void setHashes(String refreshToken, String id, String email) {
+    public void setHashes(RefreshToken refreshToken) {
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         Map<String, Object> map = new HashMap<>();
-        List<String> list = new ArrayList<>();
-        list.add(id);
-        list.add(email);
-        map.put(refreshToken, list);
-        hashOperations.put(REFRESH_TOKEN_KEY, refreshToken, map);
+        map.put(ID, refreshToken.getId());
+//        map.put(SOCIAL_TYPE, refreshToken.getSocialType());
+//        map.put(SOCIAL_ID, refreshToken.getSocialId());
+        hashOperations.putAll(refreshToken.getRefreshToken(), map);
     }
 
-    public void setHashes(String refreshToken, String id, String email, Duration duration) {
+    public void setHashes(RefreshToken refreshToken, Duration duration) {
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         Map<String, Object> map = new HashMap<>();
-        List<String> list = new ArrayList<>();
-        list.add(id);
-        list.add(email);
-        map.put(refreshToken, list);
-        hashOperations.put(REFRESH_TOKEN_KEY, refreshToken, map);
+        map.put(ID, refreshToken.getId());
+//        map.put(SOCIAL_TYPE, refreshToken.getSocialType());
+//        map.put(SOCIAL_ID, refreshToken.getSocialId());
+        hashOperations.putAll(refreshToken.getRefreshToken(), map);
     }
 
-    public void setValues(String key, String data) {
+    public void setValues(String key, String id) {
         ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(key, data);
+        values.set(key, id);
     }
 
-    public void setValues(String key, String data, Duration duration) {
+    public void setValues(String key, String id, Duration duration) {
         ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(key, data, duration);
+        values.set(key, id, duration);
     }
 
     public String getValues(String key) {
@@ -56,12 +54,15 @@ public class JwtDao {
         return values.get(key);
     }
 
-    // TODO 이게 맞나? 뭔가 이상함을 느끼고있음..테스트 필요
-    public List<String> getHashes(String key, String hashKey) {
-        Map<String, List<String>> hashMap = new HashMap<>();
-        HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
-        List<String> list = (List) hashOperations.get(key, hashKey);
-        return list;
+    public Map<String, String> getHashes(String refreshToken) {
+        Map<String, String> map = new HashMap<>();
+        String id = (String) redisTemplate.opsForHash().get(refreshToken, ID);
+        String socialType = (String) redisTemplate.opsForHash().get(refreshToken, SOCIAL_TYPE);
+        String socialId = (String) redisTemplate.opsForHash().get(refreshToken, SOCIAL_ID);
+        map.put(ID, id);
+        map.put(SOCIAL_TYPE, socialType);
+        map.put(SOCIAL_ID, socialId);
+        return map;
     }
 
     public void deleteValues(String key) {
