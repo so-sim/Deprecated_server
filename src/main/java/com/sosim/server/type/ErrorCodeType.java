@@ -20,8 +20,12 @@ public enum ErrorCodeType {
     AUTH_VERIFICATION_EXPIRED("w2005", HttpStatus.BAD_REQUEST, "Verification expired"),
 
     // User
-    USER_ALREADY_EXIST("W3003", HttpStatus.BAD_REQUEST, "회원가입 되어 있는 사용자입니다."),
-    NOT_FOUND_USER("w0002", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
+    USER_ALREADY_EXIST("W3001", HttpStatus.BAD_REQUEST, "회원가입 되어 있는 사용자입니다."),
+    NOT_FOUND_USER("w3002", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
+
+    // Group
+
+    INVALID_USER("3003", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
 
     // Provider
     PROVIDER_LIST("W4001", HttpStatus.BAD_REQUEST, "카카오 로그인만 지원합니다."),

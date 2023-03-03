@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 public interface JwtService {
 
     void saveRefreshToken(RefreshToken refreshToken);
-    Map<HttpServletRequest, HttpServletResponse> verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest request, HttpServletResponse response, String refreshToken);
-    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
+    Map<String, HttpServletResponse> verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest request, HttpServletResponse response, String refreshToken);
+    void sendRefreshToken(HttpServletResponse response, String refreshToken);
     void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException;
     void saveAuthentication(User myUser);

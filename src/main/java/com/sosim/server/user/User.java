@@ -29,9 +29,6 @@ public class User {
     // TODO nullable
     private String email;
 
-    //TODO password 어떻게 할건지
-    private String password;
-
     @NotNull
     private LocalDateTime createDate;
 
@@ -50,14 +47,6 @@ public class User {
 
     // nullable
     private WithdrawalGroundsType withdrawalGroundsType;
-
-    // TODO role에 관해 논의 필요
-//    @Enumerated(EnumType.STRING)
-//    private Role role;
-
-//    public void authorizeUser() {
-//        this.role = Role.USER;
-//    }
 
     public void setEmail(String email) {
         this.email = email;
