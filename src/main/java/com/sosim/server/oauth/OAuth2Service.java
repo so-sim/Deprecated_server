@@ -8,8 +8,11 @@ import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.dto.OAuth2JwtResponseDto;
 import com.sosim.server.oauth.dto.OAuth2TokenResponseDto;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
+import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
+import com.sosim.server.user.UserService;
+import com.sosim.server.user.dto.UserEmailUpdateReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +36,7 @@ public class OAuth2Service {
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
     private final InMemoryClientRegistrationRepository inMemoryRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final JwtFactory jwtFactory;
     private final JwtService jwtService;
 
@@ -49,7 +53,7 @@ public class OAuth2Service {
 
         // Sever 자체 JWT 생성 및 Refresh Token 저장
         OAuth2JwtResponseDto oAuth2JwtResponseDto = OAuth2JwtResponseDto.createOAuth2JwtResponseDto(user,
-                jwtFactory.createAccessToken(String.valueOf(user.getId()), user.getEmail()),
+                jwtFactory.createAccessToken(String.valueOf(user.getId())),
                 jwtFactory.createRefreshToken());
         jwtService.saveRefreshToken(oAuth2JwtResponseDto.getRefreshToken());
 
@@ -96,10 +100,9 @@ public class OAuth2Service {
         Optional<User> user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoDto.getOAuth2Id());
 
         if (user.isEmpty()) {
-            user = Optional.ofNullable(User.createUser(oAuth2UserInfoDto.getEmail(), socialType, oAuth2UserInfoDto.getOAuth2Id()));
-            userRepository.save(user.get());
+            user = Optional.ofNullable(userService.save(socialType, oAuth2UserInfoDto));
         } else {
-//            user.update(oAuth2UserInfoDto);
+            user = Optional.ofNullable(userService.update(user.get(), oAuth2UserInfoDto));
         }
 
         return user.get();

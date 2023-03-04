@@ -3,6 +3,7 @@ package com.sosim.server.oauth;
 import com.sosim.server.oauth.dto.GoogleOAuth2UserInfoDto;
 import com.sosim.server.oauth.dto.KakaoOAuth2UserInfoDto;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
+import com.sosim.server.type.SocialType;
 
 import java.util.Map;
 

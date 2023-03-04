@@ -1,6 +1,6 @@
 package com.sosim.server.oauth.dto;
 
-import com.sosim.server.oauth.SocialType;
+import com.sosim.server.type.SocialType;
 
 import java.util.Map;
 
