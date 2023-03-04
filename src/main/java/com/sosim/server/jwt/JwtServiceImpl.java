@@ -7,14 +7,14 @@ import static com.sosim.server.jwt.util.constant.CustomConstant.SET_COOKIE;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
+import com.sosim.server.jwt.dto.ReIssueTokenInfo;
+import com.sosim.server.jwt.dto.ReIssueTokenReq;
 import com.sosim.server.jwt.util.property.JwtProperties;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,8 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -42,9 +40,6 @@ public class JwtServiceImpl implements JwtService{
     private final JwtDao jwtDao;
     private final ObjectMapper objectMapper;
 
-    // TODO 쓰임새가 있나?
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-
     /**
      * refreshToken redis에 저장
      */
@@ -59,10 +54,10 @@ public class JwtServiceImpl implements JwtService{
      *  3. AccessToken 문자열과 Cookie에 담아 응답 헤더에 실은 RefreshToken값 반환
      */
     @Override
-    public Map<String, HttpServletResponse> verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest request, HttpServletResponse response, String refreshToken) {
+    public ReIssueTokenInfo verifyRefreshTokenAndReIssueAccessToken(ReIssueTokenReq reIssueTokenReq, HttpServletResponse response) {
 
-        String id = jwtDao.getValues(refreshToken);
-        log.info("refreshToken : {}, id: {}", refreshToken, id);
+        String id = jwtDao.getValues(reIssueTokenReq.getRefreshToken());
+        log.info("refreshToken : {}, id: {}", reIssueTokenReq.getRefreshToken(), id);
 
         User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
         if(Long.parseLong(id) != user.getId()) {
@@ -70,9 +65,7 @@ public class JwtServiceImpl implements JwtService{
         }
         String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);
         sendRefreshToken(response, reIssuedRefreshToken);
-        Map<String, HttpServletResponse> accessTokenAndRefreshToken = new HashMap<>();
-        accessTokenAndRefreshToken.put(jwtFactory.createAccessToken(id), response);
-        return accessTokenAndRefreshToken;
+        return ReIssueTokenInfo.builder().accessToken(jwtFactory.createAccessToken(id)).response(response).build();
     }
 
     @Override

@@ -1,9 +1,12 @@
 package com.sosim.server.user;
 
+import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -35,17 +38,20 @@ public class User {
     // nullable
     private LocalDateTime withdrawalDate;
 
-    private String socialType;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
 
     // TODO long으로 넘어오는지 String으로 넘어오는지 확인
     @NotNull
     private String socialId;
 
-    // TODO Type이 mysql에 어떻게 들어가는지 확인->요상하면 String으로 바꾸기
+    @Enumerated(EnumType.STRING)
     @NotNull
     private UserType userType;
 
     // nullable
+    @Enumerated(EnumType.STRING)
     private WithdrawalGroundsType withdrawalGroundsType;
 
     public void setEmail(String email) {
