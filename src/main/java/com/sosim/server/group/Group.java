@@ -2,11 +2,8 @@ package com.sosim.server.group;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.dto.CreateUpdateGroupDto;
-import com.sosim.server.group.dto.CreatedUpdatedGroupDto;
 import com.sosim.server.participant.Participant;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
