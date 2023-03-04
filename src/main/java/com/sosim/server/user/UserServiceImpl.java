@@ -3,8 +3,8 @@ package com.sosim.server.user;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
 import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
-import com.sosim.server.user.dto.UserEmailUpdateReq;
 import com.sosim.server.user.dto.UserWithdrawalReq;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
 
     @Override
-    public User save(String socialType, OAuth2UserInfoDto oAuth2UserInfoDto) {
+    public User save(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto) {
 
         User user = User.builder()
             .createDate(LocalDateTime.now())
@@ -36,16 +36,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User update(String socialType, OAuth2UserInfoDto oAuth2UserInfoDto, UserEmailUpdateReq userUpdateReq) {
-        User user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoDto.getOAuth2Id())
-            .orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
-        user.setEmail(userUpdateReq.getEmail());
+    public User update(User user, OAuth2UserInfoDto oAuth2UserInfoDto) {
+        user.setEmail(oAuth2UserInfoDto.getEmail());
         userRepository.save(user);
         return user;
     }
 
     @Override
-    public User withdrawal(String socialType, OAuth2UserInfoDto oAuth2UserInfoDto, UserWithdrawalReq userWithdrawalReq) {
+    public User withdrawal(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto, UserWithdrawalReq userWithdrawalReq) {
         User user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoDto.getOAuth2Id())
             .orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
         user.setWithdrawalDate(LocalDateTime.now());

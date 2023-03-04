@@ -1,14 +1,23 @@
 package com.sosim.server.type;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@Getter
-@RequiredArgsConstructor
 public enum SocialType {
-    KAKAO("kakao"),
-    NAVER("naver"),
-    GOOGLE("google");
+    KAKAO("KAKAO", "id"),
+    NAVER("NAVER", "response"),
+    GOOGLE("GOOGLE", "sub");
 
-    public final String desc;
+    private String providerName;
+    private String attributeKey;
+
+    SocialType(String providerName, String attributeKey) {
+        this.providerName = providerName;
+        this.attributeKey = attributeKey;
+    }
+
+    public static SocialType getProvider(String providerName) {
+        return SocialType.valueOf(providerName.toUpperCase());
+    }
+
+    public String getAttributeKey() {
+        return this.attributeKey;
+    }
 }
