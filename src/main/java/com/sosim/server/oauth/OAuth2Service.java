@@ -8,10 +8,12 @@ import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.dto.OAuth2JwtResponseDto;
 import com.sosim.server.oauth.dto.OAuth2TokenResponseDto;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
+import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
+import com.sosim.server.user.UserService;
+import com.sosim.server.user.dto.UserEmailUpdateReq;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,23 +36,24 @@ public class OAuth2Service {
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
     private final InMemoryClientRegistrationRepository inMemoryRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final JwtFactory jwtFactory;
     private final JwtService jwtService;
 
     @Transactional
-    public OAuth2JwtResponseDto login(Provider provider, String authorizationCode) throws JsonProcessingException {
-        // provider(kakao,google,naver) 에 따라 다른 inMemory 사용
-        ClientRegistration type = inMemoryRepository.findByRegistrationId(provider.name().toLowerCase());
+    public OAuth2JwtResponseDto login(SocialType socialType, String authorizationCode) throws JsonProcessingException {
+        // SocialType(kakao,google,naver) 에 따라 다른 inMemory 사용
+        ClientRegistration type = inMemoryRepository.findByRegistrationId(socialType.name().toLowerCase());
 
         // OAuth2.0 Authorization Server -> Access, Refresh Token 발급
         OAuth2TokenResponseDto oAuth2Token = getToken(type, authorizationCode);
 
         // Access Token 으로 User 정보 획득
-        User user = getUserProfile(provider, oAuth2Token, type);
+        User user = getUserProfile(socialType, oAuth2Token, type);
 
         // Sever 자체 JWT 생성 및 Refresh Token 저장
         OAuth2JwtResponseDto oAuth2JwtResponseDto = OAuth2JwtResponseDto.createOAuth2JwtResponseDto(user,
-                jwtFactory.createAccessToken(String.valueOf(user.getId()), user.getEmail()),
+                jwtFactory.createAccessToken(String.valueOf(user.getId())),
                 jwtFactory.createRefreshToken());
         jwtService.saveRefreshToken(oAuth2JwtResponseDto.getRefreshToken());
 
@@ -89,21 +89,20 @@ public class OAuth2Service {
         return formData;
     }
 
-    private User getUserProfile(Provider provider, OAuth2TokenResponseDto token, ClientRegistration type) throws JsonProcessingException {
+    private User getUserProfile(SocialType socialType, OAuth2TokenResponseDto token, ClientRegistration type) throws JsonProcessingException {
         Map<String, Object> userAttributes = getUserAttributes(type, token);
-        OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, userAttributes);
+        OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoFactory.getOAuth2UserInfo(socialType, userAttributes);
 
-        return saveOrUpdate(provider, oAuth2UserInfoDto);
+        return saveOrUpdate(socialType, oAuth2UserInfoDto);
     }
 
-    private User saveOrUpdate(Provider provider, OAuth2UserInfoDto oAuth2UserInfoDto) {
-        Optional<User> user = userRepository.findByProviderAndSocialId(provider, oAuth2UserInfoDto.getOAuth2Id());
+    private User saveOrUpdate(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto) {
+        Optional<User> user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoDto.getOAuth2Id());
 
         if (user.isEmpty()) {
-            user = Optional.ofNullable(User.createUser(oAuth2UserInfoDto.getEmail(), provider, oAuth2UserInfoDto.getOAuth2Id()));
-            userRepository.save(user.get());
+            user = Optional.ofNullable(userService.save(socialType, oAuth2UserInfoDto));
         } else {
-//            user.update(oAuth2UserInfoDto);
+            user = Optional.ofNullable(userService.update(user.get(), oAuth2UserInfoDto));
         }
 
         return user.get();

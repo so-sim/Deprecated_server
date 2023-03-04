@@ -25,8 +25,7 @@ public class OAuth2JwtResponseDto {
 
     private static RefreshToken createRefreshToken(User user, String refreshToken) {
         return RefreshToken.builder()
-                .userId(String.valueOf(user.getId()))
-                .userEmail(user.getEmail())
+                .id(String.valueOf(user.getId()))
                 .refreshToken(refreshToken)
                 .build();
     }
