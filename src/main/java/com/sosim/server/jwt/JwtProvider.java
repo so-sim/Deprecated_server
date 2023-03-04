@@ -10,8 +10,5 @@ public interface JwtProvider {
     Optional<String> extractId(String AccessToken);
     boolean isTokenValid(String token);
     String reIssueRefreshToken(String id);
-//    String reIssueRefreshToken(RefreshToken refreshToken);
-    String verifyAccessToken(String accessToken);
-    String refresh(String refreshToken);
 
 }
