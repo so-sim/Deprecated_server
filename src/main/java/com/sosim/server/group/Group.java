@@ -47,7 +47,7 @@ public class Group extends BaseTimeEntity {
     @Builder(access = AccessLevel.PRIVATE)
     private Group(String title, String coverColorType, String groupType) {
         this.title = title;
-        this.coverColorType = CoverColorType.valueOf(coverColorType);
+        this.coverColorType = CoverColorType.of(coverColorType);
         this.groupType = GroupType.of(groupType);
     }
 
@@ -66,7 +66,7 @@ public class Group extends BaseTimeEntity {
 
     public void update(CreateUpdateGroupDto createUpdateGroupDto) {
         title = createUpdateGroupDto.getTitle();
-        coverColorType = CoverColorType.valueOf(createUpdateGroupDto.getCoverColorType());
+        coverColorType = CoverColorType.of(createUpdateGroupDto.getCoverColorType());
         groupType = GroupType.of(createUpdateGroupDto.getGroupType());
     }
 }

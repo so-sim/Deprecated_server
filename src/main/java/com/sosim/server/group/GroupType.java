@@ -14,7 +14,7 @@ public enum GroupType {
     STUDY( "스터디"),
     CAMPUS("학교, 교내/외 모임"),
     COMPANY("회사, 사내 모임"),
-    HOBBY("취미, 동호회"),
+    HOBBY("취미, 동호회 모임"),
     SOCIAL("친구, 사모임"),
     PROJECT("프로젝트"),
     ETC("기타");
