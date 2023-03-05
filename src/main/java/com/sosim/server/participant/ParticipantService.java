@@ -45,6 +45,11 @@ public class ParticipantService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 참가자를 찾을 수 없습니다."));
     }
 
+    public Participant getParticipantEntity(Long userId, Long groupId) {
+        return participantRepository.findByUserIdAndGroupId(userId, groupId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 참가자를 찾을 수 없습니다."));
+    }
+
     public Participant saveParticipantEntity(Participant participant) {
         return participantRepository.save(participant);
     }

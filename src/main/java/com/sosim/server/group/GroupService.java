@@ -4,6 +4,7 @@ import com.sosim.server.group.dto.CreateUpdateGroupDto;
 import com.sosim.server.group.dto.CreatedUpdatedGroupDto;
 import com.sosim.server.group.dto.GetGroupDto;
 import com.sosim.server.participant.Participant;
+import com.sosim.server.participant.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +43,13 @@ public class GroupService {
         return createdUpdatedGroupDto;
     }
 
+    public void deleteGroup(Long userId, Long groupId) {
+        Group groupEntity = getGroupEntity(groupId);
+        groupEntity.setInActive();
+    }
+
     public Group getGroupEntity(Long groupId) {
-        return groupRepository.findById(groupId)
+        return groupRepository.findByIdAndGroupStatusType(groupId, GroupStatusType.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("해당 모임을 찾을 수 없습니다."));
     }
 

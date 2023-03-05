@@ -71,4 +71,9 @@ public class Group extends BaseTimeEntity {
         coverColorType = CoverColorType.of(createUpdateGroupDto.getCoverColorType());
         groupType = GroupType.of(createUpdateGroupDto.getGroupType());
     }
+
+    public void setInActive() {
+        groupStatusType = GroupStatusType.INACTIVE;
+        deleteDate = LocalDateTime.now();
+    }
 }

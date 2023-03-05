@@ -4,9 +4,11 @@ import com.sosim.server.common.response.Response;
 import com.sosim.server.group.dto.CreateUpdateGroupDto;
 import com.sosim.server.group.dto.CreatedUpdatedGroupDto;
 import com.sosim.server.group.dto.GetGroupDto;
+import com.sosim.server.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,14 @@ public class GroupController {
 
         CreatedUpdatedGroupDto createdUpdatedGroupDto = groupService.updateGroup(groupId, createUpdateGroupDto);
         Response<?> response = Response.createResponse("모임이 성공적으로 수정되었습니다.", createdUpdatedGroupDto);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/group/{groupId}")
+    public ResponseEntity<?> deleteGroup(@AuthenticationPrincipal AuthUser authUser, @PathVariable Long groupId) {
+        groupService.deleteGroup(Long.valueOf(authUser.getId()), groupId);
+        Response<?> response = Response.createResponse("모임이 성공적으로 삭제되었습니다.", null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
