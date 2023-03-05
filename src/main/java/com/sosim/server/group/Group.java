@@ -38,6 +38,10 @@ public class Group extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private GroupType groupType;
 
+    @Column(name = "GROUP_STATUS_TYPE")
+    @Enumerated(EnumType.STRING)
+    private GroupStatusType groupStatusType;
+
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<Participant> participantList;
 
@@ -46,6 +50,7 @@ public class Group extends BaseTimeEntity {
         this.title = title;
         this.coverColorType = CoverColorType.of(coverColorType);
         this.groupType = GroupType.of(groupType);
+        this.groupStatusType = GroupStatusType.ACTIVE;
     }
 
     public static Group createGroup(CreateUpdateGroupDto createUpdateGroupDto) {
