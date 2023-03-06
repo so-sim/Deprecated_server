@@ -1,6 +1,6 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.MessageConstant.REISSUETOKEN;
+import static com.sosim.server.common.constant.MessageConstant.REISSUETOKEN;
 
 import com.sosim.server.common.response.Response;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;

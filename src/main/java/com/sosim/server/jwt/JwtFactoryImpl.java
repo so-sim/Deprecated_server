@@ -1,12 +1,12 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.ACCESS_TOKEN_SUBJECT;
-import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_SUBJECT;
+import static com.sosim.server.jwt.constant.CustomConstant.ACCESS_TOKEN_SUBJECT;
+import static com.sosim.server.jwt.constant.CustomConstant.ID;
+import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN_SUBJECT;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.jwt.property.JwtProperties;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

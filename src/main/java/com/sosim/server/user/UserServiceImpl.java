@@ -5,6 +5,7 @@ import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
+import com.sosim.server.type.WithdrawalGroundsType;
 import com.sosim.server.user.dto.UserWithdrawalReq;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,16 +44,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User withdrawal(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto, UserWithdrawalReq userWithdrawalReq) {
-        User user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoDto.getOAuth2Id())
-            .orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
-        user.setWithdrawalDate(LocalDateTime.now());
-        user.setWithdrawalGroundsType(userWithdrawalReq.getWithdrawalGroundsType());
-        userRepository.save(user);
-        return user;
-    }
-
-    @Override
     public User getUser(long id) {
         return userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
     }
@@ -60,5 +51,14 @@ public class UserServiceImpl implements UserService{
     @Override
     public List<User> getUserList() {
         return null;
+    }
+
+    @Override
+    public void withdrawalUser(UserWithdrawalReq userWithdrawalReq) {
+        User user = userRepository.findById(userWithdrawalReq.getUserId())
+            .orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
+        user.setWithdrawalDate(LocalDateTime.now());
+        user.setWithdrawalGroundsType(WithdrawalGroundsType.getType(userWithdrawalReq.getWithdrawalGroundsType()));
+        userRepository.save(user);
     }
 }

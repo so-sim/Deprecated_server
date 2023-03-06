@@ -29,28 +29,24 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO nullable
     private String email;
 
     @NotNull
     private LocalDateTime createDate;
 
-    // nullable
     private LocalDateTime withdrawalDate;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    // TODO long으로 넘어오는지 String으로 넘어오는지 확인
     @NotNull
     private String socialId;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @NotNull
     private UserType userType;
 
-    // nullable
     @Enumerated(EnumType.STRING)
     private WithdrawalGroundsType withdrawalGroundsType;
 

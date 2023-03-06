@@ -1,12 +1,12 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.BEARER;
-import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
+import static com.sosim.server.jwt.constant.CustomConstant.BEARER;
+import static com.sosim.server.jwt.constant.CustomConstant.ID;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.sosim.server.jwt.dao.JwtDao;
-import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.jwt.property.JwtProperties;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
