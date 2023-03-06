@@ -1,8 +1,8 @@
 package com.sosim.server.jwt.dao;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
-import static com.sosim.server.jwt.util.constant.CustomConstant.SOCIAL_ID;
-import static com.sosim.server.jwt.util.constant.CustomConstant.SOCIAL_TYPE;
+import static com.sosim.server.jwt.constant.CustomConstant.ID;
+import static com.sosim.server.jwt.constant.CustomConstant.SOCIAL_ID;
+import static com.sosim.server.jwt.constant.CustomConstant.SOCIAL_TYPE;
 
 import com.sosim.server.jwt.RefreshToken;
 import java.time.Duration;

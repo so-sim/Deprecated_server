@@ -12,7 +12,6 @@ import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
-import com.sosim.server.user.dto.UserEmailUpdateReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

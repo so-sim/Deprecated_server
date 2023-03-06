@@ -1,4 +1,4 @@
-package com.sosim.server.jwt.util.property;
+package com.sosim.server.jwt.property;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

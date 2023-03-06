@@ -1,15 +1,15 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.NONE;
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN;
-import static com.sosim.server.jwt.util.constant.CustomConstant.SET_COOKIE;
+import static com.sosim.server.jwt.constant.CustomConstant.NONE;
+import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN;
+import static com.sosim.server.jwt.constant.CustomConstant.SET_COOKIE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
 import com.sosim.server.jwt.dto.ReIssueTokenReq;
-import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.jwt.property.JwtProperties;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;

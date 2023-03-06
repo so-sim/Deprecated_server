@@ -1,10 +1,10 @@
 package com.sosim.server.redis;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN_KEY;
+import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sosim.server.jwt.JwtFactory;
-import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.jwt.property.JwtProperties;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;

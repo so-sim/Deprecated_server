@@ -8,7 +8,7 @@ import java.util.List;
 public interface UserService {
     User save(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto);
     User update(User user, OAuth2UserInfoDto oAuth2UserInfoDto);
-    User withdrawal(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto, UserWithdrawalReq userWithdrawalReq);
     User getUser(long id);
     List<User> getUserList();
+    void withdrawalUser(UserWithdrawalReq userWithdrawalReq);
 }
