@@ -31,7 +31,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping
     public ResponseEntity<?> withdrawalUser(@Valid @RequestBody UserWithdrawalReq userWithdrawalReq) {
         this.userService.withdrawalUser(userWithdrawalReq);
         Response<?> response = Response.builder().message(USER_WITHDRAWAL_SUCCESS).content(null).build();

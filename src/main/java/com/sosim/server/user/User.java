@@ -40,14 +40,15 @@ public class User {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    //TODO 구글이랑 네이버 long으로 넘어오는지 확인
     @NotNull
     private String socialId;
 
-    @Enumerated(EnumType.ORDINAL)
     @NotNull
+    @Enumerated(EnumType.STRING)
     private UserType userType;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private WithdrawalGroundsType withdrawalGroundsType;
 
     public void setEmail(String email) {

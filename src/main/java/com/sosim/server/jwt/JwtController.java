@@ -1,6 +1,6 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.common.constant.MessageConstant.REISSUETOKEN;
+import static com.sosim.server.common.constant.MessageConstant.RE_ISSUE_TOKEN;
 
 import com.sosim.server.common.response.Response;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
@@ -28,7 +28,7 @@ public class JwtController {
         if (reIssueTokenInfo == null) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
-        Response<?> response = Response.builder().message(REISSUETOKEN).content(reIssueTokenInfo).build();
+        Response<?> response = Response.builder().message(RE_ISSUE_TOKEN).content(reIssueTokenInfo).build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
