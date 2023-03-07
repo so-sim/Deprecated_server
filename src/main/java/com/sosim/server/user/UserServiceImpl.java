@@ -6,7 +6,7 @@ import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
-import com.sosim.server.user.dto.UserWithdrawalReq;
+import com.sosim.server.user.dto.req.UserWithdrawalReq;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

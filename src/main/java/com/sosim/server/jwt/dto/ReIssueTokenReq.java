@@ -14,8 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReIssueTokenReq {
 
-    @NotNull
-    private String accessToken;
+//    @NotNull
+//    private String accessToken;
 
     @NotNull
     private String refreshToken;

@@ -1,6 +1,14 @@
 # curl --location --request GET 'http://localhost:8080/redis/test'
 GET http://localhost:8080/redis/test
 
+### login 서버 에러나네.. 한번 한거라 그런가?
+# curl --location --request GET 'localhost:8080/login/oauth2/code/kakao?code=hyxF4F7aHGmVIHBmzDw2429g5YPL7rfsZD2s2NcEepueC0x6KaMlwVLCBSuJCvfauLVqhworDR4AAAGGu5Jpsw'
+GET localhost:8080/login/oauth2/code/kakao?code=hyxF4F7aHGmVIHBmzDw2429g5YPL7rfsZD2s2NcEepueC0x6KaMlwVLCBSuJCvfauLVqhworDR4AAAGGu5Jpsw
+
+
+### 회원 조회
+
+
 ###
 POST http://localhost:8080/login/reissueToken
 

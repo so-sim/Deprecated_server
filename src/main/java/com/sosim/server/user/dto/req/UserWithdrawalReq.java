@@ -1,4 +1,4 @@
-package com.sosim.server.user.dto;
+package com.sosim.server.user.dto.req;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
