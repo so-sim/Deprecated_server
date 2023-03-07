@@ -9,10 +9,14 @@ import org.springframework.http.ResponseEntity;
 
 public class CustomException extends NestedRuntimeException {
 
+    @Getter
+    private ErrorCodeType errorCodeType;
+
     private String field;
     private String message;
     @Getter
     private HttpStatus httpStatus;
+
     private String code;
 
     public CustomException(ErrorCodeType errorCodeType) {
