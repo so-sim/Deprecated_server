@@ -4,7 +4,7 @@ import static com.sosim.server.common.constant.MessageConstant.USER_INFO_SUCCESS
 import static com.sosim.server.common.constant.MessageConstant.USER_WITHDRAWAL_SUCCESS;
 
 import com.sosim.server.common.response.Response;
-import com.sosim.server.user.dto.UserWithdrawalReq;
+import com.sosim.server.user.dto.req.UserWithdrawalReq;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

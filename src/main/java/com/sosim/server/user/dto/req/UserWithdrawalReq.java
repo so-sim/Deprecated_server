@@ -1,4 +1,4 @@
-package com.sosim.server.user.dto;
+package com.sosim.server.user.dto.req;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
@@ -17,5 +17,5 @@ public class UserWithdrawalReq {
     private LocalDateTime withdrawalDate;
 
     @NotNull
-    private long withdrawalGroundsType;
+    private int withdrawalGroundsType;
 }

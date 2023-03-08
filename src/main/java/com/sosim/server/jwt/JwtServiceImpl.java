@@ -5,13 +5,11 @@ import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN;
 import static com.sosim.server.jwt.constant.CustomConstant.SET_COOKIE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
 import com.sosim.server.jwt.dto.ReIssueTokenReq;
 import com.sosim.server.jwt.property.JwtProperties;
 import com.sosim.server.security.AuthUser;
-import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.io.IOException;
@@ -58,10 +56,11 @@ public class JwtServiceImpl implements JwtService{
 
         String id = jwtDao.getValues(reIssueTokenReq.getRefreshToken());
         log.info("refreshToken : {}, id: {}", reIssueTokenReq.getRefreshToken(), id);
-
-        User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
+//        User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
+        User user = userRepository.findById(Long.parseLong(id)).get();
         if(Long.parseLong(id) != user.getId()) {
-            throw new CustomException(ErrorCodeType.INVALID_USER);
+            log.info("invalid user");
+//            throw new CustomException(ErrorCodeType.INVALID_USER);
         }
         String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);
         sendRefreshToken(response, reIssuedRefreshToken);

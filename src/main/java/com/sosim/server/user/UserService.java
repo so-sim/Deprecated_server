@@ -2,7 +2,7 @@ package com.sosim.server.user;
 
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
 import com.sosim.server.type.SocialType;
-import com.sosim.server.user.dto.UserWithdrawalReq;
+import com.sosim.server.user.dto.req.UserWithdrawalReq;
 import java.util.List;
 
 public interface UserService {
