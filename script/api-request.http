@@ -5,29 +5,36 @@ GET http://localhost:8080/redis/test
 # curl --location --request GET 'localhost:8080/login/oauth2/code/kakao?code=hyxF4F7aHGmVIHBmzDw2429g5YPL7rfsZD2s2NcEepueC0x6KaMlwVLCBSuJCvfauLVqhworDR4AAAGGu5Jpsw'
 GET localhost:8080/login/oauth2/code/kakao?code=hyxF4F7aHGmVIHBmzDw2429g5YPL7rfsZD2s2NcEepueC0x6KaMlwVLCBSuJCvfauLVqhworDR4AAAGGu5Jpsw
 
-
-### 회원 조회
-# curl --location --request GET 'localhost:8080/api/user/1'
-#--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODE5MzA5M30.FYSDZuTm0AceNYbzlC_8K25v-29P2umQA3-YQ9PI7rbHXWz3thjL5F50XOnkMN_TW4wO2_imS_fqe7Kldf_WNg'
-GET localhost:8080/api/user/1
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODI5OTY1OX0.nJ16TrQiANxm8NoU-ad3SA6A9LvJd9Swz5Et5cTIh9-0fUUveV419zijZSYJ_vHUdIv9Te26sUUZtxHFs8EKuw
-Accept: application/json
-
-### 회원 탈퇴
-PUT localhost:8080/api/user
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODI5OTY1OX0.nJ16TrQiANxm8NoU-ad3SA6A9LvJd9Swz5Et5cTIh9-0fUUveV419zijZSYJ_vHUdIv9Te26sUUZtxHFs8EKuw
+### accessToken 재발급
+POST localhost:8080/login/reissueToken
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxNjA1Mn0.QjIpLGSQVEB2eW6wdC34q4JojS0YUDd1q6W-86O4YNvxh4jRv4GBUlm81lX7WJZKRuMv3aDnH3Gd2MlUZmu3zQ
 Content-Type: application/json
 
 {
-  "userId": 1,
-  "withdrawalGroundsType": 1
+  "refreshToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJSZWZyZXNoVG9rZW4iLCJleHAiOjE2Nzk1MjczODZ9.o_u9EEA1pRxTpbN6vuCzpnW2FN_2TBM-r60SbO4jpjQSW5mNU8izXYEFCBaaOM_9Z3lEy4_ZmfbNEgN4w59KUA"
 }
 
 ###
 
 
 
+### 회원 조회
+# curl --location --request GET 'localhost:8080/api/user/1'
+#--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODE5MzA5M30.FYSDZuTm0AceNYbzlC_8K25v-29P2umQA3-YQ9PI7rbHXWz3thjL5F50XOnkMN_TW4wO2_imS_fqe7Kldf_WNg'
+GET localhost:8080/api/user/1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxODA4Nn0.LagjWrMyV9fGn17E-vjmL7NoCPbXkfGWvuTozROYtnYMXva__onsCgfMz3D1iZtYlOd5sIHB79Bt8fp1DKuOVQ
+Accept: application/json
+
+### 회원 탈퇴
+PUT localhost:8080/api/user
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxODA4Nn0.LagjWrMyV9fGn17E-vjmL7NoCPbXkfGWvuTozROYtnYMXva__onsCgfMz3D1iZtYlOd5sIHB79Bt8fp1DKuOVQ
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "withdrawalGroundsType": 3
+}
 
 ###
-POST http://localhost:8080/login/reissueToken
+
 

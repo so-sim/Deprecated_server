@@ -65,7 +65,7 @@ public class JwtDao {
         return map;
     }
 
-    public void deleteValues(String key) {
-        redisTemplate.delete(key);
+    public void deleteValues(String refreshToken) {
+        redisTemplate.delete(refreshToken);
     }
 }

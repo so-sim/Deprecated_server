@@ -48,7 +48,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserType userType;
 
-    //TODO test :
     @Enumerated(EnumType.ORDINAL)
     private WithdrawalGroundsType withdrawalGroundsType;
 
