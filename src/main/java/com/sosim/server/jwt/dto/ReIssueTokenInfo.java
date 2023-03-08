@@ -18,6 +18,5 @@ public class ReIssueTokenInfo {
     @NotNull
     private String accessToken;
 
-    @NotNull
     private HttpServletResponse response;
 }

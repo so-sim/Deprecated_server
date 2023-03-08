@@ -17,5 +17,5 @@ public class UserWithdrawalReq {
     private LocalDateTime withdrawalDate;
 
     @NotNull
-    private long withdrawalGroundsType;
+    private int withdrawalGroundsType;
 }

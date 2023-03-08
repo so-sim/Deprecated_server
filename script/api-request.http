@@ -7,6 +7,25 @@ GET localhost:8080/login/oauth2/code/kakao?code=hyxF4F7aHGmVIHBmzDw2429g5YPL7rfs
 
 
 ### 회원 조회
+# curl --location --request GET 'localhost:8080/api/user/1'
+#--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODE5MzA5M30.FYSDZuTm0AceNYbzlC_8K25v-29P2umQA3-YQ9PI7rbHXWz3thjL5F50XOnkMN_TW4wO2_imS_fqe7Kldf_WNg'
+GET localhost:8080/api/user/1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODI5OTY1OX0.nJ16TrQiANxm8NoU-ad3SA6A9LvJd9Swz5Et5cTIh9-0fUUveV419zijZSYJ_vHUdIv9Te26sUUZtxHFs8EKuw
+Accept: application/json
+
+### 회원 탈퇴
+PUT localhost:8080/api/user
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODI5OTY1OX0.nJ16TrQiANxm8NoU-ad3SA6A9LvJd9Swz5Et5cTIh9-0fUUveV419zijZSYJ_vHUdIv9Te26sUUZtxHFs8EKuw
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "withdrawalGroundsType": 1
+}
+
+###
+
+
 
 
 ###

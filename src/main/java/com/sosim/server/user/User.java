@@ -48,6 +48,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserType userType;
 
+    //TODO test :
     @Enumerated(EnumType.ORDINAL)
     private WithdrawalGroundsType withdrawalGroundsType;
 
@@ -61,5 +62,9 @@ public class User {
 
     public void setWithdrawalGroundsType(WithdrawalGroundsType withdrawalGroundsType) {
         this.withdrawalGroundsType = withdrawalGroundsType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }

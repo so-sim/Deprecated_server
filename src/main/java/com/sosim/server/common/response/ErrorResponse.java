@@ -12,6 +12,7 @@ public class ErrorResponse {
     private String code;
     private String message;
 
+    //TODO 여기서 e가 null이 되어버리는 문제 해결(그전까지는 잘 받음)
     public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCodeType e){
         return ResponseEntity
             .status(e.getHttpStatus())
