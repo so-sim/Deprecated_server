@@ -16,7 +16,7 @@ public class Response<T> {
      */
     private T content;
 
-    public static<T> Response<?> createResponse(String message, T content) {
+    public static <T> Response<?> createResponse(String message, T content) {
         return Response.builder()
                 .message(message)
                 .content(content)

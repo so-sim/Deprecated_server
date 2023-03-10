@@ -1,7 +1,6 @@
 package com.sosim.server.group.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sosim.server.group.CoverColorType;
 import com.sosim.server.group.Group;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,30 +10,27 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class GetGroupDto {
+    @JsonProperty("title")
     private String title;
 
-    @JsonProperty("admin_nickname")
-    private String adminNickname;
-
     @JsonProperty("created_date")
-    private LocalDateTime createdDate;
+    private LocalDateTime createDate;
 
-    @JsonProperty("modified_date")
-    private LocalDateTime modifiedDate;
+    @JsonProperty("update_date")
+    private LocalDateTime updateDate;
 
     @JsonProperty("cover_color")
-    private CoverColorType coverColorType;
+    private String coverColorType;
 
     @JsonProperty("group_type")
     private String groupType;
 
-    public static GetGroupDto createGetGroupDto(Group group) {
+    public static GetGroupDto create(Group group) {
         return GetGroupDto.builder()
                 .title(group.getTitle())
-                .adminNickname(group.getAdminNickname())
-                .createdDate(group.getCreatedDate())
-                .modifiedDate(group.getModifiedDate())
-                .coverColorType(group.getCoverColorType())
+                .createDate(group.getCreateDate())
+                .updateDate(group.getUpdateDate())
+                .coverColorType(group.getCoverColorType().getLabel())
                 .groupType(group.getGroupType().getLabel())
                 .build();
     }

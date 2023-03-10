@@ -3,11 +3,13 @@ package com.sosim.server.oauth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.JwtFactory;
 import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.dto.OAuth2JwtResponseDto;
 import com.sosim.server.oauth.dto.OAuth2TokenResponseDto;
 import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
+import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -68,13 +71,17 @@ public class OAuth2Service {
                 new HttpEntity<>(tokenRequest(authorizationCode, type), headers);
 
         RestTemplate restTemplate = new RestTemplate();
-
-        String responseBody = restTemplate.exchange(
-                type.getProviderDetails().getTokenUri(),
-                HttpMethod.POST,
-                request,
-                String.class
-        ).getBody();
+        String responseBody;
+        try {
+            responseBody = restTemplate.exchange(
+                    type.getProviderDetails().getTokenUri(),
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            ).getBody();
+        } catch (HttpStatusCodeException e) {
+            throw new CustomException(ErrorCodeType.COMMON_BAD_REQUEST);
+        }
 
         return OBJECT_MAPPER.readValue(responseBody, OAuth2TokenResponseDto.class);
     }

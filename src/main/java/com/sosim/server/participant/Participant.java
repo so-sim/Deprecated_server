@@ -1,5 +1,6 @@
 package com.sosim.server.participant;
 
+import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.Group;
 import com.sosim.server.user.User;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Participant {
+public class Participant extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PARTICIPANT_ID")
@@ -28,36 +29,25 @@ public class Participant {
     @JoinColumn(name = "GROUP_ID")
     private Group group;
 
-    @Column(name = "PARTICIPANT_NAME")
-    private String participantName;
-
-    @Column(name = "PARTICIPANT_TYPE")
-    @Enumerated(EnumType.STRING)
-    private ParticipantType participantType;
-
-    @Column(name = "JOIN_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime joinDate;
+    @Column(name = "NICKNAME")
+    private String nickname;
 
     @Column(name = "WITHDRAW_DATE")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime withdrawDate;
 
     @Builder
-    private Participant(User user, Group group, String participantName, ParticipantType participantType) {
+    private Participant(User user, Group group, String nickname) {
         this.user = user;
         this.group = group;
-        this.participantName = participantName;
-        this.participantType = participantType;
-        this.joinDate = LocalDateTime.now();
+        this.nickname = nickname;
     }
 
-    public static Participant createParticipant(User user, Group group, String participantName, ParticipantType participantType) {
+    public static Participant create(User user, Group group, String nickname) {
         return Participant.builder()
                 .user(user)
                 .group(group)
-                .participantName(participantName)
-                .participantType(participantType)
+                .nickname(nickname)
                 .build();
     }
 }

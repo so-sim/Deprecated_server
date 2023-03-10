@@ -7,12 +7,12 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class CreatedUpdatedGroupDto {
+public class CreatedGroupDto {
     @JsonProperty("group_id")
     private Long groupId;
 
-    public static CreatedUpdatedGroupDto createCreatedUpdatedGroupDto(Group group) {
-        return CreatedUpdatedGroupDto.builder()
+    public static CreatedGroupDto create(Group group) {
+        return CreatedGroupDto.builder()
                 .groupId(group.getId())
                 .build();
     }

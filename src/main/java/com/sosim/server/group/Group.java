@@ -1,9 +1,13 @@
 package com.sosim.server.group;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
-import com.sosim.server.group.dto.CreateUpdateGroupDto;
+import com.sosim.server.group.dto.CreateGroupDto;
+import com.sosim.server.group.dto.UpdateGroupDto;
 import com.sosim.server.participant.Participant;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -38,42 +42,32 @@ public class Group extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private GroupType groupType;
 
-    @Column(name = "GROUP_STATUS_TYPE")
-    @Enumerated(EnumType.STRING)
-    private GroupStatusType groupStatusType;
-
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Participant> participantList;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Group(String title, String coverColorType, String groupType) {
+    private Group(String title, Long adminId, String adminNickname,
+                  String coverColorType, String groupType) {
         this.title = title;
+        this.adminId = adminId;
+        this.adminNickname = adminNickname;
         this.coverColorType = CoverColorType.of(coverColorType);
         this.groupType = GroupType.of(groupType);
-        this.groupStatusType = GroupStatusType.ACTIVE;
     }
 
-    public static Group createGroup(CreateUpdateGroupDto createUpdateGroupDto) {
+    public static Group create(Long adminId, CreateGroupDto createGroupDto) {
         return Group.builder()
-                .title(createUpdateGroupDto.getTitle())
-                .groupType(createUpdateGroupDto.getGroupType())
-                .coverColorType(createUpdateGroupDto.getCoverColorType())
+                .title(createGroupDto.getTitle())
+                .adminId(adminId)
+                .adminNickname(createGroupDto.getNickname())
+                .groupType(createGroupDto.getGroupType())
+                .coverColorType(createGroupDto.getCoverColorType())
                 .build();
     }
 
-    public void setAdmin(Participant participant) {
-        adminId = participant.getId();
-        adminNickname = participant.getParticipantName();
-    }
-
-    public void update(CreateUpdateGroupDto createUpdateGroupDto) {
-        title = createUpdateGroupDto.getTitle();
-        coverColorType = CoverColorType.of(createUpdateGroupDto.getCoverColorType());
-        groupType = GroupType.of(createUpdateGroupDto.getGroupType());
-    }
-
-    public void setInActive() {
-        groupStatusType = GroupStatusType.INACTIVE;
-        deleteDate = LocalDateTime.now();
+    public void update(UpdateGroupDto updateGroupDto) {
+        this.title = updateGroupDto.getTitle();
+        this.groupType = updateGroupDto.getGroupType();
+        this.coverColorType = updateGroupDto.getCoverColorType();
     }
 }
