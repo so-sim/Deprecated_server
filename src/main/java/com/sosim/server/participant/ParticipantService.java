@@ -16,11 +16,15 @@ public class ParticipantService {
 
     public void createParticipant(User userEntity, Group groupEntity, String nickname) {
         if (participantRepository.findByNicknameAndGroupId(nickname, groupEntity.getId()).isPresent()) {
-            throw new IllegalArgumentException("이미 모임에 존재하는 닉네임입니다.");
+            throw new CustomException(ErrorCodeType.ALREADY_USE_NICKNAME);
         }
 
         Participant participant = Participant.create(userEntity, groupEntity, nickname);
         saveParticipantEntity(participant);
+    }
+
+    public void deleteParticipantEntity(User user, Group group) {
+        participantRepository.delete(getParticipantEntity(user, group));
     }
 
     public Participant saveParticipantEntity(Participant participant) {
@@ -29,6 +33,11 @@ public class ParticipantService {
 
     public Participant getParticipantEntity(String nickname, Group group) {
         return participantRepository.findByNicknameAndGroupId(nickname, group.getId())
+                .orElseThrow(() -> new CustomException(ErrorCodeType.NONE_PARTICIPANT));
+    }
+
+    public Participant getParticipantEntity(User user, Group group) {
+        return participantRepository.findByUserAndGroup(user, group)
                 .orElseThrow(() -> new CustomException(ErrorCodeType.NONE_PARTICIPANT));
     }
 }

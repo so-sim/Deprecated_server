@@ -18,9 +18,9 @@ public class UpdateGroupDto {
 
     @ValidEnum(target = GroupType.class, message = "존재하지 않는 모임 유형입니다.")
     @JsonProperty("type")
-    private GroupType groupType;
+    private String groupType;
 
     @ValidEnum(target = CoverColorType.class, message = "존재하지 않는 커버 색상입니다.")
     @JsonProperty("coverColor")
-    private CoverColorType coverColorType;
+    private String coverColorType;
 }

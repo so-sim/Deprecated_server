@@ -49,7 +49,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/group/{groupId}/participant")
+    @GetMapping("/group/{groupId}/participants")
     public ResponseEntity<?> getGroupParticipant(@PathVariable("groupId") Long groupId) {
         GetParticipantsDto groupParticipant = groupService.getGroupParticipant(groupId);
         Response<?> response = Response.createResponse("모임 참가자가 성공적으로 조회되었습니다.", groupParticipant);
@@ -57,7 +57,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/group/{groupId}")
+    @PatchMapping("/group/{groupId}")
     public ResponseEntity<?> updateGroup(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId,
                                          @Validated @RequestBody UpdateGroupDto updateGroupDto,
@@ -81,7 +81,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/group/{groupId}")
+    @PostMapping("/group/{groupId}/participant")
     public ResponseEntity<?> intoGroup(@AuthenticationPrincipal AuthUser authUser,
                                        @PathVariable("groupId") Long groupId,
                                        @Validated @RequestBody ParticipantNicknameDto participantNicknameDto,
@@ -96,12 +96,24 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("/group/admin/{groupId}")
+    @PatchMapping("/group/{groupId}/participant")
     public ResponseEntity<?> modifyAdmin(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId,
                                          @RequestBody ParticipantNicknameDto participantNicknameDto) {
 
         groupService.modifyAdmin(Long.parseLong(authUser.getId()), groupId, participantNicknameDto);
+        Response<?> response = Response.createResponse("관리자가 성공적으로 변경되었습니다.", null);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/group/{groupId}/participant")
+    public ResponseEntity<?> withdrawGroup(@AuthenticationPrincipal AuthUser authUser,
+                                           @PathVariable("groupId") Long groupId) {
+        groupService.withdrawGroup(Long.parseLong(authUser.getId()), groupId);
+        Response<?> response = Response.createResponse("성공적으로 모임에서 탈퇴되었습니다.", null);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     private void bindingError(BindingResult bindingResult) {

@@ -67,8 +67,8 @@ public class Group extends BaseTimeEntity {
 
     public void update(UpdateGroupDto updateGroupDto) {
         this.title = updateGroupDto.getTitle();
-        this.groupType = updateGroupDto.getGroupType();
-        this.coverColorType = updateGroupDto.getCoverColorType();
+        this.groupType = GroupType.of(updateGroupDto.getGroupType());
+        this.coverColorType = CoverColorType.of(updateGroupDto.getCoverColorType());
     }
 
     public void modifyAdmin(Participant participant) {

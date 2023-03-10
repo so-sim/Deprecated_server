@@ -28,7 +28,7 @@ public class GroupService {
     private final UserService userService;
 
     public CreatedGroupDto createGroup(Long userId, CreateGroupDto createGroupDto) {
-        User userEntity = userService.getUserEntity(userId);
+        User userEntity = userService.getUser(userId);
         Group group = Group.create(userId, createGroupDto);
         Group groupEntity = saveGroupEntity(group);
 
@@ -76,7 +76,7 @@ public class GroupService {
     }
 
     public void intoGroup(Long userId, Long groupId, ParticipantNicknameDto participantNicknameDto) {
-        User userEntity = userService.getUserEntity(userId);
+        User userEntity = userService.getUser(userId);
         Group groupEntity = getGroupEntity(groupId);
 
         participantService.createParticipant(userEntity, groupEntity, participantNicknameDto.getNickname());
@@ -89,13 +89,18 @@ public class GroupService {
             throw new CustomException(ErrorCodeType.NONE_ADMIN);
         }
 
-        Participant participantEntity = participantService.getParticipantEntity(participantNicknameDto.getNickname(), groupEntity);
+        Participant participantEntity = participantService
+                .getParticipantEntity(participantNicknameDto.getNickname(), groupEntity);
 
         if (!groupEntity.getParticipantList().contains(participantEntity)) {
             throw new CustomException(ErrorCodeType.NONE_PARTICIPANT);
         }
 
         groupEntity.modifyAdmin(participantEntity);
+    }
+
+    public void withdrawGroup(Long userId, Long groupId) {
+        participantService.deleteParticipantEntity(userService.getUser(userId), getGroupEntity(groupId));
     }
 
     public Group getGroupEntity(Long groupId) {
