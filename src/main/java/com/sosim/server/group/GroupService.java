@@ -90,7 +90,12 @@ public class GroupService {
         }
 
         Participant participantEntity = participantService.getParticipantEntity(participantNicknameDto.getNickname(), groupEntity);
-        
+
+        if (!groupEntity.getParticipantList().contains(participantEntity)) {
+            throw new CustomException(ErrorCodeType.NONE_PARTICIPANT);
+        }
+
+        groupEntity.modifyAdmin(participantEntity);
     }
 
     public Group getGroupEntity(Long groupId) {
