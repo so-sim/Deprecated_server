@@ -2,6 +2,7 @@ package com.sosim.server.participant;
 
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.group.Group;
+import com.sosim.server.participant.dto.ParticipantNicknameDto;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
 
     public void createParticipant(User userEntity, Group groupEntity, String nickname) {
-        if (participantRepository.findByNicknameAndGroupId(nickname, groupEntity.getId()).isPresent()) {
+        if (participantRepository.findByNicknameAndGroup(nickname, groupEntity).isPresent()) {
             throw new CustomException(ErrorCodeType.ALREADY_USE_NICKNAME);
         }
 
@@ -27,12 +28,17 @@ public class ParticipantService {
         participantRepository.delete(getParticipantEntity(user, group));
     }
 
-    public Participant saveParticipantEntity(Participant participant) {
-        return participantRepository.save(participant);
+    public void modifyNickname(User user, Group group, ParticipantNicknameDto participantNicknameDto) {
+        Participant participantEntity = getParticipantEntity(user, group);
+        participantEntity.modifyNickname(participantNicknameDto.getNickname());
+    }
+
+    public void saveParticipantEntity(Participant participant) {
+        participantRepository.save(participant);
     }
 
     public Participant getParticipantEntity(String nickname, Group group) {
-        return participantRepository.findByNicknameAndGroupId(nickname, group.getId())
+        return participantRepository.findByNicknameAndGroup(nickname, group)
                 .orElseThrow(() -> new CustomException(ErrorCodeType.NONE_PARTICIPANT));
     }
 

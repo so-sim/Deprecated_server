@@ -103,6 +103,11 @@ public class GroupService {
         participantService.deleteParticipantEntity(userService.getUser(userId), getGroupEntity(groupId));
     }
 
+    public void modifyNickname(Long userId, Long groupId, ParticipantNicknameDto participantNicknameDto) {
+        participantService.modifyNickname(userService.getUser(userId),
+                getGroupEntity(groupId), participantNicknameDto);
+    }
+
     public Group getGroupEntity(Long groupId) {
         return groupRepository.findById(groupId)
                 .orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_GROUP));

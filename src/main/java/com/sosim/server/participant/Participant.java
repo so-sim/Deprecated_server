@@ -3,10 +3,7 @@ package com.sosim.server.participant;
 import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.Group;
 import com.sosim.server.user.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -36,7 +33,7 @@ public class Participant extends BaseTimeEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime withdrawDate;
 
-    @Builder
+    @Builder (access = AccessLevel.PRIVATE)
     private Participant(User user, Group group, String nickname) {
         this.user = user;
         this.group = group;
@@ -49,5 +46,9 @@ public class Participant extends BaseTimeEntity {
                 .group(group)
                 .nickname(nickname)
                 .build();
+    }
+
+    public void modifyNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

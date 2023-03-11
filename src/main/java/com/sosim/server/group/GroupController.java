@@ -69,7 +69,7 @@ public class GroupController {
         CreatedGroupDto updatedGroupDto = groupService.updateGroup(Long.valueOf(authUser.getId()), groupId, updateGroupDto);
         Response<?> response = Response.createResponse("모임이 성공적으로 수정되었습니다.", updatedGroupDto);
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/group/{groupId}")
@@ -112,6 +112,16 @@ public class GroupController {
                                            @PathVariable("groupId") Long groupId) {
         groupService.withdrawGroup(Long.parseLong(authUser.getId()), groupId);
         Response<?> response = Response.createResponse("성공적으로 모임에서 탈퇴되었습니다.", null);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PatchMapping("/group/{groupId}/participant")
+    public ResponseEntity<?> modifyNickname(@AuthenticationPrincipal AuthUser authUser,
+                                            @PathVariable ("groupId") Long groupId,
+                                            @Validated @RequestBody ParticipantNicknameDto participantNicknameDto) {
+        groupService.modifyNickname(Long.parseLong(authUser.getId()), groupId, participantNicknameDto);
+        Response<?> response = Response.createResponse("성공적으로 닉네임이 수정되었습니다.", null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
