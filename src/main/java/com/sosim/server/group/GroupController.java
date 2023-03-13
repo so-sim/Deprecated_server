@@ -96,7 +96,7 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/group/{groupId}/participant")
+    @PatchMapping("/group/{groupId}/admin")
     public ResponseEntity<?> modifyAdmin(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId,
                                          @RequestBody ParticipantNicknameDto participantNicknameDto) {
@@ -124,6 +124,12 @@ public class GroupController {
         Response<?> response = Response.createResponse("성공적으로 닉네임이 수정되었습니다.", null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/groups")
+    public ResponseEntity<?> getMyGroups(@AuthenticationPrincipal AuthUser authUser,
+                                         @RequestParam("index") Long index) {
+        return new ResponseEntity<>(groupService.getMyGroups(index, Long.parseLong(authUser.getId())), HttpStatus.OK);
     }
 
     private void bindingError(BindingResult bindingResult) {

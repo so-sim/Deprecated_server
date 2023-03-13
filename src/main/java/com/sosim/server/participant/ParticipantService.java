@@ -6,6 +6,8 @@ import com.sosim.server.participant.dto.ParticipantNicknameDto;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 
@@ -45,5 +47,14 @@ public class ParticipantService {
     public Participant getParticipantEntity(User user, Group group) {
         return participantRepository.findByUserAndGroup(user, group)
                 .orElseThrow(() -> new CustomException(ErrorCodeType.NONE_PARTICIPANT));
+    }
+
+    public Slice<Participant> getParticipantSlice(Long index, Long userId) {
+        if (index == 0) {
+            return participantRepository.findByIdGreaterThanAndUserIdOrderByIdDesc(index, userId,
+                    PageRequest.ofSize(17));
+        }
+        return participantRepository.findByIdLessThanAndUserIdOrderByIdDesc(index, userId,
+                PageRequest.ofSize(18));
     }
 }

@@ -2,22 +2,18 @@ package com.sosim.server.group.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sosim.server.group.Group;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 public class GetGroupDto {
+    @JsonProperty("group_id")
+    private Long id;
+
     @JsonProperty("title")
     private String title;
-
-    @JsonProperty("created_date")
-    private LocalDateTime createDate;
-
-    @JsonProperty("update_date")
-    private LocalDateTime updateDate;
 
     @JsonProperty("cover_color")
     private String coverColorType;
@@ -25,13 +21,16 @@ public class GetGroupDto {
     @JsonProperty("group_type")
     private String groupType;
 
+    @JsonProperty("admin_nickname")
+    private String adminNickname;
+
     public static GetGroupDto create(Group group) {
         return GetGroupDto.builder()
+                .id(group.getId())
                 .title(group.getTitle())
-                .createDate(group.getCreateDate())
-                .updateDate(group.getUpdateDate())
                 .coverColorType(group.getCoverColorType().getLabel())
                 .groupType(group.getGroupType().getLabel())
+                .adminNickname(group.getAdminNickname())
                 .build();
     }
 }

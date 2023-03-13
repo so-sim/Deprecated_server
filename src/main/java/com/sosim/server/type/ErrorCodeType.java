@@ -29,6 +29,7 @@ public enum ErrorCodeType {
     NONE_ADMIN("1002", HttpStatus.BAD_REQUEST, "관리자 권한이 필요합니다."),
     NONE_PARTICIPANT("1003", HttpStatus.NOT_FOUND, "존재하지 않는 참가자 정보입니다."),
     ALREADY_USE_NICKNAME("1004", HttpStatus.BAD_REQUEST, "모임에서 이미 사용중인 닉네임입니다."),
+    NO_MORE_GROUP("1005", HttpStatus.BAD_REQUEST, "더 이상 조회할 모임이 없습니다."),
 
     INVALID_USER("3003", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
 

@@ -1,21 +1,21 @@
 package com.sosim.server.group;
 
 import com.sosim.server.config.exception.CustomException;
-import com.sosim.server.group.dto.CreateGroupDto;
-import com.sosim.server.group.dto.CreatedGroupDto;
-import com.sosim.server.group.dto.GetGroupDto;
-import com.sosim.server.group.dto.UpdateGroupDto;
+import com.sosim.server.group.dto.*;
 import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantService;
 import com.sosim.server.participant.dto.GetParticipantsDto;
 import com.sosim.server.participant.dto.ParticipantNicknameDto;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
+import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,6 +26,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final ParticipantService participantService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     public CreatedGroupDto createGroup(Long userId, CreateGroupDto createGroupDto) {
         User userEntity = userService.getUser(userId);
@@ -106,6 +107,23 @@ public class GroupService {
     public void modifyNickname(Long userId, Long groupId, ParticipantNicknameDto participantNicknameDto) {
         participantService.modifyNickname(userService.getUser(userId),
                 getGroupEntity(groupId), participantNicknameDto);
+    }
+
+    public ListGroupDto getMyGroups(Long index, Long userId) {
+        Slice<Participant> slice = participantService.getParticipantSlice(index, userId);
+        List<Participant> participantEntityList = slice.getContent();
+
+        if (participantEntityList.size() == 0) {
+            throw new CustomException(ErrorCodeType.NO_MORE_GROUP);
+        }
+
+        List<GetGroupDto> groupList = new ArrayList<>();
+        for (Participant participant : participantEntityList) {
+            groupList.add(GetGroupDto.create(participant.getGroup()));
+        }
+
+        return ListGroupDto.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
+                slice.hasNext(), groupList);
     }
 
     public Group getGroupEntity(Long groupId) {
