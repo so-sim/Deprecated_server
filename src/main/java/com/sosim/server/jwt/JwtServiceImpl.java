@@ -1,15 +1,15 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.NONE;
-import static com.sosim.server.jwt.util.constant.CustomConstant.REFRESH_TOKEN;
-import static com.sosim.server.jwt.util.constant.CustomConstant.SET_COOKIE;
+import static com.sosim.server.jwt.constant.CustomConstant.NONE;
+import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN;
+import static com.sosim.server.jwt.constant.CustomConstant.SET_COOKIE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
 import com.sosim.server.jwt.dto.ReIssueTokenReq;
-import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.jwt.property.JwtProperties;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
@@ -58,20 +58,20 @@ public class JwtServiceImpl implements JwtService{
 
         String id = jwtDao.getValues(reIssueTokenReq.getRefreshToken());
         log.info("refreshToken : {}, id: {}", reIssueTokenReq.getRefreshToken(), id);
-
         User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
         if(Long.parseLong(id) != user.getId()) {
+            log.info("invalid user");
             throw new CustomException(ErrorCodeType.INVALID_USER);
         }
+        jwtDao.deleteValues(reIssueTokenReq.getRefreshToken());
         String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);
         sendRefreshToken(response, reIssuedRefreshToken);
-        return ReIssueTokenInfo.builder().accessToken(jwtFactory.createAccessToken(id)).response(response).build();
+        return ReIssueTokenInfo.builder().accessToken(jwtFactory.createAccessToken(id)).build();
     }
 
     @Override
     public void sendRefreshToken(HttpServletResponse response, String refreshToken) {
 
-        response.setStatus(HttpServletResponse.SC_OK);
         setRefreshTokenHeader(response, refreshToken);
         log.info("Refresh Token 헤더 설정 완료");
     }
@@ -101,6 +101,8 @@ public class JwtServiceImpl implements JwtService{
             .build();
 
         response.setHeader(SET_COOKIE, cookie.toString());
+        log.info("식사는 없어 : cookie {}", cookie);
+        log.info("디저트 맛만 : response {}", response);
     }
 
     public void saveAuthentication(User user) {

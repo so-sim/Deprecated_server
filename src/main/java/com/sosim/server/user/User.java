@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "USERS")
+@Table(name = "USER")
 @AllArgsConstructor
 public class User {
 
@@ -29,29 +29,26 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO nullable
     private String email;
 
     @NotNull
     private LocalDateTime createDate;
 
-    // nullable
     private LocalDateTime withdrawalDate;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
-    // TODO long으로 넘어오는지 String으로 넘어오는지 확인
+    //TODO 구글이랑 네이버 long으로 넘어오는지 확인
     @NotNull
     private String socialId;
 
-    @Enumerated(EnumType.STRING)
     @NotNull
+    @Enumerated(EnumType.STRING)
     private UserType userType;
 
-    // nullable
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private WithdrawalGroundsType withdrawalGroundsType;
 
     public void setEmail(String email) {
@@ -64,5 +61,9 @@ public class User {
 
     public void setWithdrawalGroundsType(WithdrawalGroundsType withdrawalGroundsType) {
         this.withdrawalGroundsType = withdrawalGroundsType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }

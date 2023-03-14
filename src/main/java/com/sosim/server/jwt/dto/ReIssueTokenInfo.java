@@ -1,6 +1,5 @@
 package com.sosim.server.jwt.dto;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +17,4 @@ public class ReIssueTokenInfo {
     @NotNull
     private String accessToken;
 
-    @NotNull
-    private HttpServletResponse response;
 }

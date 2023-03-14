@@ -1,12 +1,12 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.util.constant.CustomConstant.BEARER;
-import static com.sosim.server.jwt.util.constant.CustomConstant.ID;
+import static com.sosim.server.jwt.constant.CustomConstant.BEARER;
+import static com.sosim.server.jwt.constant.CustomConstant.ID;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.sosim.server.jwt.dao.JwtDao;
-import com.sosim.server.jwt.util.property.JwtProperties;
+import com.sosim.server.jwt.property.JwtProperties;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -58,38 +58,10 @@ public class JwtProviderImpl implements JwtProvider {
     // 1.
     @Override
     public String reIssueRefreshToken(String id) {
-        // 1.
         String reIssuedRefreshToken = jwtFactory.createRefreshToken();
         // TODO Duration 사용 고려해서 다시 -> 추후에 진행하기로
         jwtDao.setValues(reIssuedRefreshToken, id);
         return reIssuedRefreshToken;
-    }
-
-    /*
-    public String reIssueRefreshToken(RefreshToken refreshToken) {
-        // 2.
-        String reIssuedRefreshToken = jwtFactory.createRefreshToken();
-        HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
-        Map<String, Object> map = new HashMap<>();
-        List<String> list = new ArrayList<>();
-        list.add(refreshToken.getId());
-        list.add(refreshToken.getSocialType());
-        list.add(refreshToken.getSocialId());
-        map.put(refreshToken.getRefreshToken(), list);
-        // data 덮어씌워 지는지 확인 필요
-        hashOperations.putAll(REFRESH_TOKEN_KEY, map);
-        return reIssuedRefreshToken;
-    }
-     */
-
-    @Override
-    public String verifyAccessToken(String accessToken) {
-        return null;
-    }
-
-    @Override
-    public String refresh(String refreshToken) {
-        return null;
     }
 
     /**

@@ -1,6 +1,5 @@
-package com.sosim.server.user.dto;
+package com.sosim.server.user.dto.req;
 
-import com.sosim.server.type.WithdrawalGroundsType;
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,8 +12,10 @@ import lombok.NoArgsConstructor;
 public class UserWithdrawalReq {
 
     @NotNull
+    private long userId;
+
     private LocalDateTime withdrawalDate;
 
     @NotNull
-    private WithdrawalGroundsType withdrawalGroundsType;
+    private int withdrawalGroundsType;
 }

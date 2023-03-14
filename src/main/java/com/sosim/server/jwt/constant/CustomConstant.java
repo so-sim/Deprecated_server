@@ -1,4 +1,4 @@
-package com.sosim.server.jwt.util.constant;
+package com.sosim.server.jwt.constant;
 
 public class CustomConstant {
 

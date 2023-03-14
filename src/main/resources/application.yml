@@ -1,8 +1,6 @@
 sys:
   version: 0.1.0
 
-
-
 spring:
   profiles:
     group:
@@ -29,26 +27,32 @@ spring:
       enabled: true
 
   datasource:
-    driver-class-name: org.h2.Driver
+#    driver-class-name: org.h2.Driver
     # error - need more trouble shooting
     #    url: jdbc:h2:tcp://localhost/~/sosim
     # mem
     #    url: jdbc:h2:mem:sosim
     # use local mv.db file
-    url: jdbc:h2:~/sosim
-    username: sa
-    password:
+#    url: jdbc:h2:~/sosim
+#    username: sa
+#    password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/sosim?serverTimezone=Asia/Seoul
+      username: sosim_jean
+      password: sosim_1234
 
   jpa:
     show-sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
-    properties:
-      hibernate:
-        format_sql: true
-        show_sql: true
+#    database-platform: org.hibernate.dialect.H2Dialect
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        show_sql: true
 
     hibernate:
-      ddl-auto: #create #update
+      ddl-auto: create #update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
   redis:
     host: localhost
