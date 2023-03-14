@@ -1,4 +1,4 @@
-package com.sosim.server.group.dto;
+package com.sosim.server.group.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sosim.server.group.Group;
@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
-public class GetGroupDto {
+public class GetGroupResponse {
     @JsonProperty("group_id")
     private Long id;
 
@@ -24,8 +24,8 @@ public class GetGroupDto {
     @JsonProperty("admin_nickname")
     private String adminNickname;
 
-    public static GetGroupDto create(Group group) {
-        return GetGroupDto.builder()
+    public static GetGroupResponse create(Group group) {
+        return GetGroupResponse.builder()
                 .id(group.getId())
                 .title(group.getTitle())
                 .coverColorType(group.getCoverColorType().getLabel())

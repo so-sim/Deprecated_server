@@ -2,10 +2,10 @@ package com.sosim.server.group;
 
 import com.sosim.server.common.response.Response;
 import com.sosim.server.config.exception.CustomException;
-import com.sosim.server.group.dto.CreateGroupDto;
-import com.sosim.server.group.dto.CreatedGroupDto;
-import com.sosim.server.group.dto.GetGroupDto;
-import com.sosim.server.group.dto.UpdateGroupDto;
+import com.sosim.server.group.dto.request.CreateGroupRequest;
+import com.sosim.server.group.dto.response.CreateGroupResponse;
+import com.sosim.server.group.dto.response.GetGroupResponse;
+import com.sosim.server.group.dto.request.UpdateGroupRequest;
 import com.sosim.server.participant.dto.GetParticipantsDto;
 import com.sosim.server.participant.dto.ParticipantNicknameDto;
 import com.sosim.server.security.AuthUser;
@@ -18,8 +18,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotBlank;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -29,22 +27,22 @@ public class GroupController {
 
     @PostMapping("/group")
     public ResponseEntity<?> createGroup(@AuthenticationPrincipal AuthUser authUser,
-                                         @Validated @RequestBody CreateGroupDto createGroupDto,
+                                         @Validated @RequestBody CreateGroupRequest createGroupRequest,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingError(bindingResult);
         }
 
-        CreatedGroupDto createdGroupDto = groupService.createGroup(Long.valueOf(authUser.getId()), createGroupDto);
-        Response<?> response = Response.createResponse("모임이 성공적으로 생성되었습니다.", createdGroupDto);
+        CreateGroupResponse createGroupResponse = groupService.createGroup(Long.valueOf(authUser.getId()), createGroupRequest);
+        Response<?> response = Response.createResponse("모임이 성공적으로 생성되었습니다.", createGroupResponse);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/group/{groupId}")
     public ResponseEntity<?> getGroup(@PathVariable("groupId") Long groupId) {
-        GetGroupDto getGroupDto = groupService.getGroup(groupId);
-        Response<?> response = Response.createResponse("모임이 성공적으로 조회되었습니다.", getGroupDto);
+        GetGroupResponse getGroupResponse = groupService.getGroup(groupId);
+        Response<?> response = Response.createResponse("모임이 성공적으로 조회되었습니다.", getGroupResponse);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -60,13 +58,13 @@ public class GroupController {
     @PatchMapping("/group/{groupId}")
     public ResponseEntity<?> updateGroup(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId,
-                                         @Validated @RequestBody UpdateGroupDto updateGroupDto,
+                                         @Validated @RequestBody UpdateGroupRequest updateGroupRequest,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingError(bindingResult);
         }
 
-        CreatedGroupDto updatedGroupDto = groupService.updateGroup(Long.valueOf(authUser.getId()), groupId, updateGroupDto);
+        CreateGroupResponse updatedGroupDto = groupService.updateGroup(Long.valueOf(authUser.getId()), groupId, updateGroupRequest);
         Response<?> response = Response.createResponse("모임이 성공적으로 수정되었습니다.", updatedGroupDto);
 
         return new ResponseEntity<>(response, HttpStatus.OK);

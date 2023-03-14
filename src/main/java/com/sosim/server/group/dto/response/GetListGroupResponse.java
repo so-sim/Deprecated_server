@@ -1,4 +1,4 @@
-package com.sosim.server.group.dto;
+package com.sosim.server.group.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
-public class ListGroupDto {
+public class GetListGroupResponse {
     @JsonProperty("index")
     private Long index;
 
@@ -17,10 +17,10 @@ public class ListGroupDto {
     private boolean next;
 
     @JsonProperty("group_list")
-    List<GetGroupDto> groupList;
+    List<GetGroupResponse> groupList;
 
-    public static ListGroupDto create(Long index, boolean next, List<GetGroupDto> groupList) {
-        return ListGroupDto.builder()
+    public static GetListGroupResponse create(Long index, boolean next, List<GetGroupResponse> groupList) {
+        return GetListGroupResponse.builder()
                 .index(index)
                 .next(next)
                 .groupList(groupList)

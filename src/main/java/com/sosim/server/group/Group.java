@@ -1,8 +1,8 @@
 package com.sosim.server.group;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
-import com.sosim.server.group.dto.CreateGroupDto;
-import com.sosim.server.group.dto.UpdateGroupDto;
+import com.sosim.server.group.dto.request.CreateGroupRequest;
+import com.sosim.server.group.dto.request.UpdateGroupRequest;
 import com.sosim.server.participant.Participant;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -55,20 +55,20 @@ public class Group extends BaseTimeEntity {
         this.groupType = GroupType.of(groupType);
     }
 
-    public static Group create(Long adminId, CreateGroupDto createGroupDto) {
+    public static Group create(Long adminId, CreateGroupRequest createGroupRequest) {
         return Group.builder()
-                .title(createGroupDto.getTitle())
+                .title(createGroupRequest.getTitle())
                 .adminId(adminId)
-                .adminNickname(createGroupDto.getNickname())
-                .groupType(createGroupDto.getGroupType())
-                .coverColorType(createGroupDto.getCoverColorType())
+                .adminNickname(createGroupRequest.getNickname())
+                .groupType(createGroupRequest.getGroupType())
+                .coverColorType(createGroupRequest.getCoverColorType())
                 .build();
     }
 
-    public void update(UpdateGroupDto updateGroupDto) {
-        this.title = updateGroupDto.getTitle();
-        this.groupType = GroupType.of(updateGroupDto.getGroupType());
-        this.coverColorType = CoverColorType.of(updateGroupDto.getCoverColorType());
+    public void update(UpdateGroupRequest updateGroupRequest) {
+        this.title = updateGroupRequest.getTitle();
+        this.groupType = GroupType.of(updateGroupRequest.getGroupType());
+        this.coverColorType = CoverColorType.of(updateGroupRequest.getCoverColorType());
     }
 
     public void modifyAdmin(Participant participant) {

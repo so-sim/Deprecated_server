@@ -1,7 +1,11 @@
 package com.sosim.server.group;
 
 import com.sosim.server.config.exception.CustomException;
-import com.sosim.server.group.dto.*;
+import com.sosim.server.group.dto.request.CreateGroupRequest;
+import com.sosim.server.group.dto.request.UpdateGroupRequest;
+import com.sosim.server.group.dto.response.CreateGroupResponse;
+import com.sosim.server.group.dto.response.GetGroupResponse;
+import com.sosim.server.group.dto.response.GetListGroupResponse;
 import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantService;
 import com.sosim.server.participant.dto.GetParticipantsDto;
@@ -28,22 +32,22 @@ public class GroupService {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    public CreatedGroupDto createGroup(Long userId, CreateGroupDto createGroupDto) {
+    public CreateGroupResponse createGroup(Long userId, CreateGroupRequest createGroupRequest) {
         User userEntity = userService.getUser(userId);
-        Group group = Group.create(userId, createGroupDto);
+        Group group = Group.create(userId, createGroupRequest);
         Group groupEntity = saveGroupEntity(group);
 
-        participantService.createParticipant(userEntity, groupEntity, createGroupDto.getNickname());
+        participantService.createParticipant(userEntity, groupEntity, createGroupRequest.getNickname());
 
-        CreatedGroupDto createdGroupDto = CreatedGroupDto.create(groupEntity);
-        return createdGroupDto;
+        CreateGroupResponse createGroupResponse = CreateGroupResponse.create(groupEntity);
+        return createGroupResponse;
     }
 
-    public GetGroupDto getGroup(Long groupId) {
+    public GetGroupResponse getGroup(Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
-        GetGroupDto getGroupDto = GetGroupDto.create(groupEntity);
+        GetGroupResponse getGroupResponse = GetGroupResponse.create(groupEntity);
 
-        return getGroupDto;
+        return getGroupResponse;
     }
 
     public GetParticipantsDto getGroupParticipant(Long groupId) {
@@ -54,14 +58,14 @@ public class GroupService {
         return getList;
     }
 
-    public CreatedGroupDto updateGroup(Long userId, Long groupId, UpdateGroupDto updateGroupDto) {
+    public CreateGroupResponse updateGroup(Long userId, Long groupId, UpdateGroupRequest updateGroupRequest) {
         Group groupEntity = getGroupEntity(groupId);
 
         if (!groupEntity.getAdminId().equals(userId)) {
             throw new CustomException(ErrorCodeType.NONE_ADMIN);
         }
-        groupEntity.update(updateGroupDto);
-        CreatedGroupDto updateGroup = CreatedGroupDto.create(groupEntity);
+        groupEntity.update(updateGroupRequest);
+        CreateGroupResponse updateGroup = CreateGroupResponse.create(groupEntity);
 
         return updateGroup;
     }
@@ -109,7 +113,7 @@ public class GroupService {
                 getGroupEntity(groupId), participantNicknameDto);
     }
 
-    public ListGroupDto getMyGroups(Long index, Long userId) {
+    public GetListGroupResponse getMyGroups(Long index, Long userId) {
         Slice<Participant> slice = participantService.getParticipantSlice(index, userId);
         List<Participant> participantEntityList = slice.getContent();
 
@@ -117,12 +121,12 @@ public class GroupService {
             throw new CustomException(ErrorCodeType.NO_MORE_GROUP);
         }
 
-        List<GetGroupDto> groupList = new ArrayList<>();
+        List<GetGroupResponse> groupList = new ArrayList<>();
         for (Participant participant : participantEntityList) {
-            groupList.add(GetGroupDto.create(participant.getGroup()));
+            groupList.add(GetGroupResponse.create(participant.getGroup()));
         }
 
-        return ListGroupDto.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
+        return GetListGroupResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
                 slice.hasNext(), groupList);
     }
 
