@@ -1,6 +1,6 @@
 package com.sosim.server.config.exception;
 
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.core.NestedRuntimeException;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 public class CustomException extends NestedRuntimeException {
 
     @Getter
-    private ErrorCodeType errorCodeType;
+    private CodeType codeType;
 
     private String field;
     private String fieldMessage;
@@ -20,20 +20,20 @@ public class CustomException extends NestedRuntimeException {
 
     private String code;
 
-    public CustomException(ErrorCodeType errorCodeType) {
-        this(errorCodeType.getMessage(), errorCodeType.getHttpStatus(), errorCodeType.getCode());
+    public CustomException(CodeType codeType) {
+        this(codeType.getMessage(), codeType.getHttpStatus(), codeType.getCode());
     }
 
-    public CustomException(String field, String message, ErrorCodeType errorCodeType) {
-        this(field, message, errorCodeType.getHttpStatus(), errorCodeType.getCode());
+    public CustomException(String field, String message, CodeType codeType) {
+        this(field, message, codeType.getHttpStatus(), codeType.getCode());
     }
 
-    public CustomException(String message, ErrorCodeType errorCodeType) {
-        this(message, errorCodeType.getHttpStatus(), errorCodeType.getCode());
+    public CustomException(String message, CodeType codeType) {
+        this(message, codeType.getHttpStatus(), codeType.getCode());
     }
 
-    public CustomException(ErrorCodeType errorCodeType, String field, String fieldMessage) {
-        this(field, fieldMessage, errorCodeType.getMessage(), errorCodeType.getHttpStatus(), errorCodeType.getCode());
+    public CustomException(CodeType codeType, String field, String fieldMessage) {
+        this(field, fieldMessage, codeType.getMessage(), codeType.getHttpStatus(), codeType.getCode());
     }
 
     public CustomException(String message, HttpStatus httpStatus, int code) {

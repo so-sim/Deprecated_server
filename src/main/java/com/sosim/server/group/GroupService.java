@@ -10,7 +10,7 @@ import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantService;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
@@ -62,7 +62,7 @@ public class GroupService {
         Group groupEntity = getGroupEntity(groupId);
 
         if (!groupEntity.getAdminId().equals(userId)) {
-            throw new CustomException(ErrorCodeType.NONE_ADMIN);
+            throw new CustomException(CodeType.NONE_ADMIN);
         }
         groupEntity.update(updateGroupRequest);
         CreateGroupResponse updateGroup = CreateGroupResponse.create(groupEntity);
@@ -74,7 +74,7 @@ public class GroupService {
         Group groupEntity = getGroupEntity(groupId);
 
         if (!groupEntity.getAdminId().equals(userId)) {
-            throw new CustomException(ErrorCodeType.NONE_ADMIN);
+            throw new CustomException(CodeType.NONE_ADMIN);
         }
 
         groupRepository.delete(groupEntity);
@@ -91,14 +91,14 @@ public class GroupService {
         Group groupEntity = getGroupEntity(groupId);
 
         if (!groupEntity.getAdminId().equals(userId)) {
-            throw new CustomException(ErrorCodeType.NONE_ADMIN);
+            throw new CustomException(CodeType.NONE_ADMIN);
         }
 
         Participant participantEntity = participantService
                 .getParticipantEntity(participantNicknameRequest.getNickname(), groupEntity);
 
         if (!groupEntity.getParticipantList().contains(participantEntity)) {
-            throw new CustomException(ErrorCodeType.NONE_PARTICIPANT);
+            throw new CustomException(CodeType.NONE_PARTICIPANT);
         }
 
         groupEntity.modifyAdmin(participantEntity);
@@ -118,7 +118,7 @@ public class GroupService {
         List<Participant> participantEntityList = slice.getContent();
 
         if (participantEntityList.size() == 0) {
-            throw new CustomException(ErrorCodeType.NO_MORE_GROUP);
+            throw new CustomException(CodeType.NO_MORE_GROUP);
         }
 
         List<GetGroupResponse> groupList = new ArrayList<>();
@@ -132,7 +132,7 @@ public class GroupService {
 
     public Group getGroupEntity(Long groupId) {
         return groupRepository.findById(groupId)
-                .orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_GROUP));
+                .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
     }
 
     public Group saveGroupEntity(Group group) {

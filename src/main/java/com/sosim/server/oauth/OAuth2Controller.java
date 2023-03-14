@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sosim.server.common.response.Response;
 import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.dto.response.LoginResponse;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.type.SocialType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class OAuth2Controller {
         jwtService.setRefreshTokenHeader(response, tokens.getRefreshToken().getRefreshToken());
 
         // Response 생성
-        Response<?> responseDto = Response.createResponse("로그인이 성공적으로 완료되었습니다.", tokens);
+        Response<?> responseDto = Response.create(CodeType.SUCCESS_LOGIN, tokens);
 
         return ResponseEntity.ok(responseDto);
     }

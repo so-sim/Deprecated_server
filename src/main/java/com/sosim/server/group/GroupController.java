@@ -4,12 +4,13 @@ import com.sosim.server.common.response.Response;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.group.dto.request.CreateGroupRequest;
 import com.sosim.server.group.dto.response.CreateGroupResponse;
+import com.sosim.server.group.dto.response.GetGroupListResponse;
 import com.sosim.server.group.dto.response.GetGroupResponse;
 import com.sosim.server.group.dto.request.UpdateGroupRequest;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.security.AuthUser;
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class GroupController {
         }
 
         CreateGroupResponse createGroupResponse = groupService.createGroup(Long.valueOf(authUser.getId()), createGroupRequest);
-        Response<?> response = Response.createResponse("모임이 성공적으로 생성되었습니다.", createGroupResponse);
+        Response<?> response = Response.create(CodeType.CREATE_GROUP, createGroupResponse);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -42,21 +43,21 @@ public class GroupController {
     @GetMapping("/group/{groupId}")
     public ResponseEntity<?> getGroup(@PathVariable("groupId") Long groupId) {
         GetGroupResponse getGroupResponse = groupService.getGroup(groupId);
-        Response<?> response = Response.createResponse("모임이 성공적으로 조회되었습니다.", getGroupResponse);
+        Response<?> response = Response.create(CodeType.GET_GROUP, getGroupResponse);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/group/{groupId}/participants")
-    public ResponseEntity<?> getGroupParticipant(@PathVariable("groupId") Long groupId) {
+    public ResponseEntity<?> getGroupParticipants(@PathVariable("groupId") Long groupId) {
         GetParticipantListResponse groupParticipant = groupService.getGroupParticipant(groupId);
-        Response<?> response = Response.createResponse("모임 참가자가 성공적으로 조회되었습니다.", groupParticipant);
+        Response<?> response = Response.create(CodeType.GET_PARTICIPANTS, groupParticipant);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PatchMapping("/group/{groupId}")
-    public ResponseEntity<?> updateGroup(@AuthenticationPrincipal AuthUser authUser,
+    public ResponseEntity<?> modifyGroup(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId,
                                          @Validated @RequestBody UpdateGroupRequest updateGroupRequest,
                                          BindingResult bindingResult) {
@@ -65,7 +66,7 @@ public class GroupController {
         }
 
         CreateGroupResponse updatedGroupDto = groupService.updateGroup(Long.valueOf(authUser.getId()), groupId, updateGroupRequest);
-        Response<?> response = Response.createResponse("모임이 성공적으로 수정되었습니다.", updatedGroupDto);
+        Response<?> response = Response.create(CodeType.MODIFY_GROUP, updatedGroupDto);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -74,7 +75,7 @@ public class GroupController {
     public ResponseEntity<?> deleteGroup(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId) {
         groupService.deleteGroup(Long.parseLong(authUser.getId()), groupId);
-        Response<?> response = Response.createResponse("모임이 성공적으로 삭제되었습니다.", null);
+        Response<?> response = Response.create(CodeType.DELETE_GROUP, null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -89,7 +90,7 @@ public class GroupController {
         }
 
         groupService.intoGroup(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
-        Response<?> response = Response.createResponse("모임에 성공적으로 참가되었습니다.", null);
+        Response<?> response = Response.create(CodeType.INTO_GROUP, null);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -100,7 +101,7 @@ public class GroupController {
                                          @RequestBody ParticipantNicknameRequest participantNicknameRequest) {
 
         groupService.modifyAdmin(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
-        Response<?> response = Response.createResponse("관리자가 성공적으로 변경되었습니다.", null);
+        Response<?> response = Response.create(CodeType.MODIFY_GROUP_ADMIN, null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -109,7 +110,7 @@ public class GroupController {
     public ResponseEntity<?> withdrawGroup(@AuthenticationPrincipal AuthUser authUser,
                                            @PathVariable("groupId") Long groupId) {
         groupService.withdrawGroup(Long.parseLong(authUser.getId()), groupId);
-        Response<?> response = Response.createResponse("성공적으로 모임에서 탈퇴되었습니다.", null);
+        Response<?> response = Response.create(CodeType.WITHDRAW_GROUP, null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -119,7 +120,7 @@ public class GroupController {
                                             @PathVariable ("groupId") Long groupId,
                                             @Validated @RequestBody ParticipantNicknameRequest participantNicknameRequest) {
         groupService.modifyNickname(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
-        Response<?> response = Response.createResponse("성공적으로 닉네임이 수정되었습니다.", null);
+        Response<?> response = Response.create(CodeType.MODIFY_NICKNAME, null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -127,11 +128,14 @@ public class GroupController {
     @GetMapping("/groups")
     public ResponseEntity<?> getMyGroups(@AuthenticationPrincipal AuthUser authUser,
                                          @RequestParam("index") Long index) {
-        return new ResponseEntity<>(groupService.getMyGroups(index, Long.parseLong(authUser.getId())), HttpStatus.OK);
+        GetGroupListResponse groupList = groupService.getMyGroups(index, Long.parseLong(authUser.getId()));
+        Response<?> response = Response.create(CodeType.GET_GROUPS, groupList);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     private void bindingError(BindingResult bindingResult) {
-        throw new CustomException(ErrorCodeType.BINDING_ERROR, bindingResult.getFieldError().getField(),
+        throw new CustomException(CodeType.BINDING_ERROR, bindingResult.getFieldError().getField(),
                 bindingResult.getFieldError().getDefaultMessage());
     }
 }

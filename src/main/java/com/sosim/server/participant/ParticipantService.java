@@ -3,7 +3,7 @@ package com.sosim.server.participant;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.group.Group;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +19,11 @@ public class ParticipantService {
 
     public void createParticipant(User userEntity, Group groupEntity, String nickname) {
         if (participantRepository.findByUserAndGroup(userEntity, groupEntity).isPresent()) {
-            throw new CustomException(ErrorCodeType.ALREADY_INTO_GROUP);
+            throw new CustomException(CodeType.ALREADY_INTO_GROUP);
         }
 
         if (participantRepository.findByNicknameAndGroup(nickname, groupEntity).isPresent()) {
-            throw new CustomException(ErrorCodeType.ALREADY_USE_NICKNAME);
+            throw new CustomException(CodeType.ALREADY_USE_NICKNAME);
         }
 
         Participant participant = Participant.create(userEntity, groupEntity, nickname);
@@ -45,12 +45,12 @@ public class ParticipantService {
 
     public Participant getParticipantEntity(String nickname, Group group) {
         return participantRepository.findByNicknameAndGroup(nickname, group)
-                .orElseThrow(() -> new CustomException(ErrorCodeType.NONE_PARTICIPANT));
+                .orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 
     public Participant getParticipantEntity(User user, Group group) {
         return participantRepository.findByUserAndGroup(user, group)
-                .orElseThrow(() -> new CustomException(ErrorCodeType.NONE_PARTICIPANT));
+                .orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 
     public Slice<Participant> getParticipantSlice(Long index, Long userId) {

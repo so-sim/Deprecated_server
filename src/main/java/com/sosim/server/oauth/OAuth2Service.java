@@ -9,7 +9,7 @@ import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.dto.response.LoginResponse;
 import com.sosim.server.oauth.dto.request.OAuth2TokenRequest;
 import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
@@ -79,7 +79,7 @@ public class OAuth2Service {
                     String.class
             ).getBody();
         } catch (HttpStatusCodeException e) {
-            throw new CustomException(ErrorCodeType.COMMON_BAD_REQUEST);
+            throw new CustomException(CodeType.COMMON_BAD_REQUEST);
         }
 
         return OBJECT_MAPPER.readValue(responseBody, OAuth2TokenRequest.class);
