@@ -56,14 +56,12 @@ public class OAuth2Service {
         User user = getUserProfile(socialType, oAuth2Token, type);
 
         // Sever 자체 JWT 생성 및 Refresh Token 저장
-        LoginResponse loginResponse = LoginResponse.create(
-                jwtFactory.createAccessToken(String.valueOf(user.getId())));
-
         RefreshToken refreshToken = RefreshToken.builder().id(String.valueOf(user.getId()))
                 .refreshToken(jwtFactory.createRefreshToken()).build();
         jwtService.saveRefreshToken(refreshToken);
 
-        return loginResponse;
+        return LoginResponse.create(
+                jwtFactory.createAccessToken(String.valueOf(user.getId())), refreshToken.getRefreshToken());
     }
 
     private OAuth2TokenRequest getToken(ClientRegistration type, String authorizationCode) throws JsonProcessingException {

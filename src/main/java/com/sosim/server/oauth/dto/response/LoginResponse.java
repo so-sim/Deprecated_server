@@ -13,9 +13,13 @@ public class LoginResponse {
     @JsonProperty("access_token")
     private String accessToken;
 
-    public static LoginResponse create(String accessToken) {
+    @JsonIgnore
+    private String refreshToken;
+
+    public static LoginResponse create(String accessToken, String refreshToken) {
         return LoginResponse.builder()
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

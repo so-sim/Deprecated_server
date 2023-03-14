@@ -7,6 +7,7 @@ import com.sosim.server.oauth.dto.response.LoginResponse;
 import com.sosim.server.type.CodeType;
 import com.sosim.server.type.SocialType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,14 +23,14 @@ public class OAuth2Controller {
     @PostMapping("/login/oauth2/code/{socialType}")
     public ResponseEntity<?> login(@PathVariable("socialType") String socialType, @RequestParam("code") String code,
                                    HttpServletResponse response) throws JsonProcessingException {
-        LoginResponse tokens = oAuth2Service.login(SocialType.getSocialType(socialType), code);
+        LoginResponse loginResponse = oAuth2Service.login(SocialType.getSocialType(socialType), code);
 
         // Cookie RefreshToken 설정
-        jwtService.setRefreshTokenHeader(response, tokens.getRefreshToken().getRefreshToken());
+        jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken().getRefreshToken());
 
         // Response 생성
-        Response<?> responseDto = Response.create(CodeType.SUCCESS_LOGIN, tokens);
+        Response<?> responseDto = Response.create(CodeType.SUCCESS_LOGIN, loginResponse);
 
-        return ResponseEntity.ok(responseDto);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }
