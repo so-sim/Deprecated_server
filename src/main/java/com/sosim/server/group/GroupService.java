@@ -32,28 +32,24 @@ public class GroupService {
 
     public CreateGroupResponse createGroup(Long userId, CreateGroupRequest createGroupRequest) {
         User userEntity = userService.getUser(userId);
-        Group group = Group.create(userId, createGroupRequest);
-        Group groupEntity = saveGroupEntity(group);
+        Group groupEntity = saveGroupEntity(Group.create(userId, createGroupRequest));
 
         participantService.createParticipant(userEntity, groupEntity, createGroupRequest.getNickname());
 
-        CreateGroupResponse createGroupResponse = CreateGroupResponse.create(groupEntity);
-        return createGroupResponse;
+        return CreateGroupResponse.create(groupEntity);
     }
 
     public GetGroupResponse getGroup(Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
-        GetGroupResponse getGroupResponse = GetGroupResponse.create(groupEntity);
 
-        return getGroupResponse;
+        return GetGroupResponse.create(groupEntity);
     }
 
     public GetParticipantListResponse getGroupParticipant(Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
         List<Participant> participantList = groupEntity.getParticipantList();
-        GetParticipantListResponse getList = GetParticipantListResponse.create(groupEntity, participantList);
 
-        return getList;
+        return GetParticipantListResponse.create(groupEntity, participantList);
     }
 
     public CreateGroupResponse updateGroup(Long userId, Long groupId, UpdateGroupRequest updateGroupRequest) {
@@ -63,9 +59,8 @@ public class GroupService {
             throw new CustomException(CodeType.NONE_ADMIN);
         }
         groupEntity.update(updateGroupRequest);
-        CreateGroupResponse updateGroup = CreateGroupResponse.create(groupEntity);
 
-        return updateGroup;
+        return CreateGroupResponse.create(groupEntity);
     }
 
     public void deleteGroup(Long userId, Long groupId) {
