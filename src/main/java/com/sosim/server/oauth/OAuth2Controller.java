@@ -26,7 +26,7 @@ public class OAuth2Controller {
         LoginResponse loginResponse = oAuth2Service.login(SocialType.getSocialType(socialType), code);
 
         // Cookie RefreshToken 설정
-        jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken().getRefreshToken());
+        jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken());
 
         // Response 생성
         Response<?> responseDto = Response.create(CodeType.SUCCESS_LOGIN, loginResponse);
