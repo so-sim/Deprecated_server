@@ -28,7 +28,7 @@ public class GetGroupResponse {
         return GetGroupResponse.builder()
                 .id(group.getId())
                 .title(group.getTitle())
-                .coverColorType(group.getCoverColorType().getLabel())
+                .coverColorType(group.getCoverColorType().getCode())
                 .groupType(group.getGroupType().getLabel())
                 .adminNickname(group.getAdminNickname())
                 .build();

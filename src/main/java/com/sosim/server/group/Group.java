@@ -47,12 +47,12 @@ public class Group extends BaseTimeEntity {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Group(String title, Long adminId, String adminNickname,
-                  String coverColorType, String groupType) {
+                  CoverColorType coverColorType, GroupType groupType) {
         this.title = title;
         this.adminId = adminId;
         this.adminNickname = adminNickname;
-        this.coverColorType = CoverColorType.of(coverColorType);
-        this.groupType = GroupType.of(groupType);
+        this.coverColorType = coverColorType;
+        this.groupType = groupType;
     }
 
     public static Group create(Long adminId, CreateGroupRequest createGroupRequest) {
@@ -67,8 +67,8 @@ public class Group extends BaseTimeEntity {
 
     public void update(UpdateGroupRequest updateGroupRequest) {
         this.title = updateGroupRequest.getTitle();
-        this.groupType = GroupType.of(updateGroupRequest.getGroupType());
-        this.coverColorType = CoverColorType.of(updateGroupRequest.getCoverColorType());
+        this.groupType = updateGroupRequest.getGroupType();
+        this.coverColorType = updateGroupRequest.getCoverColorType();
     }
 
     public void modifyAdmin(Participant participant) {

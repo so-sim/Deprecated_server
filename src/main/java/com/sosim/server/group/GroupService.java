@@ -12,7 +12,6 @@ import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
-import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -30,7 +29,6 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final ParticipantService participantService;
     private final UserService userService;
-    private final UserRepository userRepository;
 
     public CreateGroupResponse createGroup(Long userId, CreateGroupRequest createGroupRequest) {
         User userEntity = userService.getUser(userId);

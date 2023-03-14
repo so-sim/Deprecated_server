@@ -1,7 +1,6 @@
 package com.sosim.server.group.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sosim.server.common.util.ValidEnum;
 import com.sosim.server.group.CoverColorType;
 import com.sosim.server.group.GroupType;
 import lombok.Getter;
@@ -21,11 +20,9 @@ public class CreateGroupRequest {
     @JsonProperty("myName")
     private String nickname;
 
-    @ValidEnum(target = GroupType.class, message = "존재하지 않는 모임 유형입니다.")
     @JsonProperty("type")
-    private String groupType;
+    private GroupType groupType;
 
-    @ValidEnum(target = CoverColorType.class, message = "존재하지 않는 커버 색상입니다.")
     @JsonProperty("coverColor")
-    private String coverColorType;
+    private CoverColorType coverColorType;
 }
