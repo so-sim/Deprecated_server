@@ -13,20 +13,9 @@ public class LoginResponse {
     @JsonProperty("access_token")
     private String accessToken;
 
-    @JsonIgnore
-    private RefreshToken refreshToken;
-
-    public static LoginResponse createOAuth2JwtResponseDto(User user, String accessToken, String refreshToken) {
+    public static LoginResponse create(String accessToken) {
         return LoginResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(createRefreshToken(user, refreshToken))
-                .build();
-    }
-
-    private static RefreshToken createRefreshToken(User user, String refreshToken) {
-        return RefreshToken.builder()
-                .id(String.valueOf(user.getId()))
-                .refreshToken(refreshToken)
                 .build();
     }
 }

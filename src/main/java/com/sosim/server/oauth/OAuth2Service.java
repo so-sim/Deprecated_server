@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.JwtFactory;
 import com.sosim.server.jwt.JwtService;
+import com.sosim.server.jwt.RefreshToken;
 import com.sosim.server.oauth.dto.response.LoginResponse;
 import com.sosim.server.oauth.dto.request.OAuth2TokenRequest;
 import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
@@ -15,6 +16,7 @@ import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -54,10 +56,12 @@ public class OAuth2Service {
         User user = getUserProfile(socialType, oAuth2Token, type);
 
         // Sever 자체 JWT 생성 및 Refresh Token 저장
-        LoginResponse loginResponse = LoginResponse.createOAuth2JwtResponseDto(user,
-                jwtFactory.createAccessToken(String.valueOf(user.getId())),
-                jwtFactory.createRefreshToken());
-        jwtService.saveRefreshToken(loginResponse.getRefreshToken());
+        LoginResponse loginResponse = LoginResponse.create(
+                jwtFactory.createAccessToken(String.valueOf(user.getId())));
+
+        RefreshToken refreshToken = RefreshToken.builder().id(String.valueOf(user.getId()))
+                .refreshToken(jwtFactory.createRefreshToken()).build();
+        jwtService.saveRefreshToken(refreshToken);
 
         return loginResponse;
     }
