@@ -5,7 +5,7 @@ import com.sosim.server.group.dto.request.CreateGroupRequest;
 import com.sosim.server.group.dto.request.UpdateGroupRequest;
 import com.sosim.server.group.dto.response.CreateGroupResponse;
 import com.sosim.server.group.dto.response.GetGroupResponse;
-import com.sosim.server.group.dto.response.GetListGroupResponse;
+import com.sosim.server.group.dto.response.GetGroupListResponse;
 import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantService;
 import com.sosim.server.participant.dto.GetParticipantsDto;
@@ -113,7 +113,7 @@ public class GroupService {
                 getGroupEntity(groupId), participantNicknameDto);
     }
 
-    public GetListGroupResponse getMyGroups(Long index, Long userId) {
+    public GetGroupListResponse getMyGroups(Long index, Long userId) {
         Slice<Participant> slice = participantService.getParticipantSlice(index, userId);
         List<Participant> participantEntityList = slice.getContent();
 
@@ -126,7 +126,7 @@ public class GroupService {
             groupList.add(GetGroupResponse.create(participant.getGroup()));
         }
 
-        return GetListGroupResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
+        return GetGroupListResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
                 slice.hasNext(), groupList);
     }
 

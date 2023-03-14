@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
-public class GetListGroupResponse {
+public class GetGroupListResponse {
     @JsonProperty("index")
     private Long index;
 
@@ -19,8 +19,8 @@ public class GetListGroupResponse {
     @JsonProperty("group_list")
     List<GetGroupResponse> groupList;
 
-    public static GetListGroupResponse create(Long index, boolean next, List<GetGroupResponse> groupList) {
-        return GetListGroupResponse.builder()
+    public static GetGroupListResponse create(Long index, boolean next, List<GetGroupResponse> groupList) {
+        return GetGroupListResponse.builder()
                 .index(index)
                 .next(next)
                 .groupList(groupList)
