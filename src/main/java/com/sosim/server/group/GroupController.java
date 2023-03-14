@@ -6,8 +6,8 @@ import com.sosim.server.group.dto.request.CreateGroupRequest;
 import com.sosim.server.group.dto.response.CreateGroupResponse;
 import com.sosim.server.group.dto.response.GetGroupResponse;
 import com.sosim.server.group.dto.request.UpdateGroupRequest;
-import com.sosim.server.participant.dto.GetParticipantsDto;
-import com.sosim.server.participant.dto.ParticipantNicknameDto;
+import com.sosim.server.participant.dto.response.GetParticipantListResponse;
+import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.ErrorCodeType;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class GroupController {
 
     @GetMapping("/group/{groupId}/participants")
     public ResponseEntity<?> getGroupParticipant(@PathVariable("groupId") Long groupId) {
-        GetParticipantsDto groupParticipant = groupService.getGroupParticipant(groupId);
+        GetParticipantListResponse groupParticipant = groupService.getGroupParticipant(groupId);
         Response<?> response = Response.createResponse("모임 참가자가 성공적으로 조회되었습니다.", groupParticipant);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -82,13 +82,13 @@ public class GroupController {
     @PostMapping("/group/{groupId}/participant")
     public ResponseEntity<?> intoGroup(@AuthenticationPrincipal AuthUser authUser,
                                        @PathVariable("groupId") Long groupId,
-                                       @Validated @RequestBody ParticipantNicknameDto participantNicknameDto,
+                                       @Validated @RequestBody ParticipantNicknameRequest participantNicknameRequest,
                                        BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             bindingError(bindingResult);
         }
 
-        groupService.intoGroup(Long.parseLong(authUser.getId()), groupId, participantNicknameDto);
+        groupService.intoGroup(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
         Response<?> response = Response.createResponse("모임에 성공적으로 참가되었습니다.", null);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -97,9 +97,9 @@ public class GroupController {
     @PatchMapping("/group/{groupId}/admin")
     public ResponseEntity<?> modifyAdmin(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId,
-                                         @RequestBody ParticipantNicknameDto participantNicknameDto) {
+                                         @RequestBody ParticipantNicknameRequest participantNicknameRequest) {
 
-        groupService.modifyAdmin(Long.parseLong(authUser.getId()), groupId, participantNicknameDto);
+        groupService.modifyAdmin(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
         Response<?> response = Response.createResponse("관리자가 성공적으로 변경되었습니다.", null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -117,8 +117,8 @@ public class GroupController {
     @PatchMapping("/group/{groupId}/participant")
     public ResponseEntity<?> modifyNickname(@AuthenticationPrincipal AuthUser authUser,
                                             @PathVariable ("groupId") Long groupId,
-                                            @Validated @RequestBody ParticipantNicknameDto participantNicknameDto) {
-        groupService.modifyNickname(Long.parseLong(authUser.getId()), groupId, participantNicknameDto);
+                                            @Validated @RequestBody ParticipantNicknameRequest participantNicknameRequest) {
+        groupService.modifyNickname(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
         Response<?> response = Response.createResponse("성공적으로 닉네임이 수정되었습니다.", null);
 
         return new ResponseEntity<>(response, HttpStatus.OK);

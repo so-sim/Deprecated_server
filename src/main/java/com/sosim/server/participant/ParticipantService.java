@@ -2,7 +2,7 @@ package com.sosim.server.participant;
 
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.group.Group;
-import com.sosim.server.participant.dto.ParticipantNicknameDto;
+import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.user.User;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +34,9 @@ public class ParticipantService {
         participantRepository.delete(getParticipantEntity(user, group));
     }
 
-    public void modifyNickname(User user, Group group, ParticipantNicknameDto participantNicknameDto) {
+    public void modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {
         Participant participantEntity = getParticipantEntity(user, group);
-        participantEntity.modifyNickname(participantNicknameDto.getNickname());
+        participantEntity.modifyNickname(participantNicknameRequest.getNickname());
     }
 
     public void saveParticipantEntity(Participant participant) {

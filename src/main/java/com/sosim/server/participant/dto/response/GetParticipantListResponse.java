@@ -1,4 +1,4 @@
-package com.sosim.server.participant.dto;
+package com.sosim.server.participant.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sosim.server.group.Group;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Builder
-public class GetParticipantsDto {
+public class GetParticipantListResponse {
     @JsonProperty("admin_id")
     private Long adminId;
 
@@ -21,8 +21,8 @@ public class GetParticipantsDto {
     @JsonProperty("nickname_list")
     private List<String> nicknameList;
 
-    public static GetParticipantsDto create(Group group, List<Participant> participants) {
-        return GetParticipantsDto.builder()
+    public static GetParticipantListResponse create(Group group, List<Participant> participants) {
+        return GetParticipantListResponse.builder()
                 .adminId(group.getAdminId())
                 .adminNickname(group.getAdminNickname())
                 .nicknameList(participants.stream()
