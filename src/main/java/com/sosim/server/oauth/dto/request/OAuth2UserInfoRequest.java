@@ -1,13 +1,13 @@
-package com.sosim.server.oauth.dto;
+package com.sosim.server.oauth.dto.request;
 
 import com.sosim.server.type.SocialType;
 
 import java.util.Map;
 
-public abstract class OAuth2UserInfoDto {
+public abstract class OAuth2UserInfoRequest {
     protected Map<String, Object> attributes;
 
-    protected OAuth2UserInfoDto(Map<String, Object> attributes) {
+    protected OAuth2UserInfoRequest(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 

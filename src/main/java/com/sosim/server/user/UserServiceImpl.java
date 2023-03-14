@@ -3,7 +3,7 @@ package com.sosim.server.user;
 import static com.sosim.server.type.UserType.WITHDRAWAL;
 
 import com.sosim.server.config.exception.CustomException;
-import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
+import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.ErrorCodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
@@ -23,17 +23,17 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
 
     @Override
-    public User save(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto) {
+    public User save(SocialType socialType, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
 
         User user = User.builder()
             .createDate(LocalDateTime.now())
             .socialType(socialType)
-            .socialId(oAuth2UserInfoDto.getOAuth2Id())
+            .socialId(oAuth2UserInfoRequest.getOAuth2Id())
             .userType(UserType.ACTIVE).build();
 
         // email있어야 email넣기
-        if(!oAuth2UserInfoDto.getEmail().isEmpty()) {
-            user.setEmail(oAuth2UserInfoDto.getEmail());
+        if(!oAuth2UserInfoRequest.getEmail().isEmpty()) {
+            user.setEmail(oAuth2UserInfoRequest.getEmail());
         }
 
         userRepository.save(user);
@@ -41,8 +41,8 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User update(User user, OAuth2UserInfoDto oAuth2UserInfoDto) {
-        user.setEmail(oAuth2UserInfoDto.getEmail());
+    public User update(User user, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+        user.setEmail(oAuth2UserInfoRequest.getEmail());
         userRepository.save(user);
         return user;
     }

@@ -1,4 +1,4 @@
-package com.sosim.server.oauth.dto;
+package com.sosim.server.oauth.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,15 +9,15 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class OAuth2JwtResponseDto {
+public class LoginResponse {
     @JsonProperty("access_token")
     private String accessToken;
 
     @JsonIgnore
     private RefreshToken refreshToken;
 
-    public static OAuth2JwtResponseDto createOAuth2JwtResponseDto(User user, String accessToken, String refreshToken) {
-        return OAuth2JwtResponseDto.builder()
+    public static LoginResponse createOAuth2JwtResponseDto(User user, String accessToken, String refreshToken) {
+        return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(createRefreshToken(user, refreshToken))
                 .build();
