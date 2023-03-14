@@ -18,6 +18,10 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
 
     public void createParticipant(User userEntity, Group groupEntity, String nickname) {
+        if (participantRepository.findByUserAndGroup(userEntity, groupEntity).isPresent()) {
+            throw new CustomException(ErrorCodeType.ALREADY_INTO_GROUP);
+        }
+
         if (participantRepository.findByNicknameAndGroup(nickname, groupEntity).isPresent()) {
             throw new CustomException(ErrorCodeType.ALREADY_USE_NICKNAME);
         }
