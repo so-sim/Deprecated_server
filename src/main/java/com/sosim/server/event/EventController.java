@@ -1,15 +1,10 @@
 package com.sosim.server.event;
 
-import static com.sosim.server.common.constant.MessageConstant.EVENT_CREATE_SUCCESS;
-import static com.sosim.server.common.constant.MessageConstant.EVENT_DELETE_SUCCESS;
-import static com.sosim.server.common.constant.MessageConstant.EVENT_INFO_SUCCESS;
-import static com.sosim.server.common.constant.MessageConstant.EVENT_PAYMENT_TYPE_CHANGE_SUCCESS;
-import static com.sosim.server.common.constant.MessageConstant.EVENT_UPDATE_SUCCESS;
-
 import com.sosim.server.common.response.Response;
 import com.sosim.server.event.dto.info.EventInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
+import com.sosim.server.type.CodeType;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,42 +31,35 @@ public class EventController {
     @PostMapping
     public ResponseEntity<?> createEvent(@Valid @RequestBody EventCreateReq eventCreateReq) {
         Long eventId = this.eventService.createEvent(eventCreateReq);
-        Response<?> response = Response.builder().message(EVENT_CREATE_SUCCESS).content(eventId).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_CREATE_SUCCESS, eventId), HttpStatus.OK);
     }
 
     @GetMapping("/{eventId}")
     public ResponseEntity<?> getEvent(@PathVariable("eventId") long id) {
         Event event = this.eventService.getEvent(id);
-        Response<?> response = Response.builder().message(EVENT_INFO_SUCCESS).content(event).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_INFO_SUCCESS, event), HttpStatus.OK);
     }
 
     @PostMapping("/{eventId}")
     public ResponseEntity<?> updateEvent(@PathVariable("eventId") long id) {
         EventInfo eventInfo = this.eventService.updateEvent(id);
-        Response<?> response = Response.builder().message(EVENT_UPDATE_SUCCESS).content(eventInfo).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_UPDATE_SUCCESS, eventInfo), HttpStatus.OK);
     }
 
     @PutMapping("/{eventId}")
     public ResponseEntity<?> deleteEvent(@PathVariable("eventId") long id) {
-        this.eventService.deleteEvent(id);
-        Response<?> response = Response.builder().message(EVENT_DELETE_SUCCESS).content(null).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_DELETE_SUCCESS, null), HttpStatus.OK);
     }
 
     @PatchMapping
     public ResponseEntity<?> changePaymentType(@PathVariable("eventId") long id) {
         EventInfo eventInfo = this.eventService.changePaymentType(id);
-        Response<?> response = Response.builder().message(EVENT_PAYMENT_TYPE_CHANGE_SUCCESS).content(eventInfo).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_PAYMENT_TYPE_CHANGE_SUCCESS, eventInfo), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<?> getEventList(@Valid @RequestBody EventListReq eventListReq) {
         List<EventInfo> eventList = this.eventService.getEvent(eventListReq);
-        Response<?> response = Response.builder().message(EVENT_INFO_SUCCESS).content(eventList).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_LIST_SUCCESS, eventList), HttpStatus.OK);
     }
 }

@@ -1,9 +1,7 @@
 package com.sosim.server.user;
 
-import static com.sosim.server.common.constant.MessageConstant.USER_INFO_SUCCESS;
-import static com.sosim.server.common.constant.MessageConstant.USER_WITHDRAWAL_SUCCESS;
-
 import com.sosim.server.common.response.Response;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.user.dto.req.UserWithdrawalReq;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +25,13 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUser(@PathVariable("userId") long id) {
         User user = this.userService.getUser(id);
-        Response<?> response = Response.builder().message(USER_INFO_SUCCESS).content(user).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.USER_INFO_SUCCESS, user), HttpStatus.OK);
     }
 
     @PutMapping
     public ResponseEntity<?> withdrawalUser(@Valid @RequestBody UserWithdrawalReq userWithdrawalReq) {
         this.userService.withdrawalUser(userWithdrawalReq);
-        Response<?> response = Response.builder().message(USER_WITHDRAWAL_SUCCESS).content(null).build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.USER_WITHDRAWAL_SUCCESS, null), HttpStatus.OK);
     }
 
 }

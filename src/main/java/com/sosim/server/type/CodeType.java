@@ -19,10 +19,16 @@ public enum CodeType {
     AUTH_INVALID_ACCESS("2000", HttpStatus.FORBIDDEN, "Invalid auth access"),
     AUTH_VERIFICATION_EXPIRED("2005", HttpStatus.BAD_REQUEST, "Verification expired"),
 
+    // Jwt
+    RE_ISSUE_TOKEN("2009", HttpStatus.OK, "AccessToken과 RefreshToken이 성공적으로 재발급 되었습니다."),
+
     // User
-    USER_ALREADY_EXIST("3001", HttpStatus.BAD_REQUEST, "회원가입 되어 있는 사용자입니다."),
-    NOT_FOUND_USER("3002", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
-    INVALID_USER("3003", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
+    USER_INFO_SUCCESS("3001", HttpStatus.OK, "회원 정보가 성공적으로 조회되었습니다."),
+    USER_WITHDRAWAL_SUCCESS ("3002", HttpStatus.OK,"회원 탈퇴가 성공적으로 이루어졌습니다."),
+    USER_ALREADY_EXIST("3003", HttpStatus.BAD_REQUEST, "회원가입 되어 있는 사용자입니다."),
+    NOT_FOUND_USER("3004", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
+    INVALID_USER("3005", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
+
 
     // Group - Success
     CREATE_GROUP("900", HttpStatus.CREATED, "모임이 성공적으로 생성되었습니다."),
@@ -44,11 +50,17 @@ public enum CodeType {
     NO_MORE_GROUP("1005", HttpStatus.BAD_REQUEST, "더 이상 조회할 모임이 없습니다."),
     ALREADY_INTO_GROUP("1006", HttpStatus.BAD_REQUEST, "이미 참여중인 모임입니다."),
 
+    // Event
+    EVENT_CREATE_SUCCESS("4001", HttpStatus.CREATED, "상세 내역이 성공적으로 생성되었습니다."),
+    EVENT_INFO_SUCCESS("4002", HttpStatus.OK, "상세 내역이 성공적으로 조회되었습니다."),
+
+    EVENT_LIST_SUCCESS("4003", HttpStatus.OK, "상세 내역 목록이 성공적으로 조회되었습니다."),
+    EVENT_UPDATE_SUCCESS("4004", HttpStatus.OK, "상세 내역이 성공적으로 수정되었습니다."),
+    EVENT_DELETE_SUCCESS("4005", HttpStatus.OK, "상세 내역이 성공적으로 삭제되었습니다."),
+    EVENT_PAYMENT_TYPE_CHANGE_SUCCESS("4005", HttpStatus.OK, "납부 여부가 성공적으로 변경되었습니다."),
+
     // OAuth - Success
     SUCCESS_LOGIN("900", HttpStatus.OK, "로그인이 성공적으로 완료되었습니다."),
-
-    // Provider
-    PROVIDER_LIST("4001", HttpStatus.BAD_REQUEST, "카카오 로그인만 지원합니다."),
     ;
 
     private String code;
