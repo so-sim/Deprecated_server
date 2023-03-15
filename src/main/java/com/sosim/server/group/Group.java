@@ -1,29 +1,21 @@
 package com.sosim.server.group;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
-import com.sosim.server.group.dto.CreateUpdateGroupDto;
+import com.sosim.server.group.dto.request.CreateGroupRequest;
+import com.sosim.server.group.dto.request.UpdateGroupRequest;
 import com.sosim.server.participant.Participant;
-import java.time.LocalDateTime;
-import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "GROUPS")
 public class Group extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,32 +42,37 @@ public class Group extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private GroupType groupType;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Participant> participantList;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private Group(String title, String coverColorType, String groupType) {
+    private Group(String title, Long adminId, String adminNickname,
+                  CoverColorType coverColorType, GroupType groupType) {
         this.title = title;
-        this.coverColorType = CoverColorType.of(coverColorType);
-        this.groupType = GroupType.of(groupType);
+        this.adminId = adminId;
+        this.adminNickname = adminNickname;
+        this.coverColorType = coverColorType;
+        this.groupType = groupType;
     }
 
-    public static Group createGroup(CreateUpdateGroupDto createUpdateGroupDto) {
+    public static Group create(Long adminId, CreateGroupRequest createGroupRequest) {
         return Group.builder()
-                .title(createUpdateGroupDto.getTitle())
-                .groupType(createUpdateGroupDto.getGroupType())
-                .coverColorType(createUpdateGroupDto.getCoverColorType())
+                .title(createGroupRequest.getTitle())
+                .adminId(adminId)
+                .adminNickname(createGroupRequest.getNickname())
+                .groupType(createGroupRequest.getGroupType())
+                .coverColorType(createGroupRequest.getCoverColorType())
                 .build();
     }
 
-    public void setAdmin(Participant participant) {
-        adminId = participant.getId();
-        adminNickname = participant.getParticipantName();
+    public void update(UpdateGroupRequest updateGroupRequest) {
+        this.title = updateGroupRequest.getTitle();
+        this.groupType = updateGroupRequest.getGroupType();
+        this.coverColorType = updateGroupRequest.getCoverColorType();
     }
 
-    public void update(CreateUpdateGroupDto createUpdateGroupDto) {
-        title = createUpdateGroupDto.getTitle();
-        coverColorType = CoverColorType.of(createUpdateGroupDto.getCoverColorType());
-        groupType = GroupType.of(createUpdateGroupDto.getGroupType());
+    public void modifyAdmin(Participant participant) {
+        adminId = participant.getUser().getId();
+        adminNickname = participant.getNickname();
     }
 }

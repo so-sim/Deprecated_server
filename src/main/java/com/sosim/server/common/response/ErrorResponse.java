@@ -1,6 +1,6 @@
 package com.sosim.server.common.response;
 
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ public class ErrorResponse {
     private String message;
 
     //TODO 여기서 e가 null이 되어버리는 문제 해결(그전까지는 잘 받음)
-    public static ResponseEntity<ErrorResponse> toResponseEntity(ErrorCodeType e){
+    public static ResponseEntity<ErrorResponse> toResponseEntity(CodeType e){
         return ResponseEntity
             .status(e.getHttpStatus())
             .body(ErrorResponse.builder()

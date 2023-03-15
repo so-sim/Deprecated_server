@@ -1,14 +1,15 @@
-package com.sosim.server.oauth.dto;
+package com.sosim.server.oauth.dto.request;
 
+import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.SocialType;
 
 import java.util.Map;
 
-public class KakaoOAuth2UserInfoDto extends OAuth2UserInfoDto {
+public class KakaoUserInfoRequest extends OAuth2UserInfoRequest {
 
     private Map<String, Object> kakaoAccountAttributes;
 
-    public KakaoOAuth2UserInfoDto(Map<String, Object> attributes) {
+    public KakaoUserInfoRequest(Map<String, Object> attributes) {
         super(attributes);
         kakaoAccountAttributes = (Map<String, Object>) attributes.get("kakao_account");
     }

@@ -1,15 +1,19 @@
 package com.sosim.server.group;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.sosim.server.config.exception.CustomException;
+import com.sosim.server.type.CodeType;
+import lombok.Getter;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.Getter;
 
 @Getter
 public enum GroupType {
-    STUDY( "스터디"),
+    STUDY("스터디"),
     CAMPUS("학교, 교내/외 모임"),
     COMPANY("회사, 사내 모임"),
     HOBBY("취미, 동호회 모임"),
@@ -29,5 +33,15 @@ public enum GroupType {
 
     public static GroupType of(String label) {
         return map.get(label);
+    }
+
+    @JsonCreator
+    public static GroupType create(String label){
+        for(GroupType groupType : GroupType.values()){
+            if(groupType.getLabel().equals(label)){
+                return groupType;
+            }
+        }
+        throw new CustomException(CodeType.BINDING_ERROR);
     }
 }

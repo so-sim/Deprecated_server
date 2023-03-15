@@ -11,7 +11,7 @@ import com.sosim.server.jwt.dto.ReIssueTokenInfo;
 import com.sosim.server.jwt.dto.ReIssueTokenReq;
 import com.sosim.server.jwt.property.JwtProperties;
 import com.sosim.server.security.AuthUser;
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.io.IOException;
@@ -58,10 +58,10 @@ public class JwtServiceImpl implements JwtService{
 
         String id = jwtDao.getValues(reIssueTokenReq.getRefreshToken());
         log.info("refreshToken : {}, id: {}", reIssueTokenReq.getRefreshToken(), id);
-        User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(ErrorCodeType.NOT_FOUND_USER));
+        User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         if(Long.parseLong(id) != user.getId()) {
             log.info("invalid user");
-            throw new CustomException(ErrorCodeType.INVALID_USER);
+            throw new CustomException(CodeType.INVALID_USER);
         }
         jwtDao.deleteValues(reIssueTokenReq.getRefreshToken());
         String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);

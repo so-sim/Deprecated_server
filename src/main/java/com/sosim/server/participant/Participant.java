@@ -1,27 +1,19 @@
 package com.sosim.server.participant;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.Group;
 import com.sosim.server.user.User;
-import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
 @NoArgsConstructor
-public class Participant {
+public class Participant extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PARTICIPANT_ID")
@@ -35,36 +27,29 @@ public class Participant {
     @JoinColumn(name = "GROUP_ID")
     private Group group;
 
-    @Column(name = "PARTICIPANT_NAME")
-    private String participantName;
-
-    @Column(name = "PARTICIPANT_TYPE")
-    @Enumerated(EnumType.STRING)
-    private ParticipantType participantType;
-
-    @Column(name = "JOIN_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime joinDate;
+    @Column(name = "NICKNAME")
+    private String nickname;
 
     @Column(name = "WITHDRAW_DATE")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime withdrawDate;
 
-    @Builder
-    private Participant(User user, Group group, String participantName, ParticipantType participantType) {
+    @Builder (access = AccessLevel.PRIVATE)
+    private Participant(User user, Group group, String nickname) {
         this.user = user;
         this.group = group;
-        this.participantName = participantName;
-        this.participantType = participantType;
-        this.joinDate = LocalDateTime.now();
+        this.nickname = nickname;
     }
 
-    public static Participant createParticipant(User user, Group group, String participantName, ParticipantType participantType) {
+    public static Participant create(User user, Group group, String nickname) {
         return Participant.builder()
                 .user(user)
                 .group(group)
-                .participantName(participantName)
-                .participantType(participantType)
+                .nickname(nickname)
                 .build();
+    }
+
+    public void modifyNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

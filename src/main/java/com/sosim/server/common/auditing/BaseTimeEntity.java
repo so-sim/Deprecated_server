@@ -7,18 +7,18 @@ import javax.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @MappedSuperclass
-@EntityListeners(AutoCloseable.class)
+@EntityListeners(AuditingEntityListener.class)
 public class BaseTimeEntity {
 
-    @Column(name = "CREATED_DATE", updatable = false)
+    @Column(name = "CREATE_DATE", updatable = false)
     @CreatedDate
-    private LocalDateTime createdDate;
+    private LocalDateTime createDate;
 
-    @Column(name = "MODIFIED_DATE")
+    @Column(name = "UPDATE_DATE")
     @LastModifiedDate
-    private LocalDateTime modifiedDate;
-
+    private LocalDateTime updateDate;
 }

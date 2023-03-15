@@ -1,16 +1,19 @@
 package com.sosim.server.participant;
 
-import com.sosim.server.participant.dto.GetParticipantDto;
-import java.util.List;
+import com.sosim.server.group.Group;
+import com.sosim.server.user.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
-    @Query(value = "select new com.sosim.server.participant.dto.GetParticipantDto" +
-            "(p.participantName, p.participantType)" +
-            "from Participant p where p.group.id = :groupId")
-    List<GetParticipantDto> findAllByGroup(@Param("groupId") Long groupId);
+    Optional<Participant> findByNicknameAndGroup(String participantName, Group group);
 
-    boolean existsByParticipantNameAndGroupId(String participantName, Long groupId);
+    Optional<Participant> findByUserAndGroup(User user, Group group);
+
+    Slice<Participant> findByIdGreaterThanAndUserIdOrderByIdDesc(Long participantId, Long userId, Pageable pageable);
+
+    Slice<Participant> findByIdLessThanAndUserIdOrderByIdDesc(Long participantId, Long userId, Pageable pageable);
 }

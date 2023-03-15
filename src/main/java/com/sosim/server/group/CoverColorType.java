@@ -1,11 +1,15 @@
 package com.sosim.server.group;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.sosim.server.config.exception.CustomException;
+import com.sosim.server.type.CodeType;
+import lombok.Getter;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.Getter;
 
 @Getter
 public enum CoverColorType {
@@ -27,5 +31,15 @@ public enum CoverColorType {
 
     public static CoverColorType of(String label) {
         return map.get(label);
+    }
+
+    @JsonCreator
+    public static CoverColorType create(String label){
+        for(CoverColorType coverColorType : CoverColorType.values()){
+            if(coverColorType.getCode().equals(label)){
+                return coverColorType;
+            }
+        }
+        throw new CustomException(CodeType.BINDING_ERROR);
     }
 }
