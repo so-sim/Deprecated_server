@@ -50,9 +50,10 @@ spring:
 #        show_sql: true
 
     hibernate:
-      ddl-auto: create #update
+      ddl-auto: update #create #update #create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    generate-ddl: true
 
   redis:
     host: localhost

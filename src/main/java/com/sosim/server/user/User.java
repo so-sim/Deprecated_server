@@ -4,6 +4,7 @@ import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
 import java.time.LocalDateTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -34,6 +35,7 @@ public class User {
     @NotNull
     private LocalDateTime createDate;
 
+    @Column(name = "WITHDRAWAL_DATE")
     private LocalDateTime withdrawalDate;
 
     @NotNull

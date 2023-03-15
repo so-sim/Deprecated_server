@@ -7,16 +7,14 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@Getter
 public class CustomException extends NestedRuntimeException {
 
-    @Getter
     private ErrorCodeType errorCodeType;
-
     private String field;
+    private String fieldMessage;
     private String message;
-    @Getter
     private HttpStatus httpStatus;
-
     private String code;
 
     public CustomException(ErrorCodeType errorCodeType) {
@@ -31,8 +29,8 @@ public class CustomException extends NestedRuntimeException {
         this(message, errorCodeType.getHttpStatus(), errorCodeType.getCode());
     }
 
-    public CustomException(ErrorCodeType errorCodeType, String field) {
-        this(field, errorCodeType.getMessage(), errorCodeType.getHttpStatus(), errorCodeType.getCode());
+    public CustomException(ErrorCodeType errorCodeType, String field, String fieldMessage) {
+        this(field, fieldMessage, errorCodeType.getMessage(), errorCodeType.getHttpStatus(), errorCodeType.getCode());
     }
 
     public CustomException(String message, HttpStatus httpStatus, int code) {
@@ -52,6 +50,15 @@ public class CustomException extends NestedRuntimeException {
     public CustomException(String field, String message, HttpStatus httpStatus, String code) {
         super(message);
         this.field = field;
+        this.message = message;
+        this.httpStatus = httpStatus;
+        this.code = code;
+    }
+
+    public CustomException(String field, String fieldMessage, String message, HttpStatus httpStatus, String code) {
+        super(message);
+        this.field = field;
+        this.fieldMessage = fieldMessage;
         this.message = message;
         this.httpStatus = httpStatus;
         this.code = code;

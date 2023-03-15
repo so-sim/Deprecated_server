@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public enum UserType {
+public enum PaymentType {
 
-    WITHDRAWAL("탈퇴"),
-    DORMANT("휴면"),
-    ACTIVE("유효");
+    NON_PAYMENT("미납"),
+    CONFIRMING("확인중/확인필요"),
+    FULL_PAYMENT("완납");
 
     private String desc;
 }
