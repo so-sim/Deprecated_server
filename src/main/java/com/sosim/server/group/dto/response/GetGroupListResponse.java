@@ -16,7 +16,7 @@ public class GetGroupListResponse {
     @JsonProperty("next")
     private boolean next;
 
-    @JsonProperty("group_list")
+    @JsonProperty("groupList")
     List<GetGroupResponse> groupList;
 
     public static GetGroupListResponse create(Long index, boolean next, List<GetGroupResponse> groupList) {

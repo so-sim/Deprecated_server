@@ -40,8 +40,9 @@ public class GroupController {
     }
 
     @GetMapping("/group/{groupId}")
-    public ResponseEntity<?> getGroup(@PathVariable("groupId") Long groupId) {
-        GetGroupResponse getGroupResponse = groupService.getGroup(groupId);
+    public ResponseEntity<?> getGroup(@AuthenticationPrincipal AuthUser authUser,
+                                      @PathVariable("groupId") Long groupId) {
+        GetGroupResponse getGroupResponse = groupService.getGroup(Long.parseLong(authUser.getId()), groupId);
 
         return new ResponseEntity<>(Response.create(CodeType.GET_GROUP, getGroupResponse), HttpStatus.OK);
     }

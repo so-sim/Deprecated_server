@@ -39,10 +39,10 @@ public class GroupService {
         return CreateGroupResponse.create(groupEntity);
     }
 
-    public GetGroupResponse getGroup(Long groupId) {
+    public GetGroupResponse getGroup(Long userId, Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
 
-        return GetGroupResponse.create(groupEntity);
+        return GetGroupResponse.create(groupEntity, groupEntity.getAdminId().equals(userId));
     }
 
     public GetParticipantListResponse getGroupParticipant(Long groupId) {
@@ -116,7 +116,8 @@ public class GroupService {
 
         List<GetGroupResponse> groupList = new ArrayList<>();
         for (Participant participant : participantEntityList) {
-            groupList.add(GetGroupResponse.create(participant.getGroup()));
+            Group group = participant.getGroup();
+            groupList.add(GetGroupResponse.create(group, group.getAdminId().equals(userId)));
         }
 
         return GetGroupListResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),

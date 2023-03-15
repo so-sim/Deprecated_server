@@ -29,7 +29,7 @@ spring:
   datasource:
 #    driver-class-name: org.h2.Driver
     # error - need more trouble shooting
-    #    url: jdbc:h2:tcp://localhost/~/sosim
+    #    url: jdbc:h2:tcp://localhost/~/sosim;NON_KEYWORDS=GROUP;
     # mem
     #    url: jdbc:h2:mem:sosim
     # use local mv.db file
