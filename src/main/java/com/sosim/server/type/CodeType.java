@@ -13,6 +13,7 @@ public enum CodeType {
     COMMON_BAD_REQUEST("0000", HttpStatus.BAD_REQUEST, "Bad request"),
     COMMON_NOT_FOUND_ID("0001", HttpStatus.NOT_FOUND, "Not found Id"),
     COMMON_NO_ELEMENT("0002", HttpStatus.NOT_FOUND, "No such element"),
+    COMMON_INTERNAL_SERVER_ERROR("0099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     BINDING_ERROR("1000", HttpStatus.BAD_REQUEST, "입력값 중 검증에 실패한 값이 있습니다."),
 
     // Auth

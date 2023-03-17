@@ -36,6 +36,7 @@ public class Event extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,18 +47,20 @@ public class Event extends BaseTimeEntity {
     @JoinColumn(name = "USER_ID")
     private User user;
 
-    @Column(name = "GROUNDS_DATE")
     @NotNull
+    @Column(name = "GROUNDS_DATE")
     private LocalDateTime groundsDate;
 
-    @Column(name = "DELETED_DATE")
-    private LocalDateTime deletedDate;
+    @Column(name = "DELETE_DATE")
+    private LocalDateTime deleteDate;
 
     @NotNull
+    @Column(name = "PAYMENT")
     private Long payment;
 
     @NotEmpty
     @Size(max=65)
+    @Column(name = "GROUNDS")
     private String grounds;
 
     @NotNull

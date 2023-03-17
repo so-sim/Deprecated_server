@@ -12,22 +12,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum WithdrawalGroundsType {
 
-    NOT_USING_SERVICE("서비스를 잘 이용하지 않아서", 0),
+    NOT_USING_SERVICE("서비스를 잘 이용하지 않아서", "notusing"),
 
-    NOT_THE_SERVICE_WAS_THINKING_OF("내가 생각한 서비스가 아니라서", 1),
+    NOT_THE_SERVICE_WAS_THINKING_OF("내가 생각한 서비스가 아니라서", "notservice"),
 
-    INCONVENIENT_TO_USE("사용하기 불편해서", 2),
+    INCONVENIENT_TO_USE("사용하기 불편해서", "inconvenient"),
 
-    LACK_OF_AVAILABLE_FEATURES("사용할 수 있는 기능이 부족해서", 3),
+    LACK_OF_AVAILABLE_FEATURES("사용할 수 있는 기능이 부족해서", "lackfeatures"),
 
-    WANT_TO_CREATE_A_NEW_ACCOUNT("새 계정을 만들고 싶어서", 4),
+    WANT_TO_CREATE_A_NEW_ACCOUNT("새 계정을 만들고 싶어서", "newaccount"),
 
-    FREQUENT_ERRORS_WHILE_USING_THE_SERVICE("서비스 사용 중 에러가 잦아서", 5),
+    FREQUENT_ERRORS_WHILE_USING_THE_SERVICE("서비스 사용 중 에러가 잦아서", "errors"),
 
-    NONE("해당사항 없음", 6);
+    NONE("해당사항 없음", "none");
 
     private String desc;
-    private int ordinal;
+    private String param;
 
     private static final Map<Object, WithdrawalGroundsType> map = EnumUtils.getMap(WithdrawalGroundsType.class);
     public static final WithdrawalGroundsType getType(int value) {

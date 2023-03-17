@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,7 +59,7 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getEventList(@Valid @RequestBody EventListReq eventListReq) {
+    public ResponseEntity<?> getEventList(@Valid @ModelAttribute EventListReq eventListReq) {
         List<EventInfo> eventList = this.eventService.getEvent(eventListReq);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_LIST_SUCCESS, eventList), HttpStatus.OK);
     }

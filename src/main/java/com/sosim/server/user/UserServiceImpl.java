@@ -26,7 +26,6 @@ public class UserServiceImpl implements UserService{
     public User save(SocialType socialType, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
 
         User user = User.builder()
-            .createDate(LocalDateTime.now())
             .socialType(socialType)
             .socialId(oAuth2UserInfoRequest.getOAuth2Id())
             .userType(UserType.ACTIVE).build();

@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum PaymentType {
 
-    NON_PAYMENT("미납"),
-    CONFIRMING("확인중/확인필요"),
-    FULL_PAYMENT("완납");
+    NON_PAYMENT("미납", "non"),
+    CONFIRMING("확인중/확인필요", "con"),
+    FULL_PAYMENT("완납", "full");
 
     private String desc;
+    private String param;
 }
