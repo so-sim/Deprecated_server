@@ -11,6 +11,7 @@ import com.sosim.server.type.WithdrawalGroundsType;
 import com.sosim.server.user.dto.req.UserWithdrawalReq;
 import java.time.LocalDateTime;
 import java.util.List;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;

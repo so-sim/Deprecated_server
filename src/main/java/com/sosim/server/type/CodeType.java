@@ -13,6 +13,7 @@ public enum CodeType {
     COMMON_BAD_REQUEST("0000", HttpStatus.BAD_REQUEST, "Bad request"),
     COMMON_NOT_FOUND_ID("0001", HttpStatus.NOT_FOUND, "Not found Id"),
     COMMON_NO_ELEMENT("0002", HttpStatus.NOT_FOUND, "No such element"),
+    INPUT_ANY_DATA("0003", HttpStatus.BAD_REQUEST, "input any data to update"),
     COMMON_INTERNAL_SERVER_ERROR("0099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     BINDING_ERROR("1000", HttpStatus.BAD_REQUEST, "입력값 중 검증에 실패한 값이 있습니다."),
 
@@ -58,7 +59,9 @@ public enum CodeType {
     EVENT_LIST_SUCCESS("4003", HttpStatus.OK, "상세 내역 목록이 성공적으로 조회되었습니다."),
     EVENT_UPDATE_SUCCESS("4004", HttpStatus.OK, "상세 내역이 성공적으로 수정되었습니다."),
     EVENT_DELETE_SUCCESS("4005", HttpStatus.OK, "상세 내역이 성공적으로 삭제되었습니다."),
-    EVENT_PAYMENT_TYPE_CHANGE_SUCCESS("4005", HttpStatus.OK, "납부 여부가 성공적으로 변경되었습니다."),
+    EVENT_PAYMENT_TYPE_CHANGE_SUCCESS("4006", HttpStatus.OK, "납부 여부가 성공적으로 변경되었습니다."),
+    EVENT_MONTH_STATUS_SUCCESS("4007", HttpStatus.OK, "월별 납부 상태가 정상적으로 조회되었습니다."),
+    NOT_FOUND_EVENT("4010", HttpStatus.NOT_FOUND, "해당 상세 내역은 존재하지 않습니다."),
 
     // OAuth - Success
     SUCCESS_LOGIN("900", HttpStatus.OK, "로그인이 성공적으로 완료되었습니다."),

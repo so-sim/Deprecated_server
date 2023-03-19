@@ -3,6 +3,7 @@ package com.sosim.server.event.dto.req;
 public class EventListReq {
 
     // 기간 필터링
+    private int year;
 	private int month;
     private int week;
     private int day;

@@ -1,10 +1,15 @@
 package com.sosim.server.event.dto.info;
 
 import java.time.LocalDateTime;
-import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@Builder
-public class EventInfo {
+@Setter
+@RequiredArgsConstructor
+public class EventSingleInfo {
+
+    // 관리자 여부
+    private String adminYn;
 
     // 팀원이름
     private String userName;

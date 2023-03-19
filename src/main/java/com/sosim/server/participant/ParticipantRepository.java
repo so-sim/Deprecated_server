@@ -13,6 +13,9 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Optional<Participant> findByUserAndGroup(User user, Group group);
 
+    Optional<Participant> findByNickname(String participantName);
+
+    Optional<Participant> findByUser(User user);
     Slice<Participant> findByIdGreaterThanAndUserIdOrderByIdDesc(Long participantId, Long userId, Pageable pageable);
 
     Slice<Participant> findByIdLessThanAndUserIdOrderByIdDesc(Long participantId, Long userId, Pageable pageable);

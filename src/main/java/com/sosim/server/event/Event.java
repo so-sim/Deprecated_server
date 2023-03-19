@@ -1,6 +1,8 @@
 package com.sosim.server.event;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
+import com.sosim.server.event.dto.req.EventModifyReq;
+import com.sosim.server.event.dto.req.PaymentTypeReq;
 import com.sosim.server.group.Group;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
@@ -25,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.ObjectUtils;
 
 @Getter
 @NoArgsConstructor
@@ -77,4 +80,35 @@ public class Event extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "EVENT_TYPE")
     private EventType eventType;
+
+    public void updateEvent(EventModifyReq eventModifyReq) {
+
+        if (eventModifyReq.getUserName() != null && eventModifyReq.getUser() != null) {
+            this.user = eventModifyReq.getUser();
+        }
+
+        if (eventModifyReq.getGroundsDate() != null) {
+            this.groundsDate = eventModifyReq.getGroundsDate();
+        }
+
+        if (!ObjectUtils.isEmpty(eventModifyReq.getPayment())) {
+            this.payment = eventModifyReq.getPayment();
+        }
+
+        if (eventModifyReq.getGrounds() != null) {
+            this.grounds = eventModifyReq.getGrounds();
+        }
+
+        if (eventModifyReq.getPaymentType() != null) {
+            this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
+        }
+    }
+
+    public void deleteEvent(){
+        this.statusType = StatusType.DELETED;
+    }
+
+    public void changePaymentType(PaymentTypeReq paymentTypeReq) {
+        this.paymentType = PaymentType.getType(paymentTypeReq.getPaymentType());
+    }
 }

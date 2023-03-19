@@ -6,7 +6,6 @@ import com.sosim.server.user.dto.req.UserWithdrawalReq;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,13 +24,13 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUser(@PathVariable("userId") long id) {
         User user = this.userService.getUser(id);
-        return new ResponseEntity<>(Response.create(CodeType.USER_INFO_SUCCESS, user), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.USER_INFO_SUCCESS, user), CodeType.USER_INFO_SUCCESS.getHttpStatus());
     }
 
     @PutMapping
     public ResponseEntity<?> withdrawalUser(@Valid @RequestBody UserWithdrawalReq userWithdrawalReq) {
         this.userService.withdrawalUser(userWithdrawalReq);
-        return new ResponseEntity<>(Response.create(CodeType.USER_WITHDRAWAL_SUCCESS, null), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.USER_WITHDRAWAL_SUCCESS, null), CodeType.USER_WITHDRAWAL_SUCCESS.getHttpStatus());
     }
 
 }

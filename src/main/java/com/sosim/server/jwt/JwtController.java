@@ -27,6 +27,6 @@ public class JwtController {
         if (reIssueTokenInfo == null) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
-        return new ResponseEntity<>(Response.create(CodeType.RE_ISSUE_TOKEN, reIssueTokenInfo), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(CodeType.RE_ISSUE_TOKEN, reIssueTokenInfo), CodeType.RE_ISSUE_TOKEN.getHttpStatus());
     }
 }
