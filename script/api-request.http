@@ -6,7 +6,7 @@ GET http://localhost:8080/redis/test
 GET localhost:8080/login/oauth2/code/kakao?code=Dru4jp-SOAfn3V_Y6rK5X8BrO7AKowE15MxnZEfNqnEEn_sC8DHyazUtTqKzp3t4mJx7Ogo9c5sAAAGG73AKvg
 
 ### accessToken 재발급
-POST localhost:8080/login/reissueToken
+GET localhost:8080/login/reissueToken
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxNjA1Mn0.QjIpLGSQVEB2eW6wdC34q4JojS0YUDd1q6W-86O4YNvxh4jRv4GBUlm81lX7WJZKRuMv3aDnH3Gd2MlUZmu3zQ
 Content-Type: application/json
 
@@ -33,6 +33,18 @@ Content-Type: application/json
 {
   "userId": 1,
   "withdrawalGroundsType": 3
+}
+
+### 모임 생성
+POST http://localhost:8080/api/group
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTI5OTQyMn0.J_Zl3NeznzOEt8HI50oXu7OYlW1yB8jkeJchzRYgLolfWDShw5heMVAqs8UaAHmUd_AVlqnsfnYfgW6nyZmQfQ
+Content-Type: application/json
+
+{
+  "groupName": "test",
+  "myName": "kkk",
+  "type": "스터디",
+  "coverColor": "#f86565"
 }
 
 ###

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
-import com.sosim.server.jwt.dto.ReIssueTokenReq;
 import com.sosim.server.jwt.property.JwtProperties;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.CodeType;
@@ -54,16 +53,17 @@ public class JwtServiceImpl implements JwtService{
      *  3. AccessToken 문자열과 Cookie에 담아 응답 헤더에 실은 RefreshToken값 반환
      */
     @Override
-    public ReIssueTokenInfo verifyRefreshTokenAndReIssueAccessToken(ReIssueTokenReq reIssueTokenReq, HttpServletResponse response) {
+    public ReIssueTokenInfo verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse response) {
 
-        String id = jwtDao.getValues(reIssueTokenReq.getRefreshToken());
-        log.info("refreshToken : {}, id: {}", reIssueTokenReq.getRefreshToken(), id);
+        String refreshToken = httpServletRequest.getHeader(SET_COOKIE);
+        String id = jwtDao.getValues(refreshToken);
+        log.info("refreshToken : {}, id: {}", refreshToken, id);
         User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         if(Long.parseLong(id) != user.getId()) {
             log.info("invalid user");
             throw new CustomException(CodeType.INVALID_USER);
         }
-        jwtDao.deleteValues(reIssueTokenReq.getRefreshToken());
+        jwtDao.deleteValues(refreshToken);
         String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);
         sendRefreshToken(response, reIssuedRefreshToken);
         return ReIssueTokenInfo.builder().accessToken(jwtFactory.createAccessToken(id)).build();

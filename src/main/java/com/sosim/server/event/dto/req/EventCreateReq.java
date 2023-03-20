@@ -1,5 +1,7 @@
 package com.sosim.server.event.dto.req;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.sosim.server.common.converter.StringToLocalDateTimeConverter;
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ public class EventCreateReq {
     private String userName;
 
     // 사유 발생 날짜
+    @JsonDeserialize(converter = StringToLocalDateTimeConverter.class)
     @NotNull
     private LocalDateTime groundsDate;
 
