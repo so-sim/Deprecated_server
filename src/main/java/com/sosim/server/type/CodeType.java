@@ -62,6 +62,7 @@ public enum CodeType {
     EVENT_PAYMENT_TYPE_CHANGE_SUCCESS("4006", HttpStatus.OK, "납부 여부가 성공적으로 변경되었습니다."),
     EVENT_MONTH_STATUS_SUCCESS("4007", HttpStatus.OK, "월별 납부 상태가 정상적으로 조회되었습니다."),
     NOT_FOUND_EVENT("4010", HttpStatus.NOT_FOUND, "해당 상세 내역은 존재하지 않습니다."),
+    INVALID_EVENT_CREATER("4011", HttpStatus.BAD_REQUEST, "상세 내역 생성은 관리자만이 가능합니다."),
 
     // OAuth - Success
     SUCCESS_LOGIN("900", HttpStatus.OK, "로그인이 성공적으로 완료되었습니다."),

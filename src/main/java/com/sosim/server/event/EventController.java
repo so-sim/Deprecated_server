@@ -8,12 +8,14 @@ import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
 import com.sosim.server.event.dto.req.EventModifyReq;
 import com.sosim.server.event.dto.req.PaymentTypeReq;
+import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.CodeType;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,8 +36,8 @@ public class EventController {
     private final EventService eventService;
 
     @PostMapping
-    public ResponseEntity<?> createEvent(@Valid @RequestBody EventCreateReq eventCreateReq) {
-        Long eventId = this.eventService.createEvent(eventCreateReq);
+    public ResponseEntity<?> createEvent(@AuthenticationPrincipal AuthUser authUser, @Valid @RequestBody EventCreateReq eventCreateReq) {
+        Long eventId = this.eventService.createEvent(authUser, eventCreateReq);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_CREATE_SUCCESS, eventId), CodeType.EVENT_CREATE_SUCCESS.getHttpStatus());
     }
 
@@ -46,20 +48,20 @@ public class EventController {
     }
 
     @PostMapping("/{eventId}")
-    public ResponseEntity<?> updateEvent(@PathVariable("eventId") long id, @RequestBody EventModifyReq eventModifyReq) {
-        EventInfo eventInfo = this.eventService.updateEvent(id, eventModifyReq);
+    public ResponseEntity<?> updateEvent(@AuthenticationPrincipal AuthUser authUser, @PathVariable("eventId") long id, @RequestBody EventModifyReq eventModifyReq) {
+        EventInfo eventInfo = this.eventService.updateEvent(authUser, id, eventModifyReq);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_UPDATE_SUCCESS, eventInfo), CodeType.EVENT_UPDATE_SUCCESS.getHttpStatus());
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<?> deleteEvent(@PathVariable("eventId") long id) {
-        this.eventService.deleteEvent(id);
+    public ResponseEntity<?> deleteEvent(@AuthenticationPrincipal AuthUser authUser, @PathVariable("eventId") long id) {
+        this.eventService.deleteEvent(authUser, id);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_DELETE_SUCCESS, null), CodeType.EVENT_DELETE_SUCCESS.getHttpStatus());
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<?> changePaymentType(@PathVariable("eventId") long id, @RequestBody PaymentTypeReq paymentTypeReq) {
-        EventInfo eventInfo = this.eventService.changePaymentType(id, paymentTypeReq);
+    public ResponseEntity<?> changePaymentType(@AuthenticationPrincipal AuthUser authUser, @PathVariable("eventId") long id, @RequestBody PaymentTypeReq paymentTypeReq) {
+        EventInfo eventInfo = this.eventService.changePaymentType(authUser, id, paymentTypeReq);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_PAYMENT_TYPE_CHANGE_SUCCESS, eventInfo), CodeType.EVENT_PAYMENT_TYPE_CHANGE_SUCCESS.getHttpStatus());
     }
 

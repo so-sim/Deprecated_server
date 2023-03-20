@@ -10,10 +10,6 @@ GET localhost:8080/login/reissueToken
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxNjA1Mn0.QjIpLGSQVEB2eW6wdC34q4JojS0YUDd1q6W-86O4YNvxh4jRv4GBUlm81lX7WJZKRuMv3aDnH3Gd2MlUZmu3zQ
 Content-Type: application/json
 
-{
-  "refreshToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJSZWZyZXNoVG9rZW4iLCJleHAiOjE2Nzk1MjczODZ9.o_u9EEA1pRxTpbN6vuCzpnW2FN_2TBM-r60SbO4jpjQSW5mNU8izXYEFCBaaOM_9Z3lEy4_ZmfbNEgN4w59KUA"
-}
-
 ###
 
 
@@ -47,6 +43,24 @@ Content-Type: application/json
   "coverColor": "#f86565"
 }
 
+### 이벤트 생성
+POST createEvent
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTMxNTg0MX0.sRcBft7YprBtun5e7JJF-fg6C1K5bdlef_cTnNLYRZZfFj-GWAYMH--sy_mtLJp9tCc8nu9zUjfmb6pA65-VEg
+Content-Type: application/json
+
+{
+  "userName": "kkk",
+  "groundsDate": "2023-03-18 23:42:43",
+  "payment": 1000,
+  "grounds": "지각",
+  "paymentType": "non"
+}
+
+### 이벤트 조회
+GET http://localhost:8080/api/event/penalty/1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTMzNTEyN30.fpL_e4zGGQAuJRum5HVr3knS9PIkTjqxqLJVB0AbM8Ovp0DpaPdbA_ediTZnSnuBrsRgVgnYUImq5aO6GC7uAA
+
 ###
+
 
 

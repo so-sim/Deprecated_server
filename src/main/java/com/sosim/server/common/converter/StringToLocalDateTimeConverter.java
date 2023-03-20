@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class StringToLocalDateTimeConverter extends StdConverter<String, LocalDateTime> {
 
     @Override
-    public LocalDateTime convert(String value) {
-        return Timestamp.valueOf(value).toLocalDateTime();
+    public LocalDateTime convert(String stringDate) {
+        return Timestamp.valueOf(stringDate).toLocalDateTime();
     }
 }

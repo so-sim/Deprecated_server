@@ -1,5 +1,7 @@
 package com.sosim.server.event.dto.req;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.sosim.server.common.converter.StringToLocalDateTimeConverter;
 import com.sosim.server.user.User;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -15,6 +17,7 @@ public class EventModifyReq {
     private User user;
 
     // 사유 발생 날짜
+    @JsonDeserialize(converter = StringToLocalDateTimeConverter.class)
     private LocalDateTime groundsDate;
 
     // 금액

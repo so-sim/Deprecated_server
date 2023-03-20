@@ -1,28 +1,44 @@
 package com.sosim.server.event.dto.info;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sosim.server.common.converter.LocalDateTimeToStringConverter;
+import com.sosim.server.event.Event;
 import java.time.LocalDateTime;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
-@RequiredArgsConstructor
+@Getter
+//@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventSingleInfo {
 
-    // 관리자 여부
+    @Setter
     private String adminYn;
 
-    // 팀원이름
+    @Setter
     private String userName;
 
-    // 금액
     private Long payment;
 
-    // 사유 발생 날짜
+    @JsonSerialize(converter = LocalDateTimeToStringConverter.class)
     private LocalDateTime groundsDate;
 
-    // 납부여부
     private String paymentType;
 
-    // 사유
     private String grounds;
+
+    public static EventSingleInfo from(Event event) {
+        return EventSingleInfo.builder()
+            .payment(event.getPayment())
+            .groundsDate(event.getGroundsDate())
+            .paymentType(event.getPaymentType().getParam())
+            .grounds(event.getGrounds())
+            .build();
+    }
+
 }

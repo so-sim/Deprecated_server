@@ -1,5 +1,7 @@
 package com.sosim.server.event.dto.info;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sosim.server.common.converter.LocalDateTimeToStringConverter;
 import java.time.LocalDateTime;
 import lombok.Builder;
 
@@ -13,6 +15,7 @@ public class EventInfo {
     private Long payment;
 
     // 사유 발생 날짜
+    @JsonSerialize(converter = LocalDateTimeToStringConverter.class)
     private LocalDateTime groundsDate;
 
     // 납부여부

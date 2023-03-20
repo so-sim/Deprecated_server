@@ -7,18 +7,19 @@ import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
 import com.sosim.server.event.dto.req.EventModifyReq;
 import com.sosim.server.event.dto.req.PaymentTypeReq;
+import com.sosim.server.security.AuthUser;
 import java.util.List;
 
 public interface EventService {
 
     EventSingleInfo getEvent(long id);
-    Long createEvent(EventCreateReq eventCreateReq);
+    Long createEvent(AuthUser authUser, EventCreateReq eventCreateReq);
 
-    EventInfo updateEvent(long id, EventModifyReq eventModifyReq);
+    EventInfo updateEvent(AuthUser authUser, long id, EventModifyReq eventModifyReq);
 
-    void deleteEvent(long id);
+    void deleteEvent(AuthUser authUser, long id);
 
-    EventInfo changePaymentType(long id, PaymentTypeReq paymentTypeReq);
+    EventInfo changePaymentType(AuthUser authUser, long id, PaymentTypeReq paymentTypeReq);
 
     List<EventInfo> getEventList(long groupId, EventListReq eventListReq);
 

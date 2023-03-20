@@ -12,6 +12,7 @@ import com.sosim.server.group.Group;
 import com.sosim.server.group.GroupRepository;
 import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantRepository;
+import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
@@ -47,34 +48,33 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventSingleInfo getEvent(long id) {
 
-        EventSingleInfo eventSingleInfo = new EventSingleInfo();
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
         Participant participant = participantRepository.findByUser(event.getUser())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
-        // 해당 이벤트의, 그룹의 admin id와 이 사람의 id를 비교
-        if ( event.getGroup().getAdminId().equals(event.getUser().getId())) {
+        EventSingleInfo eventSingleInfo = EventSingleInfo.from(event);
+
+        if (event.getGroup().getAdminId().equals(event.getUser().getId())) {
             eventSingleInfo.setAdminYn("true");
         } else {
             eventSingleInfo.setAdminYn("false");
         }
-
         eventSingleInfo.setUserName(participant.getNickname());
-        eventSingleInfo.setPayment(event.getPayment());
-        eventSingleInfo.setGroundsDate(event.getGroundsDate());
-        eventSingleInfo.setPaymentType(event.getPaymentType().getParam());
-        eventSingleInfo.setGrounds(event.getGrounds());
         return eventSingleInfo;
     }
 
     @Override
-    public Long createEvent(EventCreateReq eventCreateReq) {
+    public Long createEvent(AuthUser authUser, EventCreateReq eventCreateReq) {
 
         Optional<Participant> byNickName = participantRepository.findByNickname(eventCreateReq.getUserName());
         Participant participant = byNickName.orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
         Long userId = participant.getUser().getId();
         Long groupId = participant.getGroup().getId();
+
+        if (!participant.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
+            throw new CustomException(CodeType.INVALID_EVENT_CREATER);
+        }
 
         LocalDateTime groundsDate = eventCreateReq.getGroundsDate();
         Long payment = eventCreateReq.getPayment();
@@ -94,7 +94,7 @@ public class EventServiceImpl implements EventService{
 
 
     @Override
-    public EventInfo updateEvent(long id, EventModifyReq eventModifyReq) {
+    public EventInfo updateEvent(AuthUser authUser, long id, EventModifyReq eventModifyReq) {
 
         if (eventModifyReq.getUserName() == null && eventModifyReq.getGroundsDate() == null && ObjectUtils.isEmpty(eventModifyReq.getPayment())
             && eventModifyReq.getGrounds() == null && eventModifyReq.getPaymentType() == null) {
@@ -120,7 +120,7 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public void deleteEvent(long id) {
+    public void deleteEvent(AuthUser authUser, long id) {
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
         event.deleteEvent();
@@ -128,7 +128,7 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public EventInfo changePaymentType(long id, PaymentTypeReq paymentTypeReq) {
+    public EventInfo changePaymentType(AuthUser authUser, long id, PaymentTypeReq paymentTypeReq) {
 
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
