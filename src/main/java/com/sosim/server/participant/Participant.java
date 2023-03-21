@@ -1,6 +1,5 @@
 package com.sosim.server.participant;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.Group;
 import com.sosim.server.user.User;
