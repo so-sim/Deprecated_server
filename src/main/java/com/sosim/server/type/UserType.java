@@ -10,12 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum UserType {
 
-    // 탈퇴
-    WITHDRAWAL("withdrawal"),
-    // 휴면
-    DORMANT("dormant"),
-    // 유효
-    ACTIVE("active");
+    WITHDRAWAL("탈퇴"),
+    DORMANT("휴면"),
+    ACTIVE("유효");
 
     private String desc;
 }

@@ -3,16 +3,20 @@ package com.sosim.server.oauth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.JwtFactory;
 import com.sosim.server.jwt.JwtService;
-import com.sosim.server.oauth.dto.OAuth2JwtResponseDto;
-import com.sosim.server.oauth.dto.OAuth2TokenResponseDto;
-import com.sosim.server.oauth.dto.OAuth2UserInfoDto;
+import com.sosim.server.jwt.RefreshToken;
+import com.sosim.server.oauth.dto.response.LoginResponse;
+import com.sosim.server.oauth.dto.request.OAuth2TokenRequest;
+import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -40,26 +45,26 @@ public class OAuth2Service {
     private final JwtService jwtService;
 
     @Transactional
-    public OAuth2JwtResponseDto login(SocialType socialType, String authorizationCode) throws JsonProcessingException {
+    public LoginResponse login(SocialType socialType, String authorizationCode) throws JsonProcessingException {
         // SocialType(kakao,google,naver) 에 따라 다른 inMemory 사용
         ClientRegistration type = inMemoryRepository.findByRegistrationId(socialType.name().toLowerCase());
 
         // OAuth2.0 Authorization Server -> Access, Refresh Token 발급
-        OAuth2TokenResponseDto oAuth2Token = getToken(type, authorizationCode);
+        OAuth2TokenRequest oAuth2Token = getToken(type, authorizationCode);
 
         // Access Token 으로 User 정보 획득
         User user = getUserProfile(socialType, oAuth2Token, type);
 
         // Sever 자체 JWT 생성 및 Refresh Token 저장
-        OAuth2JwtResponseDto oAuth2JwtResponseDto = OAuth2JwtResponseDto.createOAuth2JwtResponseDto(user,
-                jwtFactory.createAccessToken(String.valueOf(user.getId())),
-                jwtFactory.createRefreshToken());
-        jwtService.saveRefreshToken(oAuth2JwtResponseDto.getRefreshToken());
+        RefreshToken refreshToken = RefreshToken.builder().id(String.valueOf(user.getId()))
+                .refreshToken(jwtFactory.createRefreshToken()).build();
+        jwtService.saveRefreshToken(refreshToken);
 
-        return oAuth2JwtResponseDto;
+        return LoginResponse.create(
+                jwtFactory.createAccessToken(String.valueOf(user.getId())), refreshToken.getRefreshToken());
     }
 
-    private OAuth2TokenResponseDto getToken(ClientRegistration type, String authorizationCode) throws JsonProcessingException {
+    private OAuth2TokenRequest getToken(ClientRegistration type, String authorizationCode) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
@@ -67,15 +72,19 @@ public class OAuth2Service {
                 new HttpEntity<>(tokenRequest(authorizationCode, type), headers);
 
         RestTemplate restTemplate = new RestTemplate();
+        String responseBody;
+        try {
+            responseBody = restTemplate.exchange(
+                    type.getProviderDetails().getTokenUri(),
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            ).getBody();
+        } catch (HttpStatusCodeException e) {
+            throw new CustomException(CodeType.COMMON_BAD_REQUEST);
+        }
 
-        String responseBody = restTemplate.exchange(
-                type.getProviderDetails().getTokenUri(),
-                HttpMethod.POST,
-                request,
-                String.class
-        ).getBody();
-
-        return OBJECT_MAPPER.readValue(responseBody, OAuth2TokenResponseDto.class);
+        return OBJECT_MAPPER.readValue(responseBody, OAuth2TokenRequest.class);
     }
 
     private MultiValueMap<String, String> tokenRequest(String authorizationCode, ClientRegistration type) {
@@ -88,26 +97,26 @@ public class OAuth2Service {
         return formData;
     }
 
-    private User getUserProfile(SocialType socialType, OAuth2TokenResponseDto token, ClientRegistration type) throws JsonProcessingException {
+    private User getUserProfile(SocialType socialType, OAuth2TokenRequest token, ClientRegistration type) throws JsonProcessingException {
         Map<String, Object> userAttributes = getUserAttributes(type, token);
-        OAuth2UserInfoDto oAuth2UserInfoDto = OAuth2UserInfoFactory.getOAuth2UserInfo(socialType, userAttributes);
+        OAuth2UserInfoRequest oAuth2UserInfoRequest = OAuth2UserInfoFactory.getOAuth2UserInfo(socialType, userAttributes);
 
-        return saveOrUpdate(socialType, oAuth2UserInfoDto);
+        return saveOrUpdate(socialType, oAuth2UserInfoRequest);
     }
 
-    private User saveOrUpdate(SocialType socialType, OAuth2UserInfoDto oAuth2UserInfoDto) {
-        Optional<User> user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoDto.getOAuth2Id());
+    private User saveOrUpdate(SocialType socialType, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+        Optional<User> user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoRequest.getOAuth2Id());
 
         if (user.isEmpty()) {
-            user = Optional.ofNullable(userService.save(socialType, oAuth2UserInfoDto));
+            user = Optional.ofNullable(userService.save(socialType, oAuth2UserInfoRequest));
         } else {
-            user = Optional.ofNullable(userService.update(user.get(), oAuth2UserInfoDto));
+            user = Optional.ofNullable(userService.update(user.get(), oAuth2UserInfoRequest));
         }
 
         return user.get();
     }
 
-    private Map<String, Object> getUserAttributes(ClientRegistration type, OAuth2TokenResponseDto token) throws JsonProcessingException {
+    private Map<String, Object> getUserAttributes(ClientRegistration type, OAuth2TokenRequest token) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
         headers.add("Authorization", "Bearer " + token.getAccessToken());

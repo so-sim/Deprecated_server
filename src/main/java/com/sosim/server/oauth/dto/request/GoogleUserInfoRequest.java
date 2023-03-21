@@ -1,12 +1,13 @@
-package com.sosim.server.oauth.dto;
+package com.sosim.server.oauth.dto.request;
 
+import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.SocialType;
 
 import java.util.Map;
 
-public class GoogleOAuth2UserInfoDto extends OAuth2UserInfoDto {
+public class GoogleUserInfoRequest extends OAuth2UserInfoRequest {
 
-    public GoogleOAuth2UserInfoDto(Map<String, Object> attributes) {
+    public GoogleUserInfoRequest(Map<String, Object> attributes) {
         super(attributes);
     }
 

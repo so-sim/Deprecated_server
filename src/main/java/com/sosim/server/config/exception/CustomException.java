@@ -1,68 +1,41 @@
 package com.sosim.server.config.exception;
 
-import com.sosim.server.type.ErrorCodeType;
+import com.sosim.server.type.CodeType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@Getter
 public class CustomException extends NestedRuntimeException {
 
+    private CodeType codeType;
+    private Content content;
+
+    public CustomException(CodeType codeType) {
+        super(codeType.getMessage());
+        this.codeType = codeType;
+    }
+
+    public CustomException(CodeType codeType, String field, String message) {
+        this(codeType);
+        content = new Content(field, message);
+    }
+
     @Getter
-    private ErrorCodeType errorCodeType;
-
-    private String field;
-    private String message;
-    @Getter
-    private HttpStatus httpStatus;
-
-    private String code;
-
-    public CustomException(ErrorCodeType errorCodeType) {
-        this(errorCodeType.getMessage(), errorCodeType.getHttpStatus(), errorCodeType.getCode());
-    }
-
-    public CustomException(String field, String message, ErrorCodeType errorCodeType) {
-        this(field, message, errorCodeType.getHttpStatus(), errorCodeType.getCode());
-    }
-
-    public CustomException(String message, ErrorCodeType errorCodeType) {
-        this(message, errorCodeType.getHttpStatus(), errorCodeType.getCode());
-    }
-
-    public CustomException(ErrorCodeType errorCodeType, String field) {
-        this(field, errorCodeType.getMessage(), errorCodeType.getHttpStatus(), errorCodeType.getCode());
-    }
-
-    public CustomException(String message, HttpStatus httpStatus, int code) {
-        super(message);
-        this.message = message;
-        this.httpStatus = httpStatus;
-        this.code = String.valueOf(code);
-    }
-
-    public CustomException(String message, HttpStatus httpStatus, String code) {
-        super(message);
-        this.message = message;
-        this.httpStatus = httpStatus;
-        this.code = code;
-    }
-
-    public CustomException(String field, String message, HttpStatus httpStatus, String code) {
-        super(message);
-        this.field = field;
-        this.message = message;
-        this.httpStatus = httpStatus;
-        this.code = code;
+    @AllArgsConstructor
+    private static class Content {
+        private String field;
+        private String message;
     }
 
     public RestError toRestError() {
-        return new RestError(this.field, this.code, this.message, this.httpStatus);
+        return new RestError(this.content.getField(), this.codeType.getCode(), this.content.getMessage(), this.codeType.getHttpStatus());
     }
 
     public ResponseEntity<RestError> toResponseEntity() {
-        return new ResponseEntity<>(this.toRestError(), this.httpStatus);
+        return new ResponseEntity<>(this.toRestError(), this.codeType.getHttpStatus());
     }
 
     @AllArgsConstructor
@@ -72,6 +45,12 @@ public class CustomException extends NestedRuntimeException {
         private String code;
         private String message;
         private HttpStatus status;
+
+    }
+
+    public CustomException(String message, CodeType codeType) {
+        this(codeType);
+        content = new Content(null, message);
     }
 
 }
