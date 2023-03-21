@@ -28,8 +28,9 @@ public enum CodeType {
     USER_INFO_SUCCESS("3001", HttpStatus.OK, "회원 정보가 성공적으로 조회되었습니다."),
     USER_WITHDRAWAL_SUCCESS ("3002", HttpStatus.OK,"회원 탈퇴가 성공적으로 이루어졌습니다."),
     USER_ALREADY_EXIST("3003", HttpStatus.BAD_REQUEST, "회원가입 되어 있는 사용자입니다."),
-    NOT_FOUND_USER("3004", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
-    INVALID_USER("3005", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
+    USER_ALREADY_WITHDRAWAL("3004", HttpStatus.BAD_REQUEST, "이미 탈퇴한 사용자입니다."),
+    NOT_FOUND_USER("3005", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
+    INVALID_USER("3006", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
 
 
     // Group - Success

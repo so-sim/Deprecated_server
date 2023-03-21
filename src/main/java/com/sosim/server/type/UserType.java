@@ -12,7 +12,7 @@ public enum UserType {
 
     WITHDRAWAL("탈퇴"),
     DORMANT("휴면"),
-    ACTIVE("유효");
+    USING("사용중");
 
     private String desc;
 }

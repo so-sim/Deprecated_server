@@ -12,17 +12,17 @@ Content-Type: application/json
 
 ### 회원 조회
 GET localhost:8080/api/user/1
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxODA4Nn0.LagjWrMyV9fGn17E-vjmL7NoCPbXkfGWvuTozROYtnYMXva__onsCgfMz3D1iZtYlOd5sIHB79Bt8fp1DKuOVQ
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5ODQ5N30.qW9JEam5JpkA6hTFhUyIi-FRZaLCPu648KTUbBjr-nSj2vFXDXIZK6BPbEIXTp_S16Z9cj72RCrJVBq0qWz91Q
 Accept: application/json
 
 ### 회원 탈퇴
 PUT localhost:8080/api/user
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxODA4Nn0.LagjWrMyV9fGn17E-vjmL7NoCPbXkfGWvuTozROYtnYMXva__onsCgfMz3D1iZtYlOd5sIHB79Bt8fp1DKuOVQ
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5ODQ5N30.qW9JEam5JpkA6hTFhUyIi-FRZaLCPu648KTUbBjr-nSj2vFXDXIZK6BPbEIXTp_S16Z9cj72RCrJVBq0qWz91Q
 Content-Type: application/json
 
 {
   "userId": 1,
-  "withdrawalGroundsType": 3
+  "withdrawalGroundsType": "errors"
 }
 
 ### 모임 생성

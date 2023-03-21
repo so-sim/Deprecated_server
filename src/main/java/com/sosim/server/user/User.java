@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -32,9 +33,11 @@ public class User extends BaseTimeEntity {
     @Column(name = "ID")
     private Long id;
 
+    @Setter
     @Column(name = "EMAIL")
     private String email;
 
+    @Setter
     @Column(name = "WITHDRAWAL_DATE")
     private LocalDateTime withdrawalDate;
 
@@ -48,28 +51,15 @@ public class User extends BaseTimeEntity {
     @Column(name = "SOCIAL_ID")
     private String socialId;
 
+    @Setter
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "USER_TYPE")
     private UserType userType;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Setter
+    @Enumerated(EnumType.STRING)
     @Column(name = "WITHDRAWAL_GROUNDS_TYPE")
     private WithdrawalGroundsType withdrawalGroundsType;
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setWithdrawalDate(LocalDateTime withdrawalDate) {
-        this.withdrawalDate = withdrawalDate;
-    }
-
-    public void setWithdrawalGroundsType(WithdrawalGroundsType withdrawalGroundsType) {
-        this.withdrawalGroundsType = withdrawalGroundsType;
-    }
-
-    public void setUserType(UserType userType) {
-        this.userType = userType;
-    }
 }
