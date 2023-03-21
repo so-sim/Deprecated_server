@@ -30,21 +30,21 @@ public enum WithdrawalGroundsType {
     private String param;
 
     private static final Map<Object, WithdrawalGroundsType> map = EnumUtils.getMap(WithdrawalGroundsType.class);
-    public static final WithdrawalGroundsType getType(int value) {
+    public static final WithdrawalGroundsType getType(String value) {
         switch (value) {
-            case 0:
+            case "notusing":
                 return map.get(NOT_USING_SERVICE.name());
-            case 1:
+            case "notservice":
                 return map.get(NOT_THE_SERVICE_WAS_THINKING_OF.name());
-            case 2:
+            case "inconvenient":
                 return map.get(INCONVENIENT_TO_USE.name());
-            case 3:
+            case "lackfeatures":
                 return map.get(LACK_OF_AVAILABLE_FEATURES.name());
-            case 4:
+            case "newaccount":
                 return map.get(WANT_TO_CREATE_A_NEW_ACCOUNT.name());
-            case 5:
+            case "errors":
                 return map.get(FREQUENT_ERRORS_WHILE_USING_THE_SERVICE.name());
-            case 6: default:
+            case "none": default:
                 return map.get(NONE.name());
         }
     }

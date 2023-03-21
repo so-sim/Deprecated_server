@@ -98,15 +98,22 @@ public class EventServiceImpl implements EventService{
 
         if (eventModifyReq.getUserName() == null && eventModifyReq.getGroundsDate() == null && ObjectUtils.isEmpty(eventModifyReq.getPayment())
             && eventModifyReq.getGrounds() == null && eventModifyReq.getPaymentType() == null) {
-            throw new CustomException(CodeType.COMMON_BAD_REQUEST);
+            throw new CustomException(CodeType.INPUT_ANY_DATA);
         }
 
-        Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
+        Event event = getActiveEvent(id);
+
+        if (!event.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
+            throw new CustomException(CodeType.INVALID_EVENT_CREATER);
+        }
+
+        Participant participant = participantRepository.findByUser(event.getUser())
+            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         if (eventModifyReq.getUserName() != null) {
-            Participant participant = participantRepository.findByNickname(eventModifyReq.getUserName())
+            Participant participantforName = participantRepository.findByNickname(eventModifyReq.getUserName())
                 .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            User user = userRepository.findById(participant.getUser().getId())
+            User user = userRepository.findById(participantforName.getUser().getId())
                 .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
             eventModifyReq.setUser(user);
         }
@@ -114,15 +121,20 @@ public class EventServiceImpl implements EventService{
         event.updateEvent(eventModifyReq);
         eventRepository.save(event);
 
-        return EventInfo.builder().userName(eventModifyReq.getUserName()).payment(event.getPayment())
-            .groundsDate(event.getGroundsDate()).paymentType(event.getPaymentType().getParam())
-            .grounds(event.getGrounds()).build();
+        EventInfo eventInfo = EventInfo.from(event);
+        eventInfo.setUserName(participant.getNickname());
+
+        return eventInfo;
     }
 
     @Override
     public void deleteEvent(AuthUser authUser, long id) {
-        Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING)
-            .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
+
+        Event event = getActiveEvent(id);
+
+        if (!event.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
+            throw new CustomException(CodeType.INVALID_EVENT_CREATER);
+        }
         event.deleteEvent();
         eventRepository.save(event);
     }
@@ -130,17 +142,22 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventInfo changePaymentType(AuthUser authUser, long id, PaymentTypeReq paymentTypeReq) {
 
-        Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING)
-            .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
+        Event event = getActiveEvent(id);
+
+        if (!event.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
+            throw new CustomException(CodeType.INVALID_EVENT_CREATER);
+        }
+
         Participant participant = participantRepository.findByUser(event.getUser())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         event.changePaymentType(paymentTypeReq);
         eventRepository.save(event);
 
-        return EventInfo.builder().userName(participant.getNickname()).payment(event.getPayment())
-            .groundsDate(event.getGroundsDate()).paymentType(event.getPaymentType().getParam())
-            .grounds(event.getGrounds()).build();
+        EventInfo eventInfo = EventInfo.from(event);
+        eventInfo.setUserName(participant.getNickname());
+
+        return eventInfo;
     }
 
     @Override
@@ -191,6 +208,11 @@ public class EventServiceImpl implements EventService{
         List<PaymentType> paymentTypeList = List.of(PaymentType.values());
         monthList = paymentTypeList.stream().map(paymentType -> getMonthInfo(paymentType, getPaymentList(groupId, paymentType, month))).collect(Collectors.toList());
         return monthList;
+    }
+
+    private Event getActiveEvent(long id) {
+        return eventRepository.findByIdAndStatusType(id, StatusType.USING)
+            .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
 
     private MonthInfo getMonthInfo(PaymentType paymentType, List<Map<Integer, Integer>> dayCountList) {
