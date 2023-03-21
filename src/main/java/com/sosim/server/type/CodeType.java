@@ -35,6 +35,7 @@ public enum CodeType {
     WITHDRAW_GROUP("900", HttpStatus.OK, "성공적으로 모임에서 탈퇴되었습니다."),
     MODIFY_NICKNAME("900", HttpStatus.OK, "성공적으로 닉네임이 수정되었습니다."),
     GET_GROUPS("900", HttpStatus.OK, "성공적으로 참가한 모임들이 조회되었습니다."),
+    GET_NICKNAME("900", HttpStatus.OK, "성공적으로 닉네임이 조회되었습니다."),
 
     // Group - Failure
     NOT_FOUND_GROUP("1001", HttpStatus.NOT_FOUND, "해당 모임을 찾을 수 없습니다."),

@@ -7,6 +7,7 @@ import com.sosim.server.group.dto.response.CreateGroupResponse;
 import com.sosim.server.group.dto.response.GetGroupListResponse;
 import com.sosim.server.group.dto.response.GetGroupResponse;
 import com.sosim.server.group.dto.request.UpdateGroupRequest;
+import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.security.AuthUser;
@@ -123,6 +124,16 @@ public class GroupController {
         GetGroupListResponse groupList = groupService.getMyGroups(index, Long.parseLong(authUser.getId()));
 
         return new ResponseEntity<>(Response.create(CodeType.GET_GROUPS, groupList), HttpStatus.OK);
+    }
+
+    @GetMapping("/group/{groupId}/participant")
+    public ResponseEntity<?> getMyNickname(@AuthenticationPrincipal AuthUser authUser,
+                                           @PathVariable("groupId") Long groupId) {
+        GetNicknameResponse getNicknameResponse =
+                groupService.getMyNickname(Long.valueOf(authUser.getId()), groupId);
+        CodeType getNickname = CodeType.GET_NICKNAME;
+
+        return new ResponseEntity<>(Response.create(getNickname, getNicknameResponse), getNickname.getHttpStatus());
     }
 
     private void bindingError(BindingResult bindingResult) {

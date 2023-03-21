@@ -8,6 +8,7 @@ import com.sosim.server.group.dto.response.GetGroupResponse;
 import com.sosim.server.group.dto.response.GetGroupListResponse;
 import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantService;
+import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.type.CodeType;
@@ -122,6 +123,10 @@ public class GroupService {
 
         return GetGroupListResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
                 slice.hasNext(), groupList);
+    }
+
+    public GetNicknameResponse getMyNickname(Long userId, Long groupId) {
+        return participantService.getMyNickname(userService.getUser(userId), getGroupEntity(groupId));
     }
 
     public Group getGroupEntity(Long groupId) {
