@@ -1,7 +1,7 @@
 # curl --location --request GET 'http://localhost:8080/redis/test'
 GET http://localhost:8080/redis/test
 
-### login 서버 에러나네.. 한번 한거라 그런가?
+### login 서버 에러나네.. 한번 한거라 그런가? -> 그건 또 아닌듯..
 # curl --location --request GET 'localhost:8080/login/oauth2/code/kakao?code=hyxF4F7aHGmVIHBmzDw2429g5YPL7rfsZD2s2NcEepueC0x6KaMlwVLCBSuJCvfauLVqhworDR4AAAGGu5Jpsw'
 GET localhost:8080/login/oauth2/code/kakao?code=Dru4jp-SOAfn3V_Y6rK5X8BrO7AKowE15MxnZEfNqnEEn_sC8DHyazUtTqKzp3t4mJx7Ogo9c5sAAAGG73AKvg
 
@@ -10,13 +10,7 @@ GET localhost:8080/login/reissueToken
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxNjA1Mn0.QjIpLGSQVEB2eW6wdC34q4JojS0YUDd1q6W-86O4YNvxh4jRv4GBUlm81lX7WJZKRuMv3aDnH3Gd2MlUZmu3zQ
 Content-Type: application/json
 
-###
-
-
-
 ### 회원 조회
-# curl --location --request GET 'localhost:8080/api/user/1'
-#--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODE5MzA5M30.FYSDZuTm0AceNYbzlC_8K25v-29P2umQA3-YQ9PI7rbHXWz3thjL5F50XOnkMN_TW4wO2_imS_fqe7Kldf_WNg'
 GET localhost:8080/api/user/1
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3ODMxODA4Nn0.LagjWrMyV9fGn17E-vjmL7NoCPbXkfGWvuTozROYtnYMXva__onsCgfMz3D1iZtYlOd5sIHB79Bt8fp1DKuOVQ
 Accept: application/json
@@ -60,7 +54,31 @@ Content-Type: application/json
 GET http://localhost:8080/api/event/penalty/1
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTMzNTEyN30.fpL_e4zGGQAuJRum5HVr3knS9PIkTjqxqLJVB0AbM8Ovp0DpaPdbA_ediTZnSnuBrsRgVgnYUImq5aO6GC7uAA
 
+### 이벤트 수정
+POST http://localhost:8080/api/event/penalty/1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5MTIwOH0.CyMPcZAijLmN1h0y62dsfEQXzIOCR5icvJSaLafgCtfb0skY_HtzUvLtzVAeUnIwOnWBl1P6oV-P2DAXDSQbeQ
+Content-Type: application/json
+
+{
+  "grounds": "지각"
+}
+
+### 납부여부 변경
+PATCH http://localhost:8080/api/event/penalty/1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5MTIwOH0.CyMPcZAijLmN1h0y62dsfEQXzIOCR5icvJSaLafgCtfb0skY_HtzUvLtzVAeUnIwOnWBl1P6oV-P2DAXDSQbeQ
+Content-Type: application/json
+
+{
+  "paymentType": "con"
+}
+
+### 이벤트 삭제
+PUT http://localhost:8080/api/event/penalty/1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5MTIwOH0.CyMPcZAijLmN1h0y62dsfEQXzIOCR5icvJSaLafgCtfb0skY_HtzUvLtzVAeUnIwOnWBl1P6oV-P2DAXDSQbeQ
+
 ###
+
+
 
 
 
