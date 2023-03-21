@@ -29,4 +29,28 @@ public class CustomException extends NestedRuntimeException {
         private String field;
         private String message;
     }
+
+    public RestError toRestError() {
+        return new RestError(this.content.getField(), this.codeType.getCode(), this.content.getMessage(), this.codeType.getHttpStatus());
+    }
+
+    public ResponseEntity<RestError> toResponseEntity() {
+        return new ResponseEntity<>(this.toRestError(), this.codeType.getHttpStatus());
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class RestError {
+        private String field;
+        private String code;
+        private String message;
+        private HttpStatus status;
+
+    }
+
+    public CustomException(String message, CodeType codeType) {
+        this(codeType);
+        content = new Content(null, message);
+    }
+
 }

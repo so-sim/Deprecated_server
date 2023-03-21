@@ -8,11 +8,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public enum UserType {
+public enum StatusType {
 
-    WITHDRAWAL("탈퇴"),
-    DORMANT("휴면"),
-    USING("사용중");
+    USING("사용중"),
+    DELETED("삭제됨");
 
     private String desc;
 }

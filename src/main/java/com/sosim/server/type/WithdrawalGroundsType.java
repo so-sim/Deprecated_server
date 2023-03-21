@@ -12,46 +12,39 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum WithdrawalGroundsType {
 
-    // 서비스를 잘 이용하지 않아서
-    NOT_USING_SERVICE("not using service", 0),
+    NOT_USING_SERVICE("서비스를 잘 이용하지 않아서", "notusing"),
 
-    // 내가 생각한 서비스가 아니라서
-    NOT_THE_SERVICE_WAS_THINKING_OF("not the service was thinking of", 1),
+    NOT_THE_SERVICE_WAS_THINKING_OF("내가 생각한 서비스가 아니라서", "notservice"),
 
-    // 사용하기 불편해서
-    INCONVENIENT_TO_USE("inconvenient to use", 2),
+    INCONVENIENT_TO_USE("사용하기 불편해서", "inconvenient"),
 
-    // 사용할 수 있는 기능이 부족해서
-    LACK_OF_AVAILABLE_FEATURES("lack of available features", 3),
+    LACK_OF_AVAILABLE_FEATURES("사용할 수 있는 기능이 부족해서", "lackfeatures"),
 
-    // 새 계정을 만들고 싶어서
-    WANT_TO_CREATE_A_NEW_ACCOUNT("want to create a new account", 4),
+    WANT_TO_CREATE_A_NEW_ACCOUNT("새 계정을 만들고 싶어서", "newaccount"),
 
-    // 서비스 사용 중 에러가 잦아서
-    FREQUENT_ERRORS_WHILE_USING_THE_SERVICE("frequent errors while using the service", 5),
+    FREQUENT_ERRORS_WHILE_USING_THE_SERVICE("서비스 사용 중 에러가 잦아서", "errors"),
 
-    // 해당사항 없음
-    NONE("none", 6);
+    NONE("해당사항 없음", "none");
 
     private String desc;
-    private int ordinal;
+    private String param;
 
     private static final Map<Object, WithdrawalGroundsType> map = EnumUtils.getMap(WithdrawalGroundsType.class);
-    public static final WithdrawalGroundsType getType(int value) {
+    public static final WithdrawalGroundsType getType(String value) {
         switch (value) {
-            case 0:
+            case "notusing":
                 return map.get(NOT_USING_SERVICE.name());
-            case 1:
+            case "notservice":
                 return map.get(NOT_THE_SERVICE_WAS_THINKING_OF.name());
-            case 2:
+            case "inconvenient":
                 return map.get(INCONVENIENT_TO_USE.name());
-            case 3:
+            case "lackfeatures":
                 return map.get(LACK_OF_AVAILABLE_FEATURES.name());
-            case 4:
+            case "newaccount":
                 return map.get(WANT_TO_CREATE_A_NEW_ACCOUNT.name());
-            case 5:
+            case "errors":
                 return map.get(FREQUENT_ERRORS_WHILE_USING_THE_SERVICE.name());
-            case 6: default:
+            case "none": default:
                 return map.get(NONE.name());
         }
     }

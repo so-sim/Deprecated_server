@@ -8,11 +8,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public enum UserType {
+public enum EventType {
 
-    WITHDRAWAL("탈퇴"),
-    DORMANT("휴면"),
-    USING("사용중");
+    DUES_PAYMENT("벌금 납부"),
+    USE_PAYMENT("벌금 사용");
 
     private String desc;
 }
