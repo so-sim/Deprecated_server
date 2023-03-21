@@ -8,6 +8,7 @@ import com.sosim.server.group.dto.response.GetGroupResponse;
 import com.sosim.server.group.dto.response.GetGroupListResponse;
 import com.sosim.server.participant.Participant;
 import com.sosim.server.participant.ParticipantService;
+import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.type.CodeType;
@@ -39,10 +40,10 @@ public class GroupService {
         return CreateGroupResponse.create(groupEntity);
     }
 
-    public GetGroupResponse getGroup(Long groupId) {
+    public GetGroupResponse getGroup(Long userId, Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
 
-        return GetGroupResponse.create(groupEntity);
+        return GetGroupResponse.create(groupEntity, groupEntity.getAdminId().equals(userId));
     }
 
     public GetParticipantListResponse getGroupParticipant(Long groupId) {
@@ -116,11 +117,16 @@ public class GroupService {
 
         List<GetGroupResponse> groupList = new ArrayList<>();
         for (Participant participant : participantEntityList) {
-            groupList.add(GetGroupResponse.create(participant.getGroup()));
+            Group group = participant.getGroup();
+            groupList.add(GetGroupResponse.create(group, group.getAdminId().equals(userId)));
         }
 
         return GetGroupListResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
                 slice.hasNext(), groupList);
+    }
+
+    public GetNicknameResponse getMyNickname(Long userId, Long groupId) {
+        return participantService.getMyNickname(userService.getUser(userId), getGroupEntity(groupId));
     }
 
     public Group getGroupEntity(Long groupId) {

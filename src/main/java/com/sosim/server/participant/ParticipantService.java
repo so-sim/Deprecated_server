@@ -3,6 +3,7 @@ package com.sosim.server.participant;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.group.Group;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
+import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
 import lombok.RequiredArgsConstructor;
@@ -60,5 +61,9 @@ public class ParticipantService {
         }
         return participantRepository.findByIdLessThanAndUserIdOrderByIdDesc(index, userId,
                 PageRequest.ofSize(18));
+    }
+
+    public GetNicknameResponse getMyNickname(User user, Group group) {
+        return GetNicknameResponse.create(getParticipantEntity(user, group));
     }
 }
