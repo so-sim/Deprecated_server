@@ -1,8 +1,7 @@
-package com.sosim.server.group;
+package com.sosim.server.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sosim.server.config.exception.CustomException;
-import com.sosim.server.type.CodeType;
 import lombok.Getter;
 
 import java.util.Collections;
