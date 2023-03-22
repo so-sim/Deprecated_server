@@ -32,7 +32,7 @@ public class ParticipantService {
     }
 
     public void deleteParticipantEntity(User user, Group group) {
-        participantRepository.delete(getParticipantEntity(user, group));
+        getParticipantEntity(user, group).delete();
     }
 
     public void modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {

@@ -4,13 +4,15 @@ import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.dto.request.CreateGroupRequest;
 import com.sosim.server.group.dto.request.UpdateGroupRequest;
 import com.sosim.server.participant.Participant;
+import com.sosim.server.type.CoverColorType;
+import com.sosim.server.type.GroupType;
+import com.sosim.server.type.StatusType;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -32,9 +34,6 @@ public class Group extends BaseTimeEntity {
     @Column(name = "ADMIN_NICKNAME")
     private String adminNickname;
 
-    @Column(name = "DELETE_DATE")
-    private LocalDateTime deleteDate;
-
     @Column(name = "COVER_COLOR_TYPE")
     @Enumerated(EnumType.STRING)
     private CoverColorType coverColorType;
@@ -43,7 +42,7 @@ public class Group extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private GroupType groupType;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<Participant> participantList;
 
     @Builder(access = AccessLevel.PRIVATE)
@@ -54,6 +53,7 @@ public class Group extends BaseTimeEntity {
         this.adminNickname = adminNickname;
         this.coverColorType = coverColorType;
         this.groupType = groupType;
+        status = StatusType.USING;
     }
 
     public static Group create(Long adminId, CreateGroupRequest createGroupRequest) {

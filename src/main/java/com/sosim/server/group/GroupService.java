@@ -71,7 +71,7 @@ public class GroupService {
             throw new CustomException(CodeType.NONE_ADMIN);
         }
 
-        groupRepository.delete(groupEntity);
+        groupEntity.delete();
     }
 
     public void intoGroup(Long userId, Long groupId, ParticipantNicknameRequest participantNicknameRequest) {

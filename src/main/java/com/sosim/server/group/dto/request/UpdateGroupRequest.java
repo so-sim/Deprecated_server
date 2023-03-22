@@ -1,8 +1,8 @@
 package com.sosim.server.group.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sosim.server.group.CoverColorType;
-import com.sosim.server.group.GroupType;
+import com.sosim.server.type.CoverColorType;
+import com.sosim.server.type.GroupType;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
