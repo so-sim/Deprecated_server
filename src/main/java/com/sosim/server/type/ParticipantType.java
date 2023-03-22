@@ -1,4 +1,4 @@
-package com.sosim.server.participant;
+package com.sosim.server.type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

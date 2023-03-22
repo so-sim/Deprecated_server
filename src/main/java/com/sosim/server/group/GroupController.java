@@ -7,12 +7,12 @@ import com.sosim.server.group.dto.response.CreateGroupResponse;
 import com.sosim.server.group.dto.response.GetGroupListResponse;
 import com.sosim.server.group.dto.response.GetGroupResponse;
 import com.sosim.server.group.dto.request.UpdateGroupRequest;
+import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.CodeType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -35,22 +35,26 @@ public class GroupController {
         }
 
         CreateGroupResponse createGroupResponse = groupService.createGroup(Long.valueOf(authUser.getId()), createGroupRequest);
+        CodeType createGroup = CodeType.CREATE_GROUP;
 
-        return new ResponseEntity<>(Response.create(CodeType.CREATE_GROUP, createGroupResponse), HttpStatus.CREATED);
+        return new ResponseEntity<>(Response.create(createGroup, createGroupResponse), createGroup.getHttpStatus());
     }
 
     @GetMapping("/group/{groupId}")
-    public ResponseEntity<?> getGroup(@PathVariable("groupId") Long groupId) {
-        GetGroupResponse getGroupResponse = groupService.getGroup(groupId);
+    public ResponseEntity<?> getGroup(@AuthenticationPrincipal AuthUser authUser,
+                                      @PathVariable("groupId") Long groupId) {
+        GetGroupResponse getGroupResponse = groupService.getGroup(Long.parseLong(authUser.getId()), groupId);
+        CodeType getGroup = CodeType.GET_GROUP;
 
-        return new ResponseEntity<>(Response.create(CodeType.GET_GROUP, getGroupResponse), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(getGroup, getGroupResponse), getGroup.getHttpStatus());
     }
 
     @GetMapping("/group/{groupId}/participants")
     public ResponseEntity<?> getGroupParticipants(@PathVariable("groupId") Long groupId) {
         GetParticipantListResponse groupParticipant = groupService.getGroupParticipant(groupId);
+        CodeType getParticipants = CodeType.GET_PARTICIPANTS;
 
-        return new ResponseEntity<>(Response.create(CodeType.GET_PARTICIPANTS, groupParticipant), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(getParticipants, groupParticipant), getParticipants.getHttpStatus());
     }
 
     @PatchMapping("/group/{groupId}")
@@ -63,16 +67,18 @@ public class GroupController {
         }
 
         CreateGroupResponse updatedGroupDto = groupService.updateGroup(Long.valueOf(authUser.getId()), groupId, updateGroupRequest);
+        CodeType modifyGroup = CodeType.MODIFY_GROUP;
 
-        return new ResponseEntity<>(Response.create(CodeType.MODIFY_GROUP, updatedGroupDto), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(modifyGroup, updatedGroupDto), modifyGroup.getHttpStatus());
     }
 
     @DeleteMapping("/group/{groupId}")
     public ResponseEntity<?> deleteGroup(@AuthenticationPrincipal AuthUser authUser,
                                          @PathVariable("groupId") Long groupId) {
         groupService.deleteGroup(Long.parseLong(authUser.getId()), groupId);
+        CodeType deleteGroup = CodeType.DELETE_GROUP;
 
-        return new ResponseEntity<>(Response.create(CodeType.DELETE_GROUP, null), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(deleteGroup, null), deleteGroup.getHttpStatus());
     }
 
     @PostMapping("/group/{groupId}/participant")
@@ -85,8 +91,9 @@ public class GroupController {
         }
 
         groupService.intoGroup(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
+        CodeType intoGroup = CodeType.INTO_GROUP;
 
-        return new ResponseEntity<>(Response.create(CodeType.INTO_GROUP, null), HttpStatus.CREATED);
+        return new ResponseEntity<>(Response.create(intoGroup, null), intoGroup.getHttpStatus());
     }
 
     @PatchMapping("/group/{groupId}/admin")
@@ -95,16 +102,18 @@ public class GroupController {
                                          @RequestBody ParticipantNicknameRequest participantNicknameRequest) {
 
         groupService.modifyAdmin(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
+        CodeType modifyGroupAdmin = CodeType.MODIFY_GROUP_ADMIN;
 
-        return new ResponseEntity<>(Response.create(CodeType.MODIFY_GROUP_ADMIN, null), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(modifyGroupAdmin, null), modifyGroupAdmin.getHttpStatus());
     }
 
     @DeleteMapping("/group/{groupId}/participant")
     public ResponseEntity<?> withdrawGroup(@AuthenticationPrincipal AuthUser authUser,
                                            @PathVariable("groupId") Long groupId) {
         groupService.withdrawGroup(Long.parseLong(authUser.getId()), groupId);
+        CodeType withdrawGroup = CodeType.WITHDRAW_GROUP;
 
-        return new ResponseEntity<>(Response.create(CodeType.WITHDRAW_GROUP, null), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(withdrawGroup, null), withdrawGroup.getHttpStatus());
     }
 
     @PatchMapping("/group/{groupId}/participant")
@@ -112,16 +121,28 @@ public class GroupController {
                                             @PathVariable ("groupId") Long groupId,
                                             @Validated @RequestBody ParticipantNicknameRequest participantNicknameRequest) {
         groupService.modifyNickname(Long.parseLong(authUser.getId()), groupId, participantNicknameRequest);
+        CodeType modifyNickname = CodeType.MODIFY_NICKNAME;
 
-        return new ResponseEntity<>(Response.create(CodeType.MODIFY_NICKNAME, null), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(modifyNickname, null), modifyNickname.getHttpStatus());
     }
 
     @GetMapping("/groups")
     public ResponseEntity<?> getMyGroups(@AuthenticationPrincipal AuthUser authUser,
                                          @RequestParam("index") Long index) {
         GetGroupListResponse groupList = groupService.getMyGroups(index, Long.parseLong(authUser.getId()));
+        CodeType getGroups = CodeType.GET_GROUPS;
 
-        return new ResponseEntity<>(Response.create(CodeType.GET_GROUPS, groupList), HttpStatus.OK);
+        return new ResponseEntity<>(Response.create(getGroups, groupList), getGroups.getHttpStatus());
+    }
+
+    @GetMapping("/group/{groupId}/participant")
+    public ResponseEntity<?> getMyNickname(@AuthenticationPrincipal AuthUser authUser,
+                                           @PathVariable("groupId") Long groupId) {
+        GetNicknameResponse getNicknameResponse =
+                groupService.getMyNickname(Long.valueOf(authUser.getId()), groupId);
+        CodeType getNickname = CodeType.GET_NICKNAME;
+
+        return new ResponseEntity<>(Response.create(getNickname, getNicknameResponse), getNickname.getHttpStatus());
     }
 
     private void bindingError(BindingResult bindingResult) {

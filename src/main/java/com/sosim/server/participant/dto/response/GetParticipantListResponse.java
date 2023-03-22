@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 public class GetParticipantListResponse {
-    @JsonProperty("admin_id")
+    @JsonProperty("adminId")
     private Long adminId;
 
-    @JsonProperty("admin_nickname")
+    @JsonProperty("adminNickname")
     private String adminNickname;
 
-    @JsonProperty("nickname_list")
+    @JsonProperty("nicknameList")
     private List<String> nicknameList;
 
     public static GetParticipantListResponse create(Group group, List<Participant> participants) {
