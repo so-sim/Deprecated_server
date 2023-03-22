@@ -5,6 +5,7 @@ import com.sosim.server.group.Group;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.type.CodeType;
+import com.sosim.server.type.StatusType;
 import com.sosim.server.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +20,11 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
 
     public void createParticipant(User userEntity, Group groupEntity, String nickname) {
-        if (participantRepository.findByUserAndGroup(userEntity, groupEntity).isPresent()) {
+        if (participantRepository.findByUserAndGroupAndStatus(userEntity, groupEntity, StatusType.USING).isPresent()) {
             throw new CustomException(CodeType.ALREADY_INTO_GROUP);
         }
 
-        if (participantRepository.findByNicknameAndGroup(nickname, groupEntity).isPresent()) {
+        if (participantRepository.findByNicknameAndGroupAndStatus(nickname, groupEntity, StatusType.USING).isPresent()) {
             throw new CustomException(CodeType.ALREADY_USE_NICKNAME);
         }
 
@@ -32,7 +33,7 @@ public class ParticipantService {
     }
 
     public void deleteParticipantEntity(User user, Group group) {
-        participantRepository.delete(getParticipantEntity(user, group));
+        getParticipantEntity(user, group).delete();
     }
 
     public void modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {
@@ -45,21 +46,21 @@ public class ParticipantService {
     }
 
     public Participant getParticipantEntity(String nickname, Group group) {
-        return participantRepository.findByNicknameAndGroup(nickname, group)
+        return participantRepository.findByNicknameAndGroupAndStatus(nickname, group, StatusType.USING)
                 .orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 
     public Participant getParticipantEntity(User user, Group group) {
-        return participantRepository.findByUserAndGroup(user, group)
+        return participantRepository.findByUserAndGroupAndStatus(user, group, StatusType.USING)
                 .orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 
     public Slice<Participant> getParticipantSlice(Long index, Long userId) {
         if (index == 0) {
-            return participantRepository.findByIdGreaterThanAndUserIdOrderByIdDesc(index, userId,
-                    PageRequest.ofSize(17));
+            return participantRepository.findByIdAndStatusGreaterThanAndUserIdOrderByIdDesc(index, StatusType.USING,
+                    userId, PageRequest.ofSize(17));
         }
-        return participantRepository.findByIdLessThanAndUserIdOrderByIdDesc(index, userId,
+        return participantRepository.findByIdAndStatusLessThanAndUserIdOrderByIdDesc(index, StatusType.USING, userId,
                 PageRequest.ofSize(18));
     }
 

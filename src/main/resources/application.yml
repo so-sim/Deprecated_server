@@ -22,24 +22,24 @@ spring:
     activate:
       on-profile: "local"
 
-#  h2:
-#    console:
-#      enabled: true
+  h2:
+    console:
+      enabled: true
 
   datasource:
-#    driver-class-name: org.h2.Driver
+    driver-class-name: org.h2.Driver
     # error - need more trouble shooting
     #    url: jdbc:h2:tcp://localhost/~/sosim;NON_KEYWORDS=GROUP;
     # mem
     #    url: jdbc:h2:mem:sosim
     # use local mv.db file
-#    url: jdbc:h2:~/sosim
-#    username: sa
-#    password:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/sosim?serverTimezone=Asia/Seoul
-      username: sosim_jean
-      password: sosim_1234
+    url: jdbc:h2:~/sosim;NON_KEYWORDS=GROUP,USER
+    username: sa
+    password:
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      url: jdbc:mysql://localhost:3306/sosim?serverTimezone=Asia/Seoul
+#      username: sosim_jean
+#      password: sosim_1234
 
   jpa:
 #    database-platform: org.hibernate.dialect.H2Dialect
