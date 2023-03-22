@@ -1,9 +1,7 @@
 package com.sosim.server.common.auditing;
 
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 
 import com.sosim.server.type.StatusType;
 import lombok.Getter;
@@ -25,6 +23,7 @@ public class BaseTimeEntity {
     @LastModifiedDate
     private LocalDateTime updateDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "STATUS")
     protected StatusType status;
 

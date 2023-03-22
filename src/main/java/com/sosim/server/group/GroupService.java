@@ -12,6 +12,7 @@ import com.sosim.server.participant.dto.response.GetNicknameResponse;
 import com.sosim.server.participant.dto.response.GetParticipantListResponse;
 import com.sosim.server.participant.dto.request.ParticipantNicknameRequest;
 import com.sosim.server.type.CodeType;
+import com.sosim.server.type.StatusType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -130,7 +131,7 @@ public class GroupService {
     }
 
     public Group getGroupEntity(Long groupId) {
-        return groupRepository.findById(groupId)
+        return groupRepository.findByIdAndStatus(groupId, StatusType.USING)
                 .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
     }
 

@@ -41,10 +41,6 @@ public class Participant extends BaseTimeEntity {
     @Column(name = "NICKNAME")
     private String nickname;
 
-    @Column(name = "DELETE_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime deleteDate;
-
     @Builder (access = AccessLevel.PRIVATE)
     private Participant(User user, Group group, String nickname) {
         this.user = user;
