@@ -1,5 +1,8 @@
 package com.sosim.server.event.dto.req;
 
+import lombok.Getter;
+
+@Getter
 public class EventListReq {
 
     // 기간 필터링
@@ -9,7 +12,7 @@ public class EventListReq {
     private int day;
 
     // 팀원별 필터링
-    private long userId;
+    private Long userId;
 
     // 납부 여부 필터링
     private int paymentType;

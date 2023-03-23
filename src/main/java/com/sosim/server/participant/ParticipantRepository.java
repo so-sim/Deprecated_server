@@ -10,15 +10,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
-    Optional<Participant> findByNicknameAndGroupAndStatus(String participantName, Group group, StatusType statusType);
+    Optional<Participant> findByNicknameAndGroupAndStatusType(String participantName, Group group, StatusType statusType);
 
-    Optional<Participant> findByUserAndGroupAndStatus(User user, Group group, StatusType statusType);
+    Optional<Participant> findByUserAndGroupAndStatusType(User user, Group group, StatusType statusType);
 
     Optional<Participant> findByNickname(String participantName);
 
     Optional<Participant> findByUser(User user);
 
-    Slice<Participant> findByIdAndStatusGreaterThanAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
+    Slice<Participant> findByIdAndStatusTypeGreaterThanAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
 
-    Slice<Participant> findByIdAndStatusLessThanAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
+    Slice<Participant> findByIdAndStatusTypeLessThanAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
 }

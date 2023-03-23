@@ -24,15 +24,15 @@ public class BaseTimeEntity {
     private LocalDateTime updateDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS")
-    protected StatusType status;
+    @Column(name = "STATUS_TYPE")
+    protected StatusType statusType;
 
     @Column(name = "DELETE_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy.MM.dd HH:mm:ss")
     private LocalDateTime deleteDate;
 
     public void delete() {
-        status = StatusType.DELETED;
+        statusType = StatusType.DELETED;
         deleteDate = LocalDateTime.now();
     }
 }

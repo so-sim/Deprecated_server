@@ -53,7 +53,7 @@ public class Group extends BaseTimeEntity {
         this.adminNickname = adminNickname;
         this.coverColorType = coverColorType;
         this.groupType = groupType;
-        status = StatusType.USING;
+        statusType = StatusType.USING;
     }
 
     public static Group create(Long adminId, CreateGroupRequest createGroupRequest) {

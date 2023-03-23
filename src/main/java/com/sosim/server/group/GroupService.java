@@ -131,7 +131,7 @@ public class GroupService {
     }
 
     public Group getGroupEntity(Long groupId) {
-        return groupRepository.findByIdAndStatus(groupId, StatusType.USING)
+        return groupRepository.findByIdAndStatusType(groupId, StatusType.USING)
                 .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
     }
 

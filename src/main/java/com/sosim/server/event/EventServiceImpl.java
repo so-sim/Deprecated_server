@@ -3,6 +3,7 @@ package com.sosim.server.event;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.event.dto.info.EventInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
+import com.sosim.server.event.dto.info.ListInfo;
 import com.sosim.server.event.dto.info.MonthInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
@@ -17,6 +18,7 @@ import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
+import com.sosim.server.type.UserType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.time.LocalDateTime;
@@ -29,6 +31,10 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -161,7 +167,17 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public List<EventInfo> getEventList(long groupId, EventListReq eventListReq) {
+    public ListInfo<EventInfo> getEventList(long groupId, EventListReq eventListReq) {
+
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
+
+        if (eventListReq.getUserId() != null) {
+            User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.USING).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+            PageRequest pageRequest = PageRequest.of(0, 16, Sort.by(Direction.DESC, "update_date"));
+            Page<Event> page = eventRepository.findByGroupAndUserAndStatusType(group, user,
+                StatusType.USING, pageRequest);
+            page.getContent();
+        }
         return null;
     }
 
