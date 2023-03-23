@@ -27,6 +27,9 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .headers().frameOptions().disable();
 
+        http
+                .cors();
+
         // 세션 STATELESS 설정
         http
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
