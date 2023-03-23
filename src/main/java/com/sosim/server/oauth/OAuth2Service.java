@@ -56,7 +56,7 @@ public class OAuth2Service {
                 .refreshToken(jwtFactory.createRefreshToken()).build();
         jwtService.saveRefreshToken(refreshToken);
 
-        return LoginResponse.create(
+        return LoginResponse.create(user,
                 jwtFactory.createAccessToken(String.valueOf(user.getId())), refreshToken.getRefreshToken());
     }
 
