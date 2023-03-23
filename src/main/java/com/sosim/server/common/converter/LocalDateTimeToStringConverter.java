@@ -8,6 +8,6 @@ public class LocalDateTimeToStringConverter extends StdConverter<LocalDateTime, 
 
     @Override
     public String convert(LocalDateTime localDateTime) {
-        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
     }
 }

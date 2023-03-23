@@ -172,38 +172,6 @@ public class EventServiceImpl implements EventService{
         // 1, 3
         // 2, 6
 
-//        findByPaymentTypeAndStatusTypeAndCreateDateBetween();
-//        List<Event> byPaymentTypeAndStatusType = eventRepository.findByPaymentTypeAndStatusType(
-//            PaymentType.NON_PAYMENT, StatusType.USING);
-//
-//        List<Event> monthNonpaymentList = byPaymentTypeAndStatusType.stream()
-//            .filter(event -> event.getCreateDate().getMonthValue() == month).collect(
-//                Collectors.toList());
-
-
-//        List<Map<Integer, Integer>> nonPaymentDayCountList = getPaymentList(PaymentType.NON_PAYMENT, month);
-//        List<Map<Integer, Integer>> conPaymentDayCountList = getPaymentList(PaymentType.CONFIRMING, month);
-//        List<Map<Integer, Integer>> fullPaymentDayCountList = getPaymentList(PaymentType.FULL_PAYMENT, month);
-
-//        List<Map<Integer, Integer>> nonPaymentDayCountList1 = monthNonpaymentList.stream().map(event -> {
-//            Map<Integer, Integer> dayCount = new HashMap<>();
-//            int dayOfMonth = event.getCreateDate().getDayOfMonth();
-//            int count = (int) monthNonpaymentList.stream().filter(y -> y.getCreateDate().getDayOfMonth() == dayOfMonth)
-//                .count();
-//            dayCount.put(dayOfMonth, count);
-//            log.info("dayCount : {}", dayCount);
-//            return dayCount;
-//        }).collect(Collectors.toList());
-
-//        MonthInfo nonMonthInfo = MonthInfo.builder().paymentType(PaymentType.NON_PAYMENT.getParam()).dayCountList(nonPaymentDayCountList).build();
-//        MonthInfo conMonthInfo = MonthInfo.builder().paymentType(PaymentType.CONFIRMING.getParam()).dayCountList(conPaymentDayCountList).build();
-//        MonthInfo fullMonthInfo = MonthInfo.builder().paymentType(PaymentType.FULL_PAYMENT.getParam()).dayCountList(fullPaymentDayCountList).build();
-//        monthList.add(nonMonthInfo);
-//        monthList.add(conMonthInfo);
-//        monthList.add(fullMonthInfo);
-//        monthList.add(getMonthInfo(PaymentType.NON_PAYMENT, nonPaymentDayCountList));
-//        monthList.add(getMonthInfo(PaymentType.CONFIRMING, conPaymentDayCountList));
-//        monthList.add(getMonthInfo(PaymentType.FULL_PAYMENT, fullPaymentDayCountList));
 
         List<PaymentType> paymentTypeList = List.of(PaymentType.values());
         monthList = paymentTypeList.stream().map(paymentType -> getMonthInfo(paymentType, getPaymentList(groupId, paymentType, month))).collect(Collectors.toList());
