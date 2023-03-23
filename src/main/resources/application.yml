@@ -5,7 +5,7 @@ spring:
   profiles:
     group:
       "local" : "local"
-    active : local
+    active : ${SPRING_PROFILES_ACTIVE}
 
   config:
     import:
@@ -22,31 +22,14 @@ spring:
     activate:
       on-profile: "local"
 
-#  h2:
-#    console:
-#      enabled: true
 
   datasource:
-#    driver-class-name: org.h2.Driver
-    # error - need more trouble shooting
-    #    url: jdbc:h2:tcp://localhost/~/sosim
-    # mem
-    #    url: jdbc:h2:mem:sosim
-    # use local mv.db file
-#    url: jdbc:h2:~/sosim
-#    username: sa
-#    password:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://localhost:3306/sosim?serverTimezone=Asia/Seoul
       username: sosim_jean
       password: sosim_1234
 
   jpa:
-#    database-platform: org.hibernate.dialect.H2Dialect
-#    properties:
-#      hibernate:
-#        format_sql: true
-#        show_sql: true
     generate-ddl: true
     hibernate:
       ddl-auto: update #create #create-drop #update #create

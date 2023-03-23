@@ -9,28 +9,32 @@ import lombok.Getter;
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 public class GetGroupResponse {
-    @JsonProperty("group_id")
+    @JsonProperty("groupId")
     private Long id;
 
     @JsonProperty("title")
     private String title;
 
-    @JsonProperty("cover_color")
+    @JsonProperty("coverColor")
     private String coverColorType;
 
-    @JsonProperty("group_type")
+    @JsonProperty("groupType")
     private String groupType;
 
-    @JsonProperty("admin_nickname")
+    @JsonProperty("adminNickname")
     private String adminNickname;
 
-    public static GetGroupResponse create(Group group) {
+    @JsonProperty("isAdmin")
+    private boolean isAdmin;
+
+    public static GetGroupResponse create(Group group, boolean isAdmin) {
         return GetGroupResponse.builder()
                 .id(group.getId())
                 .title(group.getTitle())
                 .coverColorType(group.getCoverColorType().getCode())
                 .groupType(group.getGroupType().getLabel())
                 .adminNickname(group.getAdminNickname())
+                .isAdmin(isAdmin)
                 .build();
     }
 }

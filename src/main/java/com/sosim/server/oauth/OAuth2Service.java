@@ -46,21 +46,17 @@ public class OAuth2Service {
 
     @Transactional
     public LoginResponse login(SocialType socialType, String authorizationCode) throws JsonProcessingException {
-        // SocialType(kakao,google,naver) 에 따라 다른 inMemory 사용
         ClientRegistration type = inMemoryRepository.findByRegistrationId(socialType.name().toLowerCase());
 
-        // OAuth2.0 Authorization Server -> Access, Refresh Token 발급
         OAuth2TokenRequest oAuth2Token = getToken(type, authorizationCode);
 
-        // Access Token 으로 User 정보 획득
         User user = getUserProfile(socialType, oAuth2Token, type);
 
-        // Sever 자체 JWT 생성 및 Refresh Token 저장
         RefreshToken refreshToken = RefreshToken.builder().id(String.valueOf(user.getId()))
                 .refreshToken(jwtFactory.createRefreshToken()).build();
         jwtService.saveRefreshToken(refreshToken);
 
-        return LoginResponse.create(
+        return LoginResponse.create(user,
                 jwtFactory.createAccessToken(String.valueOf(user.getId())), refreshToken.getRefreshToken());
     }
 

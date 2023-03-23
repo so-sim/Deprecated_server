@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -26,6 +27,9 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .headers().frameOptions().disable();
 
+        http
+                .cors();
+
         // 세션 STATELESS 설정
         http
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -33,7 +37,7 @@ public class SecurityConfig {
         // 요청에 대한 권한 체크 파트
         http
                 .authorizeRequests()
-                .antMatchers("/", "/login/**", "/h2-console/**").permitAll()
+                .antMatchers("/login/**").permitAll()
                 .antMatchers("/api/**").authenticated();
 
         // Jwt 인증 필터

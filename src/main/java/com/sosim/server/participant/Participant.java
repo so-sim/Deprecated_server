@@ -2,6 +2,7 @@ package com.sosim.server.participant;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.Group;
+import com.sosim.server.type.StatusType;
 import com.sosim.server.user.User;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -40,15 +41,12 @@ public class Participant extends BaseTimeEntity {
     @Column(name = "NICKNAME")
     private String nickname;
 
-    @Column(name = "WITHDRAW_DATE")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime withdrawDate;
-
     @Builder (access = AccessLevel.PRIVATE)
     private Participant(User user, Group group, String nickname) {
         this.user = user;
         this.group = group;
         this.nickname = nickname;
+        status = StatusType.USING;
     }
 
     public static Participant create(User user, Group group, String nickname) {
@@ -61,5 +59,8 @@ public class Participant extends BaseTimeEntity {
 
     public void modifyNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void delete() {
     }
 }
