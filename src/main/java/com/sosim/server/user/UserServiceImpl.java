@@ -24,6 +24,11 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User save(User user, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+        if (userRepository.findBySocialTypeAndSocialIdAndUserType(oAuth2UserInfoRequest.getOAuth2SocialType(),
+                oAuth2UserInfoRequest.getOAuth2Id(), UserType.ACTIVE).isPresent()) {
+            throw new CustomException(CodeType.USER_ALREADY_EXIST);
+        }
+
         return userRepository.save(user);
     }
 
@@ -48,7 +53,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUser(OAuth2UserInfoRequest userInfo) {
-        return userRepository.findBySocialTypeAndSocialId(userInfo.getOAuth2SocialType(), userInfo.getOAuth2Id())
+        return userRepository.findBySocialTypeAndSocialIdAndUserType(userInfo.getOAuth2SocialType(),
+                        userInfo.getOAuth2Id(), UserType.ACTIVE)
                 .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
     }
 
