@@ -2,7 +2,6 @@ package com.sosim.server.oauth.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sosim.server.jwt.RefreshToken;
 import com.sosim.server.user.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,9 +18,6 @@ public class LoginResponse {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("isPermit")
-    private boolean permit;
-
     @JsonIgnore
     private String refreshToken;
 
@@ -30,7 +26,6 @@ public class LoginResponse {
                 .accessToken(accessToken)
                 .userId(user.getId())
                 .email(user.getEmail())
-                .permit(user.isPermit())
                 .refreshToken(refreshToken)
                 .build();
     }

@@ -62,7 +62,4 @@ public class User extends BaseTimeEntity {
     @Column(name = "WITHDRAWAL_GROUNDS_TYPE")
     private WithdrawalGroundsType withdrawalGroundsType;
 
-    @Setter
-    @Column(name = "PERMIT")
-    private boolean permit;
 }
