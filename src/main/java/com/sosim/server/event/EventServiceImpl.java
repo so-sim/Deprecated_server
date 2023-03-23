@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventSingleInfo getEvent(long id) {
 
-        Event event = eventRepository.findByIdAndStatusType(id, StatusType.USING)
+        Event event = eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
         Participant participant = participantRepository.findByUser(event.getUser())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
@@ -88,7 +88,7 @@ public class EventServiceImpl implements EventService{
         PaymentType paymentType = PaymentType.getType(eventCreateReq.getPaymentType());
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-        StatusType statusType = StatusType.USING;
+        StatusType statusType = StatusType.ACTIVE;
         EventType eventType = EventType.DUES_PAYMENT;
 
         Event event = Event.builder().groundsDate(groundsDate).payment(payment).grounds(grounds).paymentType(paymentType)
@@ -172,10 +172,10 @@ public class EventServiceImpl implements EventService{
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
 
         if (eventListReq.getUserId() != null) {
-            User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.USING).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+            User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
             PageRequest pageRequest = PageRequest.of(0, 16, Sort.by(Direction.DESC, "update_date"));
             Page<Event> page = eventRepository.findByGroupAndUserAndStatusType(group, user,
-                StatusType.USING, pageRequest);
+                StatusType.ACTIVE, pageRequest);
             page.getContent();
         }
         return null;
@@ -195,7 +195,7 @@ public class EventServiceImpl implements EventService{
     }
 
     private Event getActiveEvent(long id) {
-        return eventRepository.findByIdAndStatusType(id, StatusType.USING)
+        return eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
 
@@ -208,7 +208,7 @@ public class EventServiceImpl implements EventService{
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
 
         List<Event> byPaymentTypeAndStatusType = eventRepository.findByPaymentTypeAndStatusTypeAndGroup(
-            paymentType, StatusType.USING, group);
+            paymentType, StatusType.ACTIVE, group);
 
         List<Event> paymentList = byPaymentTypeAndStatusType.stream()
             .filter(event -> event.getCreateDate().getMonthValue() == month).collect(
