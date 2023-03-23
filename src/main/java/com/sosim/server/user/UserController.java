@@ -23,5 +23,4 @@ public class UserController {
         this.userService.withdrawalUser(userWithdrawalReq);
         return new ResponseEntity<>(Response.create(CodeType.USER_WITHDRAWAL_SUCCESS, null), CodeType.USER_WITHDRAWAL_SUCCESS.getHttpStatus());
     }
-
 }

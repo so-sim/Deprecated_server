@@ -23,25 +23,16 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
 
     @Override
-    public User save(SocialType socialType, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+    public User save(User user, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+        return userRepository.save(user);
+    }
 
-        User user = User.builder()
-            .socialType(socialType)
-            .socialId(oAuth2UserInfoRequest.getOAuth2Id())
-            .userType(UserType.ACTIVE).build();
-
-        if(!oAuth2UserInfoRequest.getEmail().isEmpty()) {
+    public User update(OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+        User user = getUser(oAuth2UserInfoRequest);
+        if(!user.getEmail().equals(oAuth2UserInfoRequest.getEmail())) {
             user.setEmail(oAuth2UserInfoRequest.getEmail());
         }
 
-        userRepository.save(user);
-        return user;
-    }
-
-    @Override
-    public User update(User user, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
-        user.setEmail(oAuth2UserInfoRequest.getEmail());
-        userRepository.save(user);
         return user;
     }
 
@@ -53,6 +44,12 @@ public class UserServiceImpl implements UserService{
             throw new CustomException(CodeType.USER_ALREADY_WITHDRAWAL);
         }
         return user;
+    }
+
+    @Override
+    public User getUser(OAuth2UserInfoRequest userInfo) {
+        return userRepository.findBySocialTypeAndSocialId(userInfo.getOAuth2SocialType(), userInfo.getOAuth2Id())
+                .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
     }
 
     @Override

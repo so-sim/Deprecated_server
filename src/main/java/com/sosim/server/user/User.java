@@ -1,6 +1,7 @@
 package com.sosim.server.user;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
+import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
@@ -61,5 +62,4 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "WITHDRAWAL_GROUNDS_TYPE")
     private WithdrawalGroundsType withdrawalGroundsType;
-
 }

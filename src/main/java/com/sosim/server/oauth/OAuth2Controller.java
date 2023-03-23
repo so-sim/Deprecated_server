@@ -14,12 +14,23 @@ import javax.servlet.http.HttpServletResponse;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/login/{socialType}")
 public class OAuth2Controller {
 
     private final OAuth2Service oAuth2Service;
     private final JwtService jwtService;
 
-    @PostMapping("/login/oauth2/code/{socialType}")
+    @PostMapping
+    public ResponseEntity<?> signUp(@PathVariable("socialType") String socialType, @RequestParam("code") String code,
+                                    HttpServletResponse response) throws JsonProcessingException {
+        LoginResponse loginResponse = oAuth2Service.signUp(SocialType.getSocialType(socialType), code);
+        CodeType successSignUp = CodeType.SUCCESS_SIGN_UP;
+        jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken());
+
+        return new ResponseEntity<>(Response.create(successSignUp, loginResponse), successSignUp.getHttpStatus());
+    }
+
+    @GetMapping
     public ResponseEntity<?> login(@PathVariable("socialType") String socialType, @RequestParam("code") String code,
                                    HttpServletResponse response) throws JsonProcessingException {
         LoginResponse loginResponse = oAuth2Service.login(SocialType.getSocialType(socialType), code);
