@@ -19,9 +19,6 @@ public class LoginResponse {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("isPermit")
-    private boolean permit;
-
     @JsonIgnore
     private String refreshToken;
 
@@ -30,7 +27,6 @@ public class LoginResponse {
                 .accessToken(accessToken)
                 .userId(user.getId())
                 .email(user.getEmail())
-                .permit(user.isPermit())
                 .refreshToken(refreshToken)
                 .build();
     }

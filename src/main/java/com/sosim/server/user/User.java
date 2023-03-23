@@ -68,5 +68,7 @@ public class User extends BaseTimeEntity {
                 .email(oAuth2UserInfoRequest.getEmail())
                 .socialType(oAuth2UserInfoRequest.getOAuth2SocialType())
                 .socialId(oAuth2UserInfoRequest.getOAuth2Id())
+                .userType(UserType.USING)
+                .build();
     }
 }
