@@ -1,6 +1,7 @@
 package com.sosim.server.user;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
+import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
@@ -62,7 +63,10 @@ public class User extends BaseTimeEntity {
     @Column(name = "WITHDRAWAL_GROUNDS_TYPE")
     private WithdrawalGroundsType withdrawalGroundsType;
 
-    @Setter
-    @Column(name = "PERMIT")
-    private boolean permit;
+    public static User create(OAuth2UserInfoRequest oAuth2UserInfoRequest) {
+        return User.builder()
+                .email(oAuth2UserInfoRequest.getEmail())
+                .socialType(oAuth2UserInfoRequest.getOAuth2SocialType())
+                .socialId(oAuth2UserInfoRequest.getOAuth2Id())
+    }
 }
