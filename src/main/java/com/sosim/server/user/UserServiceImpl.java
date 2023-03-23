@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService{
         User user = User.builder()
             .socialType(socialType)
             .socialId(oAuth2UserInfoRequest.getOAuth2Id())
-            .userType(UserType.USING).build();
+            .userType(UserType.ACTIVE).build();
 
         if(!oAuth2UserInfoRequest.getEmail().isEmpty()) {
             user.setEmail(oAuth2UserInfoRequest.getEmail());

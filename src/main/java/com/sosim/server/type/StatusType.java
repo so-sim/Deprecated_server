@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum StatusType {
 
-    USING("사용중"),
+    ACTIVE("사용중"),
     DELETED("삭제됨");
 
     private String desc;

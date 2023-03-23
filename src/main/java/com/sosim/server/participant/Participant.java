@@ -44,7 +44,7 @@ public class Participant extends BaseTimeEntity {
         this.user = user;
         this.group = group;
         this.nickname = nickname;
-        statusType = StatusType.USING;
+        statusType = StatusType.ACTIVE;
     }
 
     public static Participant create(User user, Group group, String nickname) {
