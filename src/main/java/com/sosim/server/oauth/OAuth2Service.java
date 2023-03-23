@@ -13,10 +13,8 @@ import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.CodeType;
 import com.sosim.server.type.SocialType;
 import com.sosim.server.user.User;
-import com.sosim.server.user.UserRepository;
 import com.sosim.server.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,33 +29,34 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class OAuth2Service {
     private final ObjectMapper OBJECT_MAPPER = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
     private final InMemoryClientRegistrationRepository inMemoryRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
     private final JwtFactory jwtFactory;
     private final JwtService jwtService;
 
     @Transactional
     public LoginResponse login(SocialType socialType, String authorizationCode) throws JsonProcessingException {
-        ClientRegistration type = inMemoryRepository.findByRegistrationId(socialType.name().toLowerCase());
+        OAuth2UserInfoRequest userInfo = oAuthDance(socialType, authorizationCode);
+        User user = userService.update(userInfo);
+        return createLoginResponse(user);
+    }
 
+    public LoginResponse signUp(SocialType socialType, String authorizationCode) throws JsonProcessingException {
+        OAuth2UserInfoRequest userInfo = oAuthDance(socialType, authorizationCode);
+        User user = userService.save(User.create(userInfo), userInfo);
+        return createLoginResponse(user);
+    }
+
+    private OAuth2UserInfoRequest oAuthDance(SocialType socialType, String authorizationCode) throws JsonProcessingException {
+        ClientRegistration type = inMemoryRepository.findByRegistrationId(socialType.name().toLowerCase());
         OAuth2TokenRequest oAuth2Token = getToken(type, authorizationCode);
 
-        User user = getUserProfile(socialType, oAuth2Token, type);
-
-        RefreshToken refreshToken = RefreshToken.builder().id(String.valueOf(user.getId()))
-                .refreshToken(jwtFactory.createRefreshToken()).build();
-        jwtService.saveRefreshToken(refreshToken);
-
-        return LoginResponse.create(user,
-                jwtFactory.createAccessToken(String.valueOf(user.getId())), refreshToken.getRefreshToken());
+        return getUserProfile(socialType, oAuth2Token, type);
     }
 
     private OAuth2TokenRequest getToken(ClientRegistration type, String authorizationCode) throws JsonProcessingException {
@@ -93,23 +92,9 @@ public class OAuth2Service {
         return formData;
     }
 
-    private User getUserProfile(SocialType socialType, OAuth2TokenRequest token, ClientRegistration type) throws JsonProcessingException {
+    private OAuth2UserInfoRequest getUserProfile(SocialType socialType, OAuth2TokenRequest token, ClientRegistration type) throws JsonProcessingException {
         Map<String, Object> userAttributes = getUserAttributes(type, token);
-        OAuth2UserInfoRequest oAuth2UserInfoRequest = OAuth2UserInfoFactory.getOAuth2UserInfo(socialType, userAttributes);
-
-        return saveOrUpdate(socialType, oAuth2UserInfoRequest);
-    }
-
-    private User saveOrUpdate(SocialType socialType, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
-        Optional<User> user = userRepository.findBySocialTypeAndSocialId(socialType, oAuth2UserInfoRequest.getOAuth2Id());
-
-        if (user.isEmpty()) {
-            user = Optional.ofNullable(userService.save(socialType, oAuth2UserInfoRequest));
-        } else {
-            user = Optional.ofNullable(userService.update(user.get(), oAuth2UserInfoRequest));
-        }
-
-        return user.get();
+        return OAuth2UserInfoFactory.getOAuth2UserInfo(socialType, userAttributes);
     }
 
     private Map<String, Object> getUserAttributes(ClientRegistration type, OAuth2TokenRequest token) throws JsonProcessingException {
@@ -133,4 +118,16 @@ public class OAuth2Service {
         return OBJECT_MAPPER.readValue(responseBody,Map.class);
     }
 
+    private RefreshToken createServerJwt(User user) {
+        RefreshToken refreshToken = RefreshToken.builder().id(String.valueOf(user.getId()))
+                .refreshToken(jwtFactory.createRefreshToken()).build();
+        jwtService.saveRefreshToken(refreshToken);
+
+        return refreshToken;
+    }
+
+    private LoginResponse createLoginResponse(User user) {
+        return LoginResponse.create(user, jwtFactory.createAccessToken(String.valueOf(user.getId())),
+                createServerJwt(user).getRefreshToken());
+    }
 }

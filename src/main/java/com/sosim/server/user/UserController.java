@@ -24,9 +24,9 @@ public class UserController {
         return new ResponseEntity<>(Response.create(CodeType.USER_WITHDRAWAL_SUCCESS, null), CodeType.USER_WITHDRAWAL_SUCCESS.getHttpStatus());
     }
 
-    @PatchMapping("/login/permit")
+    @PatchMapping("/login")
     public ResponseEntity<?> permit(@AuthenticationPrincipal AuthUser authUser) {
-        userService.permitUser(Long.valueOf(authUser.getId()));
+        userService.getUser(Long.valueOf(authUser.getId()));
         return new ResponseEntity<>(Response.create(CodeType.PERMIT_USER, null), CodeType.PERMIT_USER.getHttpStatus());
     }
 }

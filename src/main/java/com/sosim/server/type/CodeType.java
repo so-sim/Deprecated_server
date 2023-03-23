@@ -68,6 +68,7 @@ public enum CodeType {
     INVALID_EVENT_CREATER("4011", HttpStatus.BAD_REQUEST, "상세 내역 생성은 관리자만이 가능합니다."),
 
     // OAuth - Success
+    SUCCESS_SIGN_UP("900", HttpStatus.CREATED, "회원 가입이 성공적으로 완료되었습니다."),
     SUCCESS_LOGIN("900", HttpStatus.OK, "로그인이 성공적으로 완료되었습니다."),
     ;
 
