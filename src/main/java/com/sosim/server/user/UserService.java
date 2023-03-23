@@ -11,4 +11,5 @@ public interface UserService {
     User getUser(long id);
     List<User> getUserList();
     void withdrawalUser(UserWithdrawalReq userWithdrawalReq);
+    void permitUser(Long valueOf);
 }

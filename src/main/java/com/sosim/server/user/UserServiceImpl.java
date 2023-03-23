@@ -73,4 +73,9 @@ public class UserServiceImpl implements UserService{
         user.setWithdrawalGroundsType(WithdrawalGroundsType.getType(userWithdrawalReq.getWithdrawalGroundsType()));
         userRepository.save(user);
     }
+
+    @Override
+    public void permitUser(Long userId) {
+        getUser(userId).setPermit(true);
+    }
 }
