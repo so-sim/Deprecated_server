@@ -20,11 +20,11 @@ public class ParticipantService {
     private final ParticipantRepository participantRepository;
 
     public void createParticipant(User userEntity, Group groupEntity, String nickname) {
-        if (participantRepository.findByUserAndGroupAndStatus(userEntity, groupEntity, StatusType.USING).isPresent()) {
+        if (participantRepository.findByUserAndGroupAndStatusType(userEntity, groupEntity, StatusType.USING).isPresent()) {
             throw new CustomException(CodeType.ALREADY_INTO_GROUP);
         }
 
-        if (participantRepository.findByNicknameAndGroupAndStatus(nickname, groupEntity, StatusType.USING).isPresent()) {
+        if (participantRepository.findByNicknameAndGroupAndStatusType(nickname, groupEntity, StatusType.USING).isPresent()) {
             throw new CustomException(CodeType.ALREADY_USE_NICKNAME);
         }
 
@@ -46,21 +46,21 @@ public class ParticipantService {
     }
 
     public Participant getParticipantEntity(String nickname, Group group) {
-        return participantRepository.findByNicknameAndGroupAndStatus(nickname, group, StatusType.USING)
+        return participantRepository.findByNicknameAndGroupAndStatusType(nickname, group, StatusType.USING)
                 .orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 
     public Participant getParticipantEntity(User user, Group group) {
-        return participantRepository.findByUserAndGroupAndStatus(user, group, StatusType.USING)
+        return participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.USING)
                 .orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 
     public Slice<Participant> getParticipantSlice(Long index, Long userId) {
         if (index == 0) {
-            return participantRepository.findByIdAndStatusGreaterThanAndUserIdOrderByIdDesc(index, StatusType.USING,
+            return participantRepository.findByIdAndStatusTypeGreaterThanAndUserIdOrderByIdDesc(index, StatusType.USING,
                     userId, PageRequest.ofSize(17));
         }
-        return participantRepository.findByIdAndStatusLessThanAndUserIdOrderByIdDesc(index, StatusType.USING, userId,
+        return participantRepository.findByIdAndStatusTypeLessThanAndUserIdOrderByIdDesc(index, StatusType.USING, userId,
                 PageRequest.ofSize(18));
     }
 

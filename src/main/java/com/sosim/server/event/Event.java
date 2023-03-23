@@ -54,9 +54,6 @@ public class Event extends BaseTimeEntity {
     @Column(name = "GROUNDS_DATE")
     private LocalDateTime groundsDate;
 
-    @Column(name = "DELETE_DATE")
-    private LocalDateTime deleteDate;
-
     @NotNull
     @Column(name = "PAYMENT")
     private Long payment;

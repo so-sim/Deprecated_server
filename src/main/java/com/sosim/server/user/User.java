@@ -62,13 +62,4 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "WITHDRAWAL_GROUNDS_TYPE")
     private WithdrawalGroundsType withdrawalGroundsType;
-
-    public static User create(OAuth2UserInfoRequest oAuth2UserInfoRequest) {
-        return User.builder()
-                .email(oAuth2UserInfoRequest.getEmail())
-                .socialType(oAuth2UserInfoRequest.getOAuth2SocialType())
-                .socialId(oAuth2UserInfoRequest.getOAuth2Id())
-                .userType(UserType.USING)
-                .build();
-    }
 }

@@ -1,8 +1,9 @@
 package com.sosim.server.event;
 
 import com.sosim.server.common.response.Response;
-import com.sosim.server.event.dto.info.EventSingleInfo;
 import com.sosim.server.event.dto.info.EventInfo;
+import com.sosim.server.event.dto.info.EventSingleInfo;
+import com.sosim.server.event.dto.info.ListInfo;
 import com.sosim.server.event.dto.info.MonthInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
@@ -67,7 +68,7 @@ public class EventController {
 
     @GetMapping("/list/{groupId}")
     public ResponseEntity<?> getEventList(@PathVariable("groupId") long groupId, @Valid @ModelAttribute EventListReq eventListReq) {
-        List<EventInfo> eventList = this.eventService.getEventList(groupId, eventListReq);
+        ListInfo<EventInfo> eventList = this.eventService.getEventList(groupId, eventListReq);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_LIST_SUCCESS, eventList), CodeType.EVENT_LIST_SUCCESS.getHttpStatus());
     }
 

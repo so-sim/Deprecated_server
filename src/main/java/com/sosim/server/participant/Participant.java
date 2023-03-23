@@ -4,7 +4,6 @@ import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.group.Group;
 import com.sosim.server.type.StatusType;
 import com.sosim.server.user.User;
-import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -18,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Entity
@@ -46,7 +44,7 @@ public class Participant extends BaseTimeEntity {
         this.user = user;
         this.group = group;
         this.nickname = nickname;
-        status = StatusType.USING;
+        statusType = StatusType.USING;
     }
 
     public static Participant create(User user, Group group, String nickname) {

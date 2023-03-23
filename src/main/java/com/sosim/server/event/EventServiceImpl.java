@@ -3,6 +3,7 @@ package com.sosim.server.event;
 import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.event.dto.info.EventInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
+import com.sosim.server.event.dto.info.ListInfo;
 import com.sosim.server.event.dto.info.MonthInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
@@ -17,6 +18,7 @@ import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
+import com.sosim.server.type.UserType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.time.LocalDateTime;
@@ -29,6 +31,10 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -161,7 +167,17 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public List<EventInfo> getEventList(long groupId, EventListReq eventListReq) {
+    public ListInfo<EventInfo> getEventList(long groupId, EventListReq eventListReq) {
+
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
+
+        if (eventListReq.getUserId() != null) {
+            User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.USING).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+            PageRequest pageRequest = PageRequest.of(0, 16, Sort.by(Direction.DESC, "update_date"));
+            Page<Event> page = eventRepository.findByGroupAndUserAndStatusType(group, user,
+                StatusType.USING, pageRequest);
+            page.getContent();
+        }
         return null;
     }
 
@@ -172,38 +188,6 @@ public class EventServiceImpl implements EventService{
         // 1, 3
         // 2, 6
 
-//        findByPaymentTypeAndStatusTypeAndCreateDateBetween();
-//        List<Event> byPaymentTypeAndStatusType = eventRepository.findByPaymentTypeAndStatusType(
-//            PaymentType.NON_PAYMENT, StatusType.USING);
-//
-//        List<Event> monthNonpaymentList = byPaymentTypeAndStatusType.stream()
-//            .filter(event -> event.getCreateDate().getMonthValue() == month).collect(
-//                Collectors.toList());
-
-
-//        List<Map<Integer, Integer>> nonPaymentDayCountList = getPaymentList(PaymentType.NON_PAYMENT, month);
-//        List<Map<Integer, Integer>> conPaymentDayCountList = getPaymentList(PaymentType.CONFIRMING, month);
-//        List<Map<Integer, Integer>> fullPaymentDayCountList = getPaymentList(PaymentType.FULL_PAYMENT, month);
-
-//        List<Map<Integer, Integer>> nonPaymentDayCountList1 = monthNonpaymentList.stream().map(event -> {
-//            Map<Integer, Integer> dayCount = new HashMap<>();
-//            int dayOfMonth = event.getCreateDate().getDayOfMonth();
-//            int count = (int) monthNonpaymentList.stream().filter(y -> y.getCreateDate().getDayOfMonth() == dayOfMonth)
-//                .count();
-//            dayCount.put(dayOfMonth, count);
-//            log.info("dayCount : {}", dayCount);
-//            return dayCount;
-//        }).collect(Collectors.toList());
-
-//        MonthInfo nonMonthInfo = MonthInfo.builder().paymentType(PaymentType.NON_PAYMENT.getParam()).dayCountList(nonPaymentDayCountList).build();
-//        MonthInfo conMonthInfo = MonthInfo.builder().paymentType(PaymentType.CONFIRMING.getParam()).dayCountList(conPaymentDayCountList).build();
-//        MonthInfo fullMonthInfo = MonthInfo.builder().paymentType(PaymentType.FULL_PAYMENT.getParam()).dayCountList(fullPaymentDayCountList).build();
-//        monthList.add(nonMonthInfo);
-//        monthList.add(conMonthInfo);
-//        monthList.add(fullMonthInfo);
-//        monthList.add(getMonthInfo(PaymentType.NON_PAYMENT, nonPaymentDayCountList));
-//        monthList.add(getMonthInfo(PaymentType.CONFIRMING, conPaymentDayCountList));
-//        monthList.add(getMonthInfo(PaymentType.FULL_PAYMENT, fullPaymentDayCountList));
 
         List<PaymentType> paymentTypeList = List.of(PaymentType.values());
         monthList = paymentTypeList.stream().map(paymentType -> getMonthInfo(paymentType, getPaymentList(groupId, paymentType, month))).collect(Collectors.toList());

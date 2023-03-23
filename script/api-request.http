@@ -27,7 +27,7 @@ Content-Type: application/json
 
 ### 모임 생성
 POST http://localhost:8080/api/group
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTI5OTQyMn0.J_Zl3NeznzOEt8HI50oXu7OYlW1yB8jkeJchzRYgLolfWDShw5heMVAqs8UaAHmUd_AVlqnsfnYfgW6nyZmQfQ
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTU4MDQ5N30.WhxholFsrpI8nnOZVgfQVB4foNtmP4Wwnvhi0y8NhrqEVRjpRvi0Qg7CCDVrj6TGjb3ZGXONcfVIwc79XZmoag
 Content-Type: application/json
 
 {
@@ -38,8 +38,8 @@ Content-Type: application/json
 }
 
 ### 이벤트 생성
-POST createEvent
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTMxNTg0MX0.sRcBft7YprBtun5e7JJF-fg6C1K5bdlef_cTnNLYRZZfFj-GWAYMH--sy_mtLJp9tCc8nu9zUjfmb6pA65-VEg
+POST localhost:8080/api/event/penalty
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTU4MDQ5N30.WhxholFsrpI8nnOZVgfQVB4foNtmP4Wwnvhi0y8NhrqEVRjpRvi0Qg7CCDVrj6TGjb3ZGXONcfVIwc79XZmoag
 Content-Type: application/json
 
 {
