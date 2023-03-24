@@ -18,7 +18,7 @@ public class GetGroupResponse {
     @JsonProperty("coverColor")
     private String coverColorType;
 
-    @JsonProperty("groupType")
+    @JsonProperty("type")
     private String groupType;
 
     @JsonProperty("adminNickname")
