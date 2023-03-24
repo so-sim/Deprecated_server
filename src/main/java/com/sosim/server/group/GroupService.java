@@ -76,6 +76,7 @@ public class GroupService {
             throw new CustomException(CodeType.NONE_ZERO_PARTICIPANT);
         }
 
+        participantService.deleteParticipantEntity(userService.getUser(userId), getGroupEntity(groupId));
         groupEntity.delete();
     }
 
