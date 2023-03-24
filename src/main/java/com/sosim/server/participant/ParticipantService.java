@@ -57,10 +57,10 @@ public class ParticipantService {
 
     public Slice<Participant> getParticipantSlice(Long index, Long userId) {
         if (index == 0) {
-            return participantRepository.findByIdAndStatusTypeGreaterThanAndUserIdOrderByIdDesc(index, StatusType.ACTIVE,
-                    userId, PageRequest.ofSize(17));
+            return participantRepository.findByUserIdAndStatusTypeOrderByIdDesc(userId, StatusType.ACTIVE,
+                    PageRequest.ofSize(17));
         }
-        return participantRepository.findByIdAndStatusTypeLessThanAndUserIdOrderByIdDesc(index, StatusType.ACTIVE, userId,
+        return participantRepository.findByIdLessThanAndStatusTypeAndUserIdOrderByIdDesc(index, StatusType.ACTIVE, userId,
                 PageRequest.ofSize(18));
     }
 

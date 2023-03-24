@@ -18,7 +18,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Optional<Participant> findByUser(User user);
 
-    Slice<Participant> findByIdAndStatusTypeGreaterThanAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
+    Slice<Participant> findByUserIdAndStatusTypeOrderByIdDesc(Long userId, StatusType statusType, Pageable pageable);
 
-    Slice<Participant> findByIdAndStatusTypeLessThanAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
+    Slice<Participant> findByIdLessThanAndStatusTypeAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
 }
