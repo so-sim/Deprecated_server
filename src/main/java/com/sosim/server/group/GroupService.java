@@ -72,6 +72,10 @@ public class GroupService {
             throw new CustomException(CodeType.NONE_ADMIN);
         }
 
+        if (participantService.getCountParticipantAtGroup(groupEntity.getId()) > 1) {
+            throw new CustomException(CodeType.NONE_ZERO_PARTICIPANT);
+        }
+
         groupEntity.delete();
     }
 

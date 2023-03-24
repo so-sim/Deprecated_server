@@ -67,4 +67,8 @@ public class ParticipantService {
     public GetNicknameResponse getMyNickname(User user, Group group) {
         return GetNicknameResponse.create(getParticipantEntity(user, group));
     }
+
+    public Long getCountParticipantAtGroup(Long groupId) {
+        return participantRepository.countByGroupIdAndStatusType(groupId, StatusType.ACTIVE);
+    }
 }
