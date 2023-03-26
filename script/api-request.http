@@ -27,40 +27,44 @@ Content-Type: application/json
 
 ### 모임 생성
 POST http://localhost:8080/api/group
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTU4MDQ5N30.WhxholFsrpI8nnOZVgfQVB4foNtmP4Wwnvhi0y8NhrqEVRjpRvi0Qg7CCDVrj6TGjb3ZGXONcfVIwc79XZmoag
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMiIsImV4cCI6MTY3OTc1MjMzOX0.r06_nlkfsr5gO4CFt5zhvR4s01L44V8d3tW9j0cxwrvDlhYm6Nq_k8GYhv9MG3zoEgaPI8mrXYpTDHj-gN_LmA
 Content-Type: application/json
 
 {
-  "groupName": "test",
-  "myName": "kkk",
+  "title": "bbb의 스터디",
+  "nickname": "aaa",
   "type": "스터디",
   "coverColor": "#f86565"
 }
 
+### 모임 내 본인 닉네임 조회
+GET localhost:8080/api/group/2/participant
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMiIsImV4cCI6MTY3OTc1MjMzOX0.r06_nlkfsr5gO4CFt5zhvR4s01L44V8d3tW9j0cxwrvDlhYm6Nq_k8GYhv9MG3zoEgaPI8mrXYpTDHj-gN_LmA
+
 ### 이벤트 생성
 POST localhost:8080/api/event/penalty
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTU4MDQ5N30.WhxholFsrpI8nnOZVgfQVB4foNtmP4Wwnvhi0y8NhrqEVRjpRvi0Qg7CCDVrj6TGjb3ZGXONcfVIwc79XZmoag
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc4MDE0OH0.WxnDUIEQzsTx7Hc19BN-zArh8RlBTgoXZO1qtGVgONo1y_wPTnjAMaeZmp3xuTJN1acCs0CPA3sNe9zZT4lmBg
 Content-Type: application/json
 
 {
   "userName": "kkk",
-  "groundsDate": "2023-03-18 23:42:43",
-  "payment": 1000,
-  "grounds": "지각",
+  "groundsDate": "2023.03.17",
+  "payment": 170000,
+  "grounds": "되라",
   "paymentType": "non"
 }
 
 ### 이벤트 조회
-GET http://localhost:8080/api/event/penalty/1
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTMzNTEyN30.fpL_e4zGGQAuJRum5HVr3knS9PIkTjqxqLJVB0AbM8Ovp0DpaPdbA_ediTZnSnuBrsRgVgnYUImq5aO6GC7uAA
+GET http://localhost:8080/api/event/penalty/47
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc3MzQxNH0.ZymlUmwd6OJcrSa8Im_uBbu7BQUX4TDRYkmtHaUb720jjo2qAkPl-Yaqbik2vWWUcWcjGWUhu8Afx8ErLBl1GQ
 
 ### 이벤트 수정
-POST http://localhost:8080/api/event/penalty/1
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5MTIwOH0.CyMPcZAijLmN1h0y62dsfEQXzIOCR5icvJSaLafgCtfb0skY_HtzUvLtzVAeUnIwOnWBl1P6oV-P2DAXDSQbeQ
+POST http://localhost:8080/api/event/penalty/33
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc4MDE0OH0.WxnDUIEQzsTx7Hc19BN-zArh8RlBTgoXZO1qtGVgONo1y_wPTnjAMaeZmp3xuTJN1acCs0CPA3sNe9zZT4lmBg
 Content-Type: application/json
 
 {
-  "grounds": "지각"
+  "groundsDate": "2023.03.26"
 }
 
 ### 납부여부 변경
@@ -76,9 +80,13 @@ Content-Type: application/json
 PUT http://localhost:8080/api/event/penalty/1
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTM5MTIwOH0.CyMPcZAijLmN1h0y62dsfEQXzIOCR5icvJSaLafgCtfb0skY_HtzUvLtzVAeUnIwOnWBl1P6oV-P2DAXDSQbeQ
 
-###
+### 이벤트 리스트
+#GET http://localhost:8080/api/event/penalty/list/1?paymentType=full&page=0
+GET http://localhost:8080/api/event/penalty/list/1?year=2023&month=3&week=5&page=0
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc4NjIxOH0.fSE7CYG_jbmaSxmr6hAqFDYKnvGKrK34rIsunrGjMy1I4BUkWkWjUmxsrxfSFfWolbqy4hVnJ23k_ZZBPNRK8A
 
-
-
+### 달별 납부여부 조회
+GET http://localhost:8080/api/event/penalty/mstatus/1?year=2023&month=3
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc5MjQ4OX0.32IQsPqbIwXaR9FRx_-1tWT3M-vuTRR7jPDGsTfz-Kjp_wnSJIsVmH4Co55muH6XLXd39a8fnGtgSc4CZ8poIQ
 
 

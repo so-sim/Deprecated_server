@@ -1,13 +1,15 @@
 package com.sosim.server.event;
 
 import com.sosim.server.config.exception.CustomException;
+import com.sosim.server.event.dto.info.DayInfo;
 import com.sosim.server.event.dto.info.EventInfo;
+import com.sosim.server.event.dto.info.EventListInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
 import com.sosim.server.event.dto.info.ListInfo;
-import com.sosim.server.event.dto.info.MonthInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
 import com.sosim.server.event.dto.req.EventModifyReq;
+import com.sosim.server.event.dto.req.MonthlyDayPaymentTypeReq;
 import com.sosim.server.event.dto.req.PaymentTypeReq;
 import com.sosim.server.group.Group;
 import com.sosim.server.group.GroupRepository;
@@ -21,12 +23,17 @@ import com.sosim.server.type.StatusType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -81,8 +88,9 @@ public class EventServiceImpl implements EventService{
         if (!participant.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
         }
-
-        LocalDateTime groundsDate = eventCreateReq.getGroundsDate();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate localDate = LocalDate.parse(eventCreateReq.getGroundsDate(), dateTimeFormatter);
+        LocalDateTime groundsDatetime = LocalDateTime.of(localDate, LocalTime.of(0,0,0));
         Long payment = eventCreateReq.getPayment();
         String grounds = eventCreateReq.getGrounds();
         PaymentType paymentType = PaymentType.getType(eventCreateReq.getPaymentType());
@@ -91,7 +99,7 @@ public class EventServiceImpl implements EventService{
         StatusType statusType = StatusType.ACTIVE;
         EventType eventType = EventType.DUES_PAYMENT;
 
-        Event event = Event.builder().groundsDate(groundsDate).payment(payment).grounds(grounds).paymentType(paymentType)
+        Event event = Event.builder().groundsDate(groundsDatetime).payment(payment).grounds(grounds).paymentType(paymentType)
             .group(group).user(user).statusType(statusType).eventType(eventType).build();
         eventRepository.save(event);
 
@@ -167,31 +175,203 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public ListInfo<EventInfo> getEventList(long groupId, EventListReq eventListReq) {
+    public ListInfo<EventListInfo> getEventList(long groupId, EventListReq eventListReq) {
+
+        if (eventListReq.getPage() == null) {
+            throw new CustomException(CodeType.INPUT_PAGE_DATA);
+        }
 
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
 
+        long totalCount = 0;
+        List<Event> eventList = null;
+        List<EventListInfo> eventInfoList = null;
+        PageRequest pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.ASC, "groundsDate"));
+        Page<Event> page = null;
+        LocalDateTime startDatetime = null;
+        LocalDateTime endDatetime = null;
+
+        if (eventListReq.getYear() == null && eventListReq.getUserId() == null
+            && eventListReq.getPaymentType() == null && eventListReq.getToday() == null) {
+            page = eventRepository.findByGroupAndStatusType(group, StatusType.ACTIVE, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndStatusType(group, StatusType.ACTIVE);
+        }
+
+        if (eventListReq.getDay() != null) {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            LocalDate localDate = LocalDate.parse(eventListReq.getDay(), dateTimeFormatter);
+            startDatetime = LocalDateTime.of(localDate, LocalTime.of(0,0,0));
+            endDatetime = LocalDateTime.of(localDate, LocalTime.of(23,59,59));
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null) {
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+            boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
+            int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null) {
+            LocalDateTime localDateTime = null;
+            switch (eventListReq.getWeek()) {
+                case 1:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+                break;
+                case 2:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 8, 0, 0);
+                break;
+                case 3:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 15, 0, 0);
+                    break;
+                case 4:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
+                    break;
+                case 5:
+                    boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
+                    int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
+                    break;
+
+            }
+            if (eventListReq.getWeek().equals(5)) {
+                // 월요일이 1, 일요일이 7
+                // 끝날이 토요일6이면 더할게 없음
+                // 끝날이 5면 1을 더해야 함
+                // 4면 2 더하기
+                // 3이면 3 더하기
+                int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
+                endDatetime = localDateTime.plusDays(plusDay);
+                startDatetime = endDatetime.minusDays(6);
+                log.info("startDateTime:{}", startDatetime);
+                log.info("endDateTime:{}", endDatetime);
+            } else {
+                int minusDay = localDateTime.getDayOfWeek().getValue();
+                startDatetime = localDateTime.minusDays(minusDay);
+                endDatetime = startDatetime.plusDays(6);
+                log.info("startDateTime:{}", startDatetime);
+                log.info("endDateTime:{}", endDatetime);
+            }
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
         if (eventListReq.getUserId() != null) {
             User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-            PageRequest pageRequest = PageRequest.of(0, 16, Sort.by(Direction.DESC, "update_date"));
-            Page<Event> page = eventRepository.findByGroupAndUserAndStatusType(group, user,
-                StatusType.ACTIVE, pageRequest);
-            page.getContent();
+            Participant participant = participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+            page = eventRepository.findByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE, pageRequest);
+            eventList = page.getContent();
+            eventInfoList = eventList.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = eventRepository.countByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE);
         }
-        return null;
+
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true")) {
+            startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+            endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
+        if (eventListReq.getPaymentType() != null) {
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
+        }
+
+        return ListInfo.from(totalCount, eventInfoList);
+    }
+
+
+    private List<EventListInfo> getEventInfoList(Group group, Page<Event> page) {
+        List<Event> eventList;
+        List<EventListInfo> eventInfoList;
+        eventList = page.getContent();
+        eventInfoList = eventList.stream().map(x -> {
+            EventListInfo eventlistInfo = EventListInfo.from(x);
+            Participant participant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+            eventlistInfo.setUserName(participant.getNickname());
+            return eventlistInfo;
+        }).collect(Collectors.toList());
+        return eventInfoList;
+    }
+
+    int getEndDayOfMonth(boolean isLeapYear, int month) {
+        int endDay = 0;
+        if (isLeapYear) {
+            switch (month) {
+                case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+                    endDay = 31;
+                    break;
+                case 4: case 6: case 9: case 11:
+                    endDay = 30;
+                    break;
+                case 2:
+                    endDay = 29;
+                    break;
+            }
+        } else {
+                switch (month) {
+                    case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+                        endDay = 31;
+                        break;
+                    case 4: case 6: case 9: case 11:
+                        endDay = 30;
+                        break;
+                    case 2:
+                        endDay = 28;
+                        break;
+            }
+        }
+        return endDay;
     }
 
     @Override
-    public List<MonthInfo> getMonthInfo(long groupId, int month) {
-        List<MonthInfo> monthList = new ArrayList<>();
-        // 필요한 데이터 : day가 몇일인지, 그리고 몇개인지
-        // 1, 3
-        // 2, 6
+    public List<DayInfo> getMonthlyDayPaymentType(long groupId, MonthlyDayPaymentTypeReq mdpTreq) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
+        LocalDateTime startDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), 1, 0, 0);
+        boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
+        int endDay = getEndDayOfMonth(isLeapYear, mdpTreq.getMonth());
+        LocalDateTime endDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), endDay, 23, 59);
+        List<Event> eventList = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
 
-
-        List<PaymentType> paymentTypeList = List.of(PaymentType.values());
-        monthList = paymentTypeList.stream().map(paymentType -> getMonthInfo(paymentType, getPaymentList(groupId, paymentType, month))).collect(Collectors.toList());
-        return monthList;
+        List<DayInfo> monthlyDayInfoList = eventList.stream().map(x -> {
+            Map<String, Integer> paymentTypeCountMap = new HashMap<>();
+            int dayOfMonth = x.getGroundsDate().getDayOfMonth();
+            int nonCount = (int) eventList.stream().filter(y -> (y.getPaymentType().equals(PaymentType.NON_PAYMENT))
+                && y.getGroundsDate().getDayOfMonth() == dayOfMonth).count();
+            int conCount = (int) eventList.stream().filter(y -> (y.getPaymentType().equals(PaymentType.CONFIRMING))
+                && y.getGroundsDate().getDayOfMonth() == dayOfMonth).count();
+            int fullCount = (int) eventList.stream().filter(y -> (y.getPaymentType().equals(PaymentType.FULL_PAYMENT))
+                && y.getGroundsDate().getDayOfMonth() == dayOfMonth).count();
+            paymentTypeCountMap.put("non", nonCount);
+            paymentTypeCountMap.put("con", conCount);
+            paymentTypeCountMap.put("full", fullCount);
+            return DayInfo.builder().day(dayOfMonth).paymentTypeCountMap(paymentTypeCountMap).build();
+        }).filter(distinctByKey(m -> m.getDay())).sorted( new Comparator<DayInfo>() {
+            public int compare(DayInfo o1, DayInfo o2) {
+                return Long.compare(o1.getDay(), o2.getDay());
+                }
+        }).collect(Collectors.toList());
+        monthlyDayInfoList.stream().filter(distinctByKey(m -> m.getDay())).collect(Collectors.toList());
+        return monthlyDayInfoList;
+    }
+    public static <T> Predicate<T> distinctByKey( Function<? super T, Object> keyExtractor) {
+        Map<Object, Boolean> map = new HashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
     private Event getActiveEvent(long id) {
@@ -199,9 +379,9 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
 
-    private MonthInfo getMonthInfo(PaymentType paymentType, List<Map<Integer, Integer>> dayCountList) {
-        return MonthInfo.builder().paymentType(paymentType.getParam()).dayCountList(dayCountList).build();
-    }
+//    private DayInfo getMonthInfo(PaymentType paymentType, List<Map<Integer, Integer>> dayCountList) {
+//        return DayInfo.builder().paymentType(paymentType.getParam()).dayCountList(dayCountList).build();
+//    }
 
     private List<Map<Integer, Integer>> getPaymentList(long groupId, PaymentType paymentType, int month) {
 

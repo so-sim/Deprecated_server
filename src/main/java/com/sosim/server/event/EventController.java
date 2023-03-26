@@ -1,13 +1,15 @@
 package com.sosim.server.event;
 
 import com.sosim.server.common.response.Response;
+import com.sosim.server.event.dto.info.DayInfo;
 import com.sosim.server.event.dto.info.EventInfo;
+import com.sosim.server.event.dto.info.EventListInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
 import com.sosim.server.event.dto.info.ListInfo;
-import com.sosim.server.event.dto.info.MonthInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
 import com.sosim.server.event.dto.req.EventModifyReq;
+import com.sosim.server.event.dto.req.MonthlyDayPaymentTypeReq;
 import com.sosim.server.event.dto.req.PaymentTypeReq;
 import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.CodeType;
@@ -25,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -68,13 +69,13 @@ public class EventController {
 
     @GetMapping("/list/{groupId}")
     public ResponseEntity<?> getEventList(@PathVariable("groupId") long groupId, @Valid @ModelAttribute EventListReq eventListReq) {
-        ListInfo<EventInfo> eventList = this.eventService.getEventList(groupId, eventListReq);
+        ListInfo<EventListInfo> eventList = this.eventService.getEventList(groupId, eventListReq);
         return new ResponseEntity<>(Response.create(CodeType.EVENT_LIST_SUCCESS, eventList), CodeType.EVENT_LIST_SUCCESS.getHttpStatus());
     }
 
     @GetMapping("/mstatus/{groupId}")
-    public ResponseEntity<?> getMstatus(@PathVariable("groupId") long groupId, @Valid @RequestParam("month") int month) {
-        List<MonthInfo> monthList = this.eventService.getMonthInfo(groupId, month);
-        return new ResponseEntity<>(Response.create(CodeType.EVENT_MONTH_STATUS_SUCCESS, monthList), CodeType.EVENT_MONTH_STATUS_SUCCESS.getHttpStatus());
+    public ResponseEntity<?> getMstatus(@PathVariable("groupId") long groupId, @Valid @ModelAttribute MonthlyDayPaymentTypeReq mdpTreq) {
+        List<DayInfo> monthlyDayList = this.eventService.getMonthlyDayPaymentType(groupId, mdpTreq);
+        return new ResponseEntity<>(Response.create(CodeType.EVENT_MONTH_STATUS_SUCCESS, monthlyDayList), CodeType.EVENT_MONTH_STATUS_SUCCESS.getHttpStatus());
     }
 }

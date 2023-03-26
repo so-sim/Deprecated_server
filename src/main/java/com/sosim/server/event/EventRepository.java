@@ -15,7 +15,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByPaymentTypeAndStatusTypeAndGroup(PaymentType paymentType, StatusType statusType, Group group);
 
     Page<Event> findByGroupAndUserAndStatusType(Group group, User user, StatusType statusType, Pageable pageable);
-    Optional<Event> findByPaymentTypeAndStatusTypeAndCreateDateBetween(PaymentType paymentType, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate);
-
+    Page<Event> findByGroupAndPaymentTypeAndStatusType(Group group, PaymentType paymentType, StatusType statusType, Pageable pageable);
+    Long countByGroupAndPaymentTypeAndStatusType(Group group, PaymentType paymentType, StatusType statusType);
+    Page<Event> findByGroupAndStatusTypeAndGroundsDateBetween(Group group, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    List<Event> findByGroupAndStatusTypeAndGroundsDateBetween(Group group, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate);
+    Long countByGroupAndStatusTypeAndGroundsDateBetween(Group group, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate);
+    Long countByGroupAndUserAndStatusType(Group group, User user, StatusType statusType);
+    Page<Event> findByGroupAndStatusType(Group group, StatusType statusType, Pageable pageable);
+    Long countByGroupAndStatusType(Group group, StatusType statusType);
     Optional<Event> findByIdAndStatusType(Long id, StatusType statusType);
 }
