@@ -101,8 +101,6 @@ public class JwtServiceImpl implements JwtService{
             .build();
 
         response.setHeader(SET_COOKIE, cookie.toString());
-        log.info("식사는 없어 : cookie {}", cookie);
-        log.info("디저트 맛만 : response {}", response);
     }
 
     public void saveAuthentication(User user) {

@@ -8,7 +8,10 @@ import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
 import com.sosim.server.user.User;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -85,7 +88,10 @@ public class Event extends BaseTimeEntity {
         }
 
         if (eventModifyReq.getGroundsDate() != null) {
-            this.groundsDate = eventModifyReq.getGroundsDate();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            LocalDate localDate = LocalDate.parse(eventModifyReq.getGroundsDate(), dateTimeFormatter);
+            LocalDateTime groundsDatetime = LocalDateTime.of(localDate, LocalTime.of(0,0,0));
+            this.groundsDate = groundsDatetime;
         }
 
         if (!ObjectUtils.isEmpty(eventModifyReq.getPayment())) {

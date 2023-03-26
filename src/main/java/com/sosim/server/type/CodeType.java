@@ -14,6 +14,7 @@ public enum CodeType {
     COMMON_NOT_FOUND_ID("0001", HttpStatus.NOT_FOUND, "Not found Id"),
     COMMON_NO_ELEMENT("0002", HttpStatus.NOT_FOUND, "No such element"),
     INPUT_ANY_DATA("0003", HttpStatus.BAD_REQUEST, "input any data to update"),
+    INPUT_PAGE_DATA("0004", HttpStatus.BAD_REQUEST, "input page index to execute"),
     COMMON_INTERNAL_SERVER_ERROR("0099", HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error"),
     BINDING_ERROR("1000", HttpStatus.BAD_REQUEST, "입력값 중 검증에 실패한 값이 있습니다."),
 
