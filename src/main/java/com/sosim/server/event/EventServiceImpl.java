@@ -198,17 +198,6 @@ public class EventServiceImpl implements EventService{
             totalCount = eventRepository.countByGroupAndStatusType(group, StatusType.ACTIVE);
         }
 
-        if (eventListReq.getDay() != null) {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-            LocalDate localDate = LocalDate.parse(eventListReq.getDay(), dateTimeFormatter);
-            startDatetime = LocalDateTime.of(localDate, LocalTime.of(0,0,0));
-            endDatetime = LocalDateTime.of(localDate, LocalTime.of(23,59,59));
-            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
-            eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
-        }
-
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null) {
             startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
             boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
@@ -242,11 +231,6 @@ public class EventServiceImpl implements EventService{
 
             }
             if (eventListReq.getWeek().equals(5)) {
-                // 월요일이 1, 일요일이 7
-                // 끝날이 토요일6이면 더할게 없음
-                // 끝날이 5면 1을 더해야 함
-                // 4면 2 더하기
-                // 3이면 3 더하기
                 int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
                 endDatetime = localDateTime.plusDays(plusDay);
                 startDatetime = endDatetime.minusDays(6);
@@ -259,6 +243,15 @@ public class EventServiceImpl implements EventService{
                 log.info("startDateTime:{}", startDatetime);
                 log.info("endDateTime:{}", endDatetime);
             }
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null) {
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(), 0, 0, 0);
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(),23,59, 59);
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
