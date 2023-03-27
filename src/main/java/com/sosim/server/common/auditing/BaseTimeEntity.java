@@ -1,10 +1,14 @@
 package com.sosim.server.common.auditing;
 
-import java.time.LocalDateTime;
-import javax.persistence.*;
-
 import com.sosim.server.type.StatusType;
+import java.time.LocalDateTime;
+import javax.persistence.Column;
+import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.MappedSuperclass;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,6 +27,7 @@ public class BaseTimeEntity {
     @LastModifiedDate
     private LocalDateTime updateDate;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS_TYPE")
     protected StatusType statusType;

@@ -3,6 +3,7 @@ package com.sosim.server.user;
 import com.sosim.server.common.auditing.BaseTimeEntity;
 import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.type.SocialType;
+import com.sosim.server.type.StatusType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
 import java.time.LocalDateTime;
@@ -47,10 +48,11 @@ public class User extends BaseTimeEntity {
     @Column(name = "SOCIAL_TYPE")
     private SocialType socialType;
 
-    //TODO 구글이랑 네이버 long으로 넘어오는지 확인
+
     @NotNull
     @Column(name = "SOCIAL_ID")
     private String socialId;
+
 
     @Setter
     @NotNull
@@ -58,17 +60,20 @@ public class User extends BaseTimeEntity {
     @Column(name = "USER_TYPE")
     private UserType userType;
 
+
     @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "WITHDRAWAL_GROUNDS_TYPE")
     private WithdrawalGroundsType withdrawalGroundsType;
 
     public static User create(OAuth2UserInfoRequest oAuth2UserInfoRequest) {
-        return User.builder()
+        User user = User.builder()
                 .email(oAuth2UserInfoRequest.getEmail())
                 .socialType(oAuth2UserInfoRequest.getOAuth2SocialType())
                 .socialId(oAuth2UserInfoRequest.getOAuth2Id())
                 .userType(UserType.ACTIVE)
                 .build();
+        user.setStatusType(StatusType.ACTIVE);
+        return user;
     }
 }
