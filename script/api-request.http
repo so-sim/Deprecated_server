@@ -82,8 +82,8 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb
 
 ### 이벤트 리스트
 #GET http://localhost:8080/api/event/penalty/list/1?paymentType=full&page=0
-GET http://localhost:8080/api/event/penalty/list/1?year=2023&month=3&week=5&page=0
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc4NjIxOH0.fSE7CYG_jbmaSxmr6hAqFDYKnvGKrK34rIsunrGjMy1I4BUkWkWjUmxsrxfSFfWolbqy4hVnJ23k_ZZBPNRK8A
+GET http://localhost:8080/api/event/penalty/list/1?year=2023&month=3&day=26&page=0
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTg3NzIwM30.jXd420EDaPK_bq3ysqPf34GWg1w7V5h49qzFDm4rM1goo7PcB9PzXlXjD5VFz5Tkl-sy7fgPEZMCHzgJlCIJOQ
 
 ### 달별 납부여부 조회
 GET http://localhost:8080/api/event/penalty/mstatus/1?year=2023&month=3

@@ -17,7 +17,7 @@ public class EventListReq {
     private Integer week;
 
     // 일별 필터링
-    private String day;
+    private Integer day;
 
     // 팀원별 필터링
     private Long userId;
