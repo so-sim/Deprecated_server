@@ -94,7 +94,7 @@ public class JwtServiceImpl implements JwtService{
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
 
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN , refreshToken)
-            .maxAge(jwtProperties.getAccessTokenMaxAge())
+            .maxAge(jwtProperties.getRefreshTokenMaxAge())
             .secure(true)
             .sameSite(NONE)
             .httpOnly(true)
