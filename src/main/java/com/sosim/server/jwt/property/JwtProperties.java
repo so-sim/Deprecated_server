@@ -11,11 +11,11 @@ public class JwtProperties {
     public JwtProperties() {
     }
 
-    public JwtProperties(String secretKey, Long accessTokenExpirationPeriod, Long accessTokenMaxAge, Long refreshTokenExpirationPeriod,
+    public JwtProperties(String secretKey, Long accessTokenExpirationPeriod, Long refreshTokenMaxAge, Long refreshTokenExpirationPeriod,
         String accessHeader, String refreshHeader) {
         this.secretKey = secretKey;
         this.accessTokenExpirationPeriod = accessTokenExpirationPeriod;
-        this.accessTokenMaxAge = accessTokenMaxAge;
+        this.refreshTokenMaxAge = refreshTokenMaxAge;
         this.refreshTokenExpirationPeriod = refreshTokenExpirationPeriod;
         this.accessHeader = accessHeader;
         this.refreshHeader = refreshHeader;
@@ -27,8 +27,8 @@ public class JwtProperties {
     @Value("${jwt.access.expiration}")
     private Long accessTokenExpirationPeriod;
 
-    @Value("${jwt.access.maxage}")
-    private Long accessTokenMaxAge;
+    @Value("${jwt.refresh.maxage}")
+    private Long refreshTokenMaxAge;
 
     @Value("${jwt.refresh.expiration}")
     private Long refreshTokenExpirationPeriod;

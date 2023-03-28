@@ -3,10 +3,10 @@ jwt:
 
   access:
     expiration: 6000000 # 100분
-    #3600000 # 1시간(60분)
-    maxage: 600
+    #expiration: 3600000 # 1시간(60분)
     header: Authorization
 
   refresh:
     expiration: 1209600000 #  (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> 하루) * 14(2주))
+    maxage: 7200 # 2시간
     header: Authorization-refresh
