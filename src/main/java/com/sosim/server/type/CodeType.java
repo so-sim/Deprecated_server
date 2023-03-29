@@ -62,10 +62,12 @@ public enum CodeType {
     EVENT_LIST_SUCCESS("4003", HttpStatus.OK, "상세 내역 목록이 성공적으로 조회되었습니다."),
     EVENT_UPDATE_SUCCESS("4004", HttpStatus.OK, "상세 내역이 성공적으로 수정되었습니다."),
     EVENT_DELETE_SUCCESS("4005", HttpStatus.OK, "상세 내역이 성공적으로 삭제되었습니다."),
-    EVENT_PAYMENT_TYPE_CHANGE_SUCCESS("4006", HttpStatus.OK, "납부 여부가 성공적으로 변경되었습니다."),
+    EVENT_PAYMENT_TYPE_CHANGE_SUCCESS("4006", HttpStatus.OK, "납부 여부 상태가 성공적으로 변경되었습니다."),
     EVENT_MONTH_STATUS_SUCCESS("4007", HttpStatus.OK, "월별 납부 상태가 정상적으로 조회되었습니다."),
     NOT_FOUND_EVENT("4010", HttpStatus.NOT_FOUND, "해당 상세 내역은 존재하지 않습니다."),
     INVALID_EVENT_CREATER("4011", HttpStatus.BAD_REQUEST, "상세 내역 생성은 관리자만이 가능합니다."),
+    INVALID_PAYMENT_TYPE_CHANGER("4012", HttpStatus.BAD_REQUEST, "해당 상세 내역의 대상자가 아닙니다."),
+    PAYMENT_TYPE_MUST_BE_NON("4013", HttpStatus.BAD_REQUEST, "팀원은 확인요청만 가능합니다."),
 
     // OAuth - Success
     SUCCESS_SIGN_UP("900", HttpStatus.CREATED, "회원 가입이 성공적으로 완료되었습니다."),
