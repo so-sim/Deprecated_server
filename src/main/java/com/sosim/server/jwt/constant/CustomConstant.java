@@ -11,7 +11,6 @@ public class CustomConstant {
     public static final String SOCIAL_TYPE = "socialType";
     public static final String SOCIAL_ID = "socialId";
     public static final String BEARER = "Bearer ";
-    public static final String REFRESH_TOKEN_KEY = "refreshTokenKey";
     public static final String REFRESH_TOKEN = "refreshToken";
 
 }

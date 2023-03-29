@@ -159,10 +159,17 @@ public class EventServiceImpl implements EventService{
         Event event = getActiveEvent(id);
 
         if (!event.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
-            throw new CustomException(CodeType.INVALID_EVENT_CREATER);
+            if (event.getUser().getId().equals(Long.parseLong(authUser.getId()))) {
+                if (!event.getPaymentType().equals(PaymentType.NON_PAYMENT) ||
+                    !paymentTypeReq.getPaymentType().equals("con")) {
+                    throw new CustomException(CodeType.PAYMENT_TYPE_MUST_BE_NON);
+                }
+            } else {
+                throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_CHANGER);
+            }
         }
 
-        Participant participant = participantRepository.findByUser(event.getUser())
+        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         event.changePaymentType(paymentTypeReq);
