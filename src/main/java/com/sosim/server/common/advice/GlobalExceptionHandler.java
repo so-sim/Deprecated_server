@@ -64,9 +64,9 @@ public class GlobalExceptionHandler {
         return customException.toResponseEntity();
     }
 
-//    @ExceptionHandler({Exception.class})
-//    public ResponseEntity<?> handleException(Exception e) {
-//        CustomException customException = new CustomException(e.getMessage(), CodeType.COMMON_INTERNAL_SERVER_ERROR);
-//        return customException.toResponseEntity();
-//    }
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<?> handleException(Exception e) {
+        CustomException customException = new CustomException(e.getMessage(), CodeType.COMMON_INTERNAL_SERVER_ERROR);
+        return customException.toResponseEntity();
+    }
 }
