@@ -50,8 +50,9 @@ public class GroupController {
     }
 
     @GetMapping("/group/{groupId}/participants")
-    public ResponseEntity<?> getGroupParticipants(@PathVariable("groupId") Long groupId) {
-        GetParticipantListResponse groupParticipant = groupService.getGroupParticipant(groupId);
+    public ResponseEntity<?> getGroupParticipants(@AuthenticationPrincipal AuthUser authUser,
+                                                  @PathVariable("groupId") Long groupId) {
+        GetParticipantListResponse groupParticipant = groupService.getGroupParticipant(Long.parseLong(authUser.getId()), groupId);
         CodeType getParticipants = CodeType.GET_PARTICIPANTS;
 
         return new ResponseEntity<>(Response.create(getParticipants, groupParticipant), getParticipants.getHttpStatus());
