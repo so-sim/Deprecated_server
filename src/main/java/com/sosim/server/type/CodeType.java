@@ -68,6 +68,7 @@ public enum CodeType {
     INVALID_EVENT_CREATER("4011", HttpStatus.BAD_REQUEST, "상세 내역 생성은 관리자만이 가능합니다."),
     INVALID_PAYMENT_TYPE_CHANGER("4012", HttpStatus.BAD_REQUEST, "해당 상세 내역의 대상자가 아닙니다."),
     PAYMENT_TYPE_MUST_BE_NON("4013", HttpStatus.BAD_REQUEST, "팀원은 확인요청만 가능합니다."),
+    INVALID_PAYMENT_TYPE_PARAMETER("4014", HttpStatus.BAD_REQUEST, "기존의 납부여부 상태로 요청할 수 없습니다."),
 
     // OAuth - Success
     SUCCESS_SIGN_UP("900", HttpStatus.CREATED, "회원 가입이 성공적으로 완료되었습니다."),

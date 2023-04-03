@@ -55,8 +55,8 @@ Content-Type: application/json
 }
 
 ### 이벤트 조회
-GET http://localhost:8080/api/event/penalty/47
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY3OTc3MzQxNH0.ZymlUmwd6OJcrSa8Im_uBbu7BQUX4TDRYkmtHaUb720jjo2qAkPl-Yaqbik2vWWUcWcjGWUhu8Afx8ErLBl1GQ
+GET http://localhost:8080/api/event/penalty/5
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY4MDUwODM1OX0.rmnvl0aZ9PHpnY_nJ3-GZHi6OV8aKG2O_NemnMHmJShsgx6QAVAotkkVCLtsn7ep_dAS6kMeLR-QR1g7UqZ_PA
 
 ### 이벤트 수정
 POST http://localhost:8080/api/event/penalty/33
