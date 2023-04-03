@@ -1,9 +1,11 @@
 package com.sosim.server.event;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
+import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.event.dto.req.EventModifyReq;
 import com.sosim.server.event.dto.req.PaymentTypeReq;
 import com.sosim.server.group.Group;
+import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
@@ -30,6 +32,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.util.ObjectUtils;
 
 @Getter
@@ -81,6 +85,21 @@ public class Event extends BaseTimeEntity {
     @Column(name = "EVENT_TYPE")
     private EventType eventType;
 
+    @Setter
+    @ColumnDefault("0")
+    @Column(name = "ADMIN_NON_TO_FULL")
+    private Integer adminNonToFull;
+
+    @Setter
+    @ColumnDefault("0")
+    @Column(name = "ADMIN_CON_TO_FULL")
+    private Integer adminConToFull;
+
+    @Setter
+    @ColumnDefault("0")
+    @Column(name = "USER_NON_TO_CON")
+    private Integer userNonToCon;
+
     public void updateEvent(EventModifyReq eventModifyReq) {
 
         if (eventModifyReq.getUserName() != null && eventModifyReq.getUser() != null) {
@@ -104,6 +123,15 @@ public class Event extends BaseTimeEntity {
 
         if (eventModifyReq.getPaymentType() != null) {
             this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
+            if (eventModifyReq.getPaymentType().equals("full")) {
+                if (this.paymentType.equals(PaymentType.NON_PAYMENT)) {
+                    this.adminNonToFull++;
+                } else if (this.paymentType.equals(PaymentType.CONFIRMING)) {
+                    this.adminConToFull++;
+                } else {
+                    throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_PARAMETER);
+                }
+            }
         }
     }
 

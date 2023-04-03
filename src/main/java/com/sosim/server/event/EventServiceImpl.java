@@ -63,7 +63,7 @@ public class EventServiceImpl implements EventService{
 
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
-        Participant participant = participantRepository.findByUser(event.getUser())
+        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         EventSingleInfo eventSingleInfo = EventSingleInfo.from(event);
@@ -121,7 +121,7 @@ public class EventServiceImpl implements EventService{
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
         }
 
-        Participant participant = participantRepository.findByUser(event.getUser())
+        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         if (eventModifyReq.getUserName() != null) {
@@ -164,6 +164,7 @@ public class EventServiceImpl implements EventService{
                     !paymentTypeReq.getPaymentType().equals("con")) {
                     throw new CustomException(CodeType.PAYMENT_TYPE_MUST_BE_NON);
                 }
+                event.setUserNonToCon(event.getUserNonToCon() + 1);
             } else {
                 throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_CHANGER);
             }
@@ -173,6 +174,17 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         event.changePaymentType(paymentTypeReq);
+
+        if (paymentTypeReq.getPaymentType().equals("full")) {
+            if (event.getPaymentType().equals(PaymentType.NON_PAYMENT)) {
+                event.setAdminNonToFull(event.getAdminNonToFull() + 1);
+            } else if (event.getPaymentType().equals(PaymentType.CONFIRMING)) {
+                event.setAdminConToFull(event.getAdminConToFull() + 1);
+            } else {
+                throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_PARAMETER);
+            }
+        }
+
         eventRepository.save(event);
 
         EventInfo eventInfo = EventInfo.from(event);
