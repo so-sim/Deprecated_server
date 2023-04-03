@@ -34,6 +34,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.util.ObjectUtils;
 
 @Getter
@@ -42,6 +43,7 @@ import org.springframework.util.ObjectUtils;
 @Builder
 @Table(name = "EVENT")
 @AllArgsConstructor
+@DynamicInsert
 public class Event extends BaseTimeEntity {
 
     @Id
