@@ -127,8 +127,7 @@ public class GroupService {
             groupList.add(GetGroupResponse.create(group, group.getAdminId().equals(userId)));
         }
 
-        return GetGroupListResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
-                slice.hasNext(), groupList);
+        return GetGroupListResponse.create(slice.hasNext(), groupList);
     }
 
     public GetNicknameResponse getMyNickname(Long userId, Long groupId) {
