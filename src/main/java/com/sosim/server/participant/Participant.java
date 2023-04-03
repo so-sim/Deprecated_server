@@ -58,7 +58,4 @@ public class Participant extends BaseTimeEntity {
     public void modifyNickname(String nickname) {
         this.nickname = nickname;
     }
-
-    public void delete() {
-    }
 }
