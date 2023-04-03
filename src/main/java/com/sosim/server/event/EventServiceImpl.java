@@ -242,7 +242,7 @@ public class EventServiceImpl implements EventService{
                 case 4:
                     localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
                     break;
-                case 5:
+                case 5: case 6:
                     boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
                     int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
                     localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
