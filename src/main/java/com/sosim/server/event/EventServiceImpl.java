@@ -100,7 +100,7 @@ public class EventServiceImpl implements EventService{
         EventType eventType = EventType.DUES_PAYMENT;
 
         Event event = Event.builder().groundsDate(groundsDatetime).payment(payment).grounds(grounds).paymentType(paymentType)
-            .group(group).user(user).statusType(statusType).eventType(eventType).build();
+            .group(group).user(user).statusType(statusType).eventType(eventType)/*.adminNonToFull(0).adminConToFull(0).userNonToCon(0)*/.build();
         eventRepository.save(event);
 
         return event.getId();
@@ -173,8 +173,6 @@ public class EventServiceImpl implements EventService{
         Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
-        event.changePaymentType(paymentTypeReq);
-
         if (paymentTypeReq.getPaymentType().equals("full")) {
             if (event.getPaymentType().equals(PaymentType.NON_PAYMENT)) {
                 event.setAdminNonToFull(event.getAdminNonToFull() + 1);
@@ -184,6 +182,8 @@ public class EventServiceImpl implements EventService{
                 throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_PARAMETER);
             }
         }
+
+        event.changePaymentType(paymentTypeReq);
 
         eventRepository.save(event);
 
