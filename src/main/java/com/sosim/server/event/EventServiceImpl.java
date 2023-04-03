@@ -100,7 +100,7 @@ public class EventServiceImpl implements EventService{
         EventType eventType = EventType.DUES_PAYMENT;
 
         Event event = Event.builder().groundsDate(groundsDatetime).payment(payment).grounds(grounds).paymentType(paymentType)
-            .group(group).user(user).statusType(statusType).eventType(eventType)/*.adminNonToFull(0).adminConToFull(0).userNonToCon(0)*/.build();
+            .group(group).user(user).statusType(statusType).eventType(eventType).build();
         eventRepository.save(event);
 
         return event.getId();
@@ -390,10 +390,6 @@ public class EventServiceImpl implements EventService{
         return eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
-
-//    private DayInfo getMonthInfo(PaymentType paymentType, List<Map<Integer, Integer>> dayCountList) {
-//        return DayInfo.builder().paymentType(paymentType.getParam()).dayCountList(dayCountList).build();
-//    }
 
     private List<Map<Integer, Integer>> getPaymentList(long groupId, PaymentType paymentType, int month) {
 
