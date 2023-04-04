@@ -36,9 +36,10 @@ public class ParticipantService {
         getParticipantEntity(user, group).delete();
     }
 
-    public void modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {
+    public Participant modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {
         Participant participantEntity = getParticipantEntity(user, group);
         participantEntity.modifyNickname(participantNicknameRequest.getNickname());
+        return participantEntity;
     }
 
     public void saveParticipantEntity(Participant participant) {

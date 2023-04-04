@@ -43,7 +43,8 @@ public class GroupController {
     @GetMapping("/group/{groupId}")
     public ResponseEntity<?> getGroup(@AuthenticationPrincipal AuthUser authUser,
                                       @PathVariable("groupId") Long groupId) {
-        GetGroupResponse getGroupResponse = groupService.getGroup(Long.parseLong(authUser.getId()), groupId);
+        GetGroupResponse getGroupResponse = groupService.getGroup(
+                authUser != null ? Long.parseLong(authUser.getId()) : 0, groupId);
         CodeType getGroup = CodeType.GET_GROUP;
 
         return new ResponseEntity<>(Response.create(getGroup, getGroupResponse), getGroup.getHttpStatus());
