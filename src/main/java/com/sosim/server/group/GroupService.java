@@ -116,8 +116,13 @@ public class GroupService {
     }
 
     public void modifyNickname(Long userId, Long groupId, ParticipantNicknameRequest participantNicknameRequest) {
-        participantService.modifyNickname(userService.getUser(userId),
-                getGroupEntity(groupId), participantNicknameRequest);
+        Group groupEntity = getGroupEntity(groupId);
+        Participant participant = participantService.modifyNickname(userService.getUser(userId),
+                groupEntity, participantNicknameRequest);
+
+        if (groupEntity.getAdminId().equals(userId)) {
+            groupEntity.modifyAdmin(participant);
+        }
     }
 
     public GetGroupListResponse getMyGroups(Long index, Long userId) {
