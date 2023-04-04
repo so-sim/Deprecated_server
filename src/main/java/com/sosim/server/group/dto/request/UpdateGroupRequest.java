@@ -6,6 +6,7 @@ import com.sosim.server.type.GroupType;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -15,9 +16,11 @@ public class UpdateGroupRequest {
     @JsonProperty("title")
     private String title;
 
+    @NotNull
     @JsonProperty("type")
     private GroupType groupType;
 
+    @NotNull
     @JsonProperty("coverColor")
     private CoverColorType coverColorType;
 }
