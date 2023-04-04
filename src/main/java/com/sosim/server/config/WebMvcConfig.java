@@ -13,6 +13,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3090")
+                .allowedOrigins("https://sosim-manager.com")
                 .allowedMethods("GET", "POST", "PATCH", "OPTIONS", "DELETE", "PUT")
                 .allowedHeaders("*")
                 .allowCredentials(true)
