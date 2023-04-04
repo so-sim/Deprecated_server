@@ -13,8 +13,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3090")
+                .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+
+        registry.addMapping("/**")
                 .allowedOrigins("https://sosim-manager.com")
-                .allowedMethods("GET", "POST", "PATCH", "OPTIONS", "DELETE", "PUT")
+                .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
