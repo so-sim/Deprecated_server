@@ -27,7 +27,10 @@ public class GetGroupResponse {
     @JsonProperty("isAdmin")
     private Boolean isAdmin;
 
-    public static GetGroupResponse create(Group group, boolean isAdmin) {
+    @JsonProperty("size")
+    private int size;
+
+    public static GetGroupResponse create(Group group, boolean isAdmin, int size) {
         return GetGroupResponse.builder()
                 .id(group.getId())
                 .title(group.getTitle())
@@ -35,6 +38,7 @@ public class GetGroupResponse {
                 .groupType(group.getGroupType().getLabel())
                 .adminNickname(group.getAdminNickname())
                 .isAdmin(isAdmin)
+                .size(size)
                 .build();
     }
 }
