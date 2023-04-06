@@ -12,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,11 @@ public class ParticipantService {
     }
 
     public Participant modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {
+        if (participantRepository.findByNicknameAndGroupAndStatusType(participantNicknameRequest.getNickname(),
+                group, StatusType.ACTIVE).isPresent()) {
+            throw new CustomException(CodeType.ALREADY_USE_NICKNAME);
+        }
+
         Participant participantEntity = getParticipantEntity(user, group);
         participantEntity.modifyNickname(participantNicknameRequest.getNickname());
         return participantEntity;
