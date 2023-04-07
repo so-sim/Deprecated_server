@@ -64,8 +64,12 @@ public class ParticipantService {
     }
 
     public Slice<Participant> getParticipantSlice(Long index, Long userId) {
-        return participantRepository.findByUserIdAndStatusTypeOrderByIdDesc(userId, StatusType.ACTIVE,
-                PageRequest.ofSize(17 + (18 * index.intValue())));
+        if (index == 0) {
+            return participantRepository.findByUserIdAndStatusTypeOrderByIdDesc(userId, StatusType.ACTIVE,
+                    PageRequest.ofSize(17));
+        }
+        return participantRepository.findByIdLessThanAndStatusTypeAndUserIdOrderByIdDesc(index, StatusType.ACTIVE, userId,
+                PageRequest.ofSize(18));
     }
 
     public GetNicknameResponse getMyNickname(User user, Group group) {
