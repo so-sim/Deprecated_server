@@ -8,6 +8,9 @@ import lombok.Getter;
 @Getter
 public class EventCreateReq {
 
+    @NotNull
+    private long groupId;
+
     @NotEmpty
     private String userName;
 

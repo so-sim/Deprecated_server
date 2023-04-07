@@ -27,11 +27,11 @@ Content-Type: application/json
 
 ### 모임 생성
 POST http://localhost:8080/api/group
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMiIsImV4cCI6MTY3OTc1MjMzOX0.r06_nlkfsr5gO4CFt5zhvR4s01L44V8d3tW9j0cxwrvDlhYm6Nq_k8GYhv9MG3zoEgaPI8mrXYpTDHj-gN_LmA
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImlkIjoiMSIsImV4cCI6MTY4MDg3ODk1OX0.8io_gEQo4jmn_ieW6doq2GGFcm9jqxyUx2q6aMQTPWD_uf-bWNKdiAKuuhNfvGVzZzeMDIIhFNh3V59u2dlk1g
 Content-Type: application/json
 
 {
-  "title": "bbb의 스터디",
+  "title": "kkk의 스터디",
   "nickname": "aaa",
   "type": "스터디",
   "coverColor": "#f86565"
@@ -47,6 +47,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb
 Content-Type: application/json
 
 {
+  "groupId": 2,
   "userName": "kkk",
   "groundsDate": "2023.03.17",
   "payment": 170000,
