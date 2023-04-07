@@ -47,7 +47,8 @@ public class GroupService {
         Group groupEntity = getGroupEntity(groupId);
 
         return GetGroupResponse.create(groupEntity, groupEntity.getAdminId().equals(userId),
-                participantService.getCountParticipantAtGroup(groupId).intValue());
+                participantService.getCountParticipantAtGroup(groupId).intValue(),
+                userId != 0 && participantService.getParticipantEntity(userService.getUser(userId), groupEntity) != null);
     }
 
     public GetParticipantListResponse getGroupParticipant(Long userId, Long groupId) {
@@ -137,7 +138,7 @@ public class GroupService {
         for (Participant participant : participantEntityList) {
             Group group = participant.getGroup();
             groupList.add(GetGroupResponse.create(group, group.getAdminId().equals(userId),
-                    participantService.getCountParticipantAtGroup(group.getId()).intValue()));
+                    participantService.getCountParticipantAtGroup(group.getId()).intValue(),true));
         }
 
         return GetGroupListResponse.create(slice.hasNext(), groupList);
