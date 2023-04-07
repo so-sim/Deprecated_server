@@ -2,6 +2,7 @@ package com.sosim.server.oauth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sosim.server.common.response.Response;
+import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.JwtService;
 import com.sosim.server.oauth.dto.response.LoginResponse;
 import com.sosim.server.type.CodeType;
@@ -23,6 +24,10 @@ public class OAuth2Controller {
     @PostMapping
     public ResponseEntity<?> signUp(@PathVariable("socialType") String socialType, @RequestParam("code") String code,
                                     HttpServletResponse response) throws JsonProcessingException {
+        if (code == null) {
+            throw new CustomException(CodeType.BINDING_ERROR);
+        }
+
         LoginResponse loginResponse = oAuth2Service.signUp(SocialType.getSocialType(socialType), code);
         CodeType successSignUp = CodeType.SUCCESS_SIGN_UP;
         jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken());
@@ -33,6 +38,10 @@ public class OAuth2Controller {
     @GetMapping
     public ResponseEntity<?> login(@PathVariable("socialType") String socialType, @RequestParam("code") String code,
                                    HttpServletResponse response) throws JsonProcessingException {
+        if (code == null) {
+            throw new CustomException(CodeType.BINDING_ERROR);
+        }
+
         LoginResponse loginResponse = oAuth2Service.login(SocialType.getSocialType(socialType), code);
         CodeType successLogin = CodeType.SUCCESS_LOGIN;
         jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken());

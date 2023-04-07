@@ -131,6 +131,10 @@ public class GroupController {
     @GetMapping("/groups")
     public ResponseEntity<?> getMyGroups(@AuthenticationPrincipal AuthUser authUser,
                                          @RequestParam("index") Long index) {
+        if (index == null) {
+            throw new CustomException(CodeType.BINDING_ERROR);
+        }
+
         GetGroupListResponse groupList = groupService.getMyGroups(index, Long.parseLong(authUser.getId()));
         CodeType getGroups = CodeType.GET_GROUPS;
 
