@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -80,10 +79,9 @@ public class EventServiceImpl implements EventService{
     @Override
     public Long createEvent(AuthUser authUser, EventCreateReq eventCreateReq) {
 
-        Optional<Participant> byNickName = participantRepository.findByNickname(eventCreateReq.getUserName());
-        Participant participant = byNickName.orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+        Group group = groupRepository.findByIdAndStatusType(eventCreateReq.getGroupId(), StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
+        Participant participant = participantRepository.findByNicknameAndGroupAndStatusType(eventCreateReq.getUserName(), group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
         Long userId = participant.getUser().getId();
-        Long groupId = participant.getGroup().getId();
 
         if (!participant.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
@@ -94,7 +92,6 @@ public class EventServiceImpl implements EventService{
         Long payment = eventCreateReq.getPayment();
         String grounds = eventCreateReq.getGrounds();
         PaymentType paymentType = PaymentType.getType(eventCreateReq.getPaymentType());
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         StatusType statusType = StatusType.ACTIVE;
         EventType eventType = EventType.DUES_PAYMENT;
