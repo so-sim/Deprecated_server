@@ -2,7 +2,8 @@ package com.sosim.server.config;
 
 import com.sosim.server.jwt.JwtProvider;
 import com.sosim.server.jwt.JwtService;
-import com.sosim.server.security.authentication.AuthenticationFilter;
+import com.sosim.server.security.filter.AuthenticationFilter;
+import com.sosim.server.security.filter.ExceptionHandlerFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -42,15 +42,9 @@ public class SecurityConfig {
 
         // Jwt 인증 필터
         http
-                .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new AuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class);
 
         return http.build();
     }
-
-    @Bean
-    public AuthenticationFilter authenticationFilter() {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(jwtProvider, jwtService);
-        return authenticationFilter;
-    }
-
 }
