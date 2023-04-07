@@ -2,8 +2,8 @@ package com.sosim.server.config;
 
 import com.sosim.server.jwt.JwtProvider;
 import com.sosim.server.jwt.JwtService;
-import com.sosim.server.security.authentication.AuthenticationFilter;
-import com.sosim.server.security.handler.ExceptionHandlerFilter;
+import com.sosim.server.security.filter.AuthenticationFilter;
+import com.sosim.server.security.filter.ExceptionHandlerFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

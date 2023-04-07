@@ -1,14 +1,9 @@
-package com.sosim.server.security.handler;
+package com.sosim.server.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sosim.server.common.response.Response;
 import com.sosim.server.config.exception.CustomException;
-import com.sosim.server.type.CodeType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,7 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
