@@ -1,6 +1,5 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.constant.CustomConstant.NONE;
 import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN;
 import static com.sosim.server.jwt.constant.CustomConstant.SET_COOKIE;
 
@@ -9,24 +8,15 @@ import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
 import com.sosim.server.jwt.property.JwtProperties;
-import com.sosim.server.security.AuthUser;
 import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
-import java.io.IOException;
-import java.net.CookieManager;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -80,13 +70,13 @@ public class JwtServiceImpl implements JwtService{
 
     @Override
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN , refreshToken)
-            .maxAge(jwtProperties.getRefreshTokenMaxAge())
-            .secure(true)
-            .sameSite(NONE)
-            .httpOnly(true)
-            .build();
+        Cookie cookieOfResponse = new Cookie(REFRESH_TOKEN, refreshToken);
+        cookieOfResponse.setMaxAge(60 * 60 * 24);
+        cookieOfResponse.setHttpOnly(true);
+        cookieOfResponse.setSecure(true);
+        cookieOfResponse.setDomain("sosim-manager.com");
+        cookieOfResponse.setPath("/login/reissueToken");
 
-        response.setHeader(SET_COOKIE, cookie.toString());
+        response.addCookie(cookieOfResponse);
     }
 }
