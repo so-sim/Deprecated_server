@@ -70,6 +70,9 @@ public class JwtServiceImpl implements JwtService{
 
     @Override
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+        response.setHeader("Access-Control-Allow-Origin", "https://sosim-manager.com");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+
         Cookie cookieOfResponse = new Cookie(REFRESH_TOKEN, refreshToken);
         cookieOfResponse.setMaxAge(60 * 60 * 24);
         cookieOfResponse.setHttpOnly(true);
