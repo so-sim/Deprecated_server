@@ -30,7 +30,6 @@ public class EventListInfo {
     public static EventListInfo from(Event event) {
         return EventListInfo.builder()
             .eventId(event.getId())
-            // TODO 이거 이렇게 해도 문제없이 잘 돌아가는지 확인
             .userId(event.getUser().getId())
             .payment(event.getPayment())
             .groundsDate(event.getGroundsDate())

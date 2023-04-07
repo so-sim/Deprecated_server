@@ -214,7 +214,8 @@ public class EventServiceImpl implements EventService{
             && eventListReq.getPaymentType() == null && eventListReq.getToday() == null) {
             page = eventRepository.findByGroupAndStatusType(group, StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndStatusType(group, StatusType.ACTIVE);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusType(group, StatusType.ACTIVE);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null) {
@@ -224,7 +225,8 @@ public class EventServiceImpl implements EventService{
             endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null) {
@@ -264,7 +266,8 @@ public class EventServiceImpl implements EventService{
             }
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null) {
@@ -273,7 +276,8 @@ public class EventServiceImpl implements EventService{
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getUserId() != null) {
@@ -286,7 +290,8 @@ public class EventServiceImpl implements EventService{
                 eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = eventRepository.countByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE);
         }
 
         if (eventListReq.getToday() != null && eventListReq.getToday().equals("true")) {
@@ -295,13 +300,85 @@ public class EventServiceImpl implements EventService{
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getPaymentType() != null) {
             page = eventRepository.findByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
-            totalCount = eventRepository.countByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getPaymentType() != null) {
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+            boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
+            int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getPaymentType() != null) {
+            LocalDateTime localDateTime = null;
+            switch (eventListReq.getWeek()) {
+                case 1:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+                    break;
+                case 2:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 8, 0, 0);
+                    break;
+                case 3:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 15, 0, 0);
+                    break;
+                case 4:
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
+                    break;
+                case 5: case 6:
+                    boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
+                    int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
+                    break;
+
+            }
+            if (eventListReq.getWeek().equals(5)) {
+                int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
+                endDatetime = localDateTime.plusDays(plusDay);
+                startDatetime = endDatetime.minusDays(6);
+                log.info("startDateTime:{}", startDatetime);
+                log.info("endDateTime:{}", endDatetime);
+            } else {
+                int minusDay = localDateTime.getDayOfWeek().getValue();
+                startDatetime = localDateTime.minusDays(minusDay);
+                endDatetime = startDatetime.plusDays(6);
+                log.info("startDateTime:{}", startDatetime);
+                log.info("endDateTime:{}", endDatetime);
+            }
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = page.getTotalElements();
+//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getPaymentType() != null) {
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(), 0, 0, 0);
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(),23,59, 59);
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = page.getTotalElements();
+        }
+
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getPaymentType() != null) {
+            startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+            endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = page.getTotalElements();
         }
 
         return ListInfo.from(totalCount, eventInfoList);
