@@ -1,8 +1,5 @@
 package com.sosim.server.security.filter;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.JwtProvider;
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -36,16 +33,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-
         String accessToken = authorizationHeader.substring(BEARER.length());
-
-        try {
-            setAuthenticationPrincipal(jwtProvider.extractId(accessToken));
-        } catch (TokenExpiredException e) {
-            throw new CustomException(CodeType.EXPIRE_TOKEN);
-        } catch (JWTVerificationException e) {
-            throw new CustomException(CodeType.FALSIFIED_TOKEN);
-        }
+        setAuthenticationPrincipal(jwtProvider.extractId(accessToken));
 
         filterChain.doFilter(request, response);
     }
