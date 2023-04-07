@@ -14,8 +14,10 @@ import com.sosim.server.type.CodeType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.io.IOException;
+import java.net.CookieManager;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
@@ -77,22 +79,7 @@ public class JwtServiceImpl implements JwtService{
     }
 
     @Override
-    public void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
-
-        log.info("checkAccessTokenAndAuthentication() 호출");
-        jwtProvider.extractAccessToken(request)
-            .filter(jwtProvider::isTokenValid)
-            .ifPresent(accessToken -> jwtProvider.extractId(accessToken)
-                .ifPresent(id -> userRepository.findById(Long.parseLong(id))
-                    .ifPresent(this::saveAuthentication)));
-
-        filterChain.doFilter(request, response);
-    }
-
-    @Override
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN , refreshToken)
             .maxAge(jwtProperties.getRefreshTokenMaxAge())
             .secure(true)
@@ -101,12 +88,5 @@ public class JwtServiceImpl implements JwtService{
             .build();
 
         response.setHeader(SET_COOKIE, cookie.toString());
-    }
-
-    public void saveAuthentication(User user) {
-
-        AuthUser context = AuthUser.builder().id(String.valueOf(user.getId())).build();
-        Authentication authentication = new UsernamePasswordAuthenticationToken(context, null, context.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

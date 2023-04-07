@@ -13,9 +13,5 @@ public interface JwtService {
     void saveRefreshToken(RefreshToken refreshToken);
     ReIssueTokenInfo verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse response);
     void sendRefreshToken(HttpServletResponse response, String refreshToken);
-    void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException;
-    void saveAuthentication(User myUser);
     void setRefreshTokenHeader(HttpServletResponse response, String refreshToken);
-
 }

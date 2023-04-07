@@ -5,10 +5,15 @@ import static com.sosim.server.jwt.constant.CustomConstant.ID;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.property.JwtProperties;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+
+import com.sosim.server.type.CodeType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +48,8 @@ public class JwtProviderImpl implements JwtProvider {
     }
 
     public boolean isTokenValid(String token) {
-        try {
-            JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey())).build().verify(token);
-            return true;
-        } catch (Exception e) {
-            log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
-            return false;
-        }
+        JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey())).build().verify(token);
+        return true;
     }
 
     /**
@@ -72,17 +72,15 @@ public class JwtProviderImpl implements JwtProvider {
      * 유효하지 않다면 빈 Optional 객체 반환
      */
     @Override
-    public Optional<String> extractId(String accessToken) {
+    public String extractId(String accessToken) {
+        // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
         try {
-            // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
-            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
-                .build() // 반환된 빌더로 JWT verifier 생성
-                .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-                .getClaim(ID) // claim(id) 가져오기
-                .asString());
-        } catch (Exception e) {
-            log.error("액세스 토큰이 유효하지 않습니다.");
-            return Optional.empty();
+            return JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
+                    .build().verify(accessToken).getClaim(ID).asString();
+        } catch (TokenExpiredException e) {
+            throw new CustomException(CodeType.EXPIRE_TOKEN);
+        } catch (JWTVerificationException e) {
+            throw new CustomException(CodeType.FALSIFIED_TOKEN);
         }
     }
 }
