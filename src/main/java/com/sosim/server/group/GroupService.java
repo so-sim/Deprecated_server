@@ -76,7 +76,8 @@ public class GroupService {
         }
 
         if (!groupEntity.getAdminId().equals(userId)) Collections.swap(memberList, 0, userIdList.indexOf(userId));
-        memberList.subList(1, memberList.size()).sort(Comparator.comparing(GetParticipantListResponse.Member::getNickname));
+        if (memberList.size() > 0) memberList.subList(1, memberList.size())
+                .sort(Comparator.comparing(GetParticipantListResponse.Member::getNickname));
 
         return GetParticipantListResponse.create(groupEntity, memberList);
     }

@@ -19,7 +19,7 @@ public class GetParticipantListResponse {
     @JsonProperty("adminNickname")
     private String adminNickname;
 
-    @JsonProperty("nicknameList")
+    @JsonProperty("memberList")
     private List<Member> memberList;
 
     public static GetParticipantListResponse create(Group group, List<Member> memberList) {
