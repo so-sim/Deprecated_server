@@ -76,7 +76,7 @@ public class ParticipantService {
         return GetNicknameResponse.create(getParticipantEntity(user, group));
     }
 
-    public List<Long> getUserIdList(List<String> nicknameList) {
-        return participantRepository.findByNicknameIn(nicknameList);
+    public List<Long> getUserIdList(List<String> nicknameList, Long groupId) {
+        return participantRepository.findByGroupIdAndNicknameIn(groupId, nicknameList);
     }
 }
