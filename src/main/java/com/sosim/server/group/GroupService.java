@@ -48,7 +48,9 @@ public class GroupService {
         boolean isInto = false;
 
         try {
-            isInto = participantService.getParticipantEntity(userService.getUser(userId), groupEntity) != null;
+            if (userId != 0) isInto = participantService.
+                    getParticipantEntity(userService.getUser(userId), groupEntity) != null;
+
         } catch (CustomException e) {}
 
         return GetGroupResponse.create(groupEntity, groupEntity.getAdminId().equals(userId),
