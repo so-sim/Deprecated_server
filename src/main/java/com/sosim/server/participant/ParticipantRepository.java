@@ -6,7 +6,10 @@ import com.sosim.server.user.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
@@ -20,5 +23,6 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     Slice<Participant> findByIdLessThanAndStatusTypeAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
 
-    Long countByGroupIdAndStatusType(Long groupId, StatusType statusType);
+    @Query("select p.user.id from Participant p where p.nickname in (:nickname)")
+    List<Long> findByNicknameIn(@Param("nickname") List<String> nickname);
 }

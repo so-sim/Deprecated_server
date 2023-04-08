@@ -3,6 +3,7 @@ package com.sosim.server.participant.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sosim.server.group.Group;
 import com.sosim.server.participant.Participant;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,16 +20,20 @@ public class GetParticipantListResponse {
     private String adminNickname;
 
     @JsonProperty("nicknameList")
-    private List<String> nicknameList;
+    private List<Member> memberList;
 
-    public static GetParticipantListResponse create(Group group, List<Participant> participants) {
+    public static GetParticipantListResponse create(Group group, List<Member> memberList) {
         return GetParticipantListResponse.builder()
                 .adminId(group.getAdminId())
                 .adminNickname(group.getAdminNickname())
-                .nicknameList(participants.stream()
-                        .map(Participant::getNickname)
-                        .filter(nickname -> !nickname.equals(group.getAdminNickname()))
-                        .collect(Collectors.toList()))
+                .memberList(memberList)
                 .build();
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class Member {
+        private Long userId;
+        private String nickname;
     }
 }
