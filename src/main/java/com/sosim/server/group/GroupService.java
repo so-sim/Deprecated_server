@@ -45,10 +45,14 @@ public class GroupService {
 
     public GetGroupResponse getGroup(Long userId, Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
+        boolean isInto = false;
+
+        try {
+            isInto = participantService.getParticipantEntity(userService.getUser(userId), groupEntity) != null;
+        } catch (CustomException e) {}
 
         return GetGroupResponse.create(groupEntity, groupEntity.getAdminId().equals(userId),
-                participantService.getCountParticipantAtGroup(groupId).intValue(),
-                userId != 0 && participantService.getParticipantEntity(userService.getUser(userId), groupEntity) != null);
+                participantService.getCountParticipantAtGroup(groupId).intValue(), isInto);
     }
 
     public GetParticipantListResponse getGroupParticipant(Long userId, Long groupId) {
