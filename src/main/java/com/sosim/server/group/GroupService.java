@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,21 +46,40 @@ public class GroupService {
 
     public GetGroupResponse getGroup(Long userId, Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
+        boolean isInto = false;
+
+        try {
+            if (userId != 0) isInto = participantService.
+                    getParticipantEntity(userService.getUser(userId), groupEntity) != null;
+
+        } catch (CustomException e) {}
 
         return GetGroupResponse.create(groupEntity, groupEntity.getAdminId().equals(userId),
-                participantService.getCountParticipantAtGroup(groupId).intValue(),
-                userId != 0 && participantService.getParticipantEntity(userService.getUser(userId), groupEntity) != null);
+                (int) groupEntity.getParticipantList().stream()
+                        .filter(p -> p.getStatusType().equals(StatusType.ACTIVE)).count(), isInto);
     }
 
     public GetParticipantListResponse getGroupParticipant(Long userId, Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
         Participant participant = participantService.getParticipantEntity(userService.getUser(userId), groupEntity);
-        List<Participant> participantList = groupEntity.getParticipantList();
+        List<String> nicknameList = groupEntity.getParticipantList().stream()
+                .filter(p -> p.getStatusType().equals(StatusType.ACTIVE) &&
+                        !p.getNickname().equals(groupEntity.getAdminNickname()))
+                .map(Participant::getNickname)
+                .collect(Collectors.toList());
 
-        Collections.swap(participantList, 0, participantList.indexOf(participant));
-        participantList.subList(1, participantList.size()).sort(Comparator.comparing(Participant::getNickname));
+        List<Long> userIdList = participantService.getUserIdList(nicknameList);
 
-        return GetParticipantListResponse.create(groupEntity, participantList);
+        List<GetParticipantListResponse.Member> memberList = new ArrayList<>();
+
+        for (int i = 0; i < nicknameList.size(); i++) {
+            memberList.add(new GetParticipantListResponse.Member(userIdList.get(i), nicknameList.get(i)));
+        }
+
+        Collections.swap(memberList, 0, userIdList.indexOf(userId));
+        memberList.subList(1, memberList.size()).sort(Comparator.comparing(GetParticipantListResponse.Member::getNickname));
+
+        return GetParticipantListResponse.create(groupEntity, memberList);
     }
 
     public CreateGroupResponse updateGroup(Long userId, Long groupId, UpdateGroupRequest updateGroupRequest) {
@@ -80,7 +100,8 @@ public class GroupService {
             throw new CustomException(CodeType.NONE_ADMIN);
         }
 
-        if (participantService.getCountParticipantAtGroup(groupEntity.getId()) > 1) {
+        if (groupEntity.getParticipantList().stream()
+                .filter(p -> p.getStatusType().equals(StatusType.ACTIVE)).count() > 1) {
             throw new CustomException(CodeType.NONE_ZERO_PARTICIPANT);
         }
 
@@ -138,7 +159,8 @@ public class GroupService {
         for (Participant participant : participantEntityList) {
             Group group = participant.getGroup();
             groupList.add(GetGroupResponse.create(group, group.getAdminId().equals(userId),
-                    participantService.getCountParticipantAtGroup(group.getId()).intValue(),true));
+                    (int) group.getParticipantList().stream()
+                            .filter(p -> p.getStatusType().equals(StatusType.ACTIVE)).count(),true));
         }
 
         return GetGroupListResponse.create(slice.hasNext(), groupList);
