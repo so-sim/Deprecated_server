@@ -61,14 +61,13 @@ public class GroupService {
 
     public GetParticipantListResponse getGroupParticipant(Long userId, Long groupId) {
         Group groupEntity = getGroupEntity(groupId);
-        Participant participant = participantService.getParticipantEntity(userService.getUser(userId), groupEntity);
         List<String> nicknameList = groupEntity.getParticipantList().stream()
                 .filter(p -> p.getStatusType().equals(StatusType.ACTIVE) &&
                         !p.getNickname().equals(groupEntity.getAdminNickname()))
                 .map(Participant::getNickname)
                 .collect(Collectors.toList());
 
-        List<Long> userIdList = participantService.getUserIdList(nicknameList);
+        List<Long> userIdList = participantService.getUserIdList(nicknameList, groupId);
 
         List<GetParticipantListResponse.Member> memberList = new ArrayList<>();
 
@@ -76,7 +75,7 @@ public class GroupService {
             memberList.add(new GetParticipantListResponse.Member(userIdList.get(i), nicknameList.get(i)));
         }
 
-        Collections.swap(memberList, 0, userIdList.indexOf(userId));
+        if (!groupEntity.getAdminId().equals(userId)) Collections.swap(memberList, 0, userIdList.indexOf(userId));
         memberList.subList(1, memberList.size()).sort(Comparator.comparing(GetParticipantListResponse.Member::getNickname));
 
         return GetParticipantListResponse.create(groupEntity, memberList);
