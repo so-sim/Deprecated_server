@@ -122,7 +122,6 @@ public class Event extends BaseTimeEntity {
         }
 
         if (eventModifyReq.getPaymentType() != null) {
-            this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
             if (eventModifyReq.getPaymentType().equals("full")) {
                 if (this.paymentType.equals(PaymentType.NON_PAYMENT)) {
                     this.adminNonToFull++;
@@ -132,6 +131,7 @@ public class Event extends BaseTimeEntity {
                     throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_PARAMETER);
                 }
             }
+            this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
         }
     }
 
