@@ -6,6 +6,8 @@ import com.sosim.server.event.dto.info.EventInfo;
 import com.sosim.server.event.dto.info.EventListInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
 import com.sosim.server.event.dto.info.ListInfo;
+import com.sosim.server.event.dto.info.UserAndParticipantInfo;
+import com.sosim.server.event.dto.info.YearMonthWeekInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
 import com.sosim.server.event.dto.req.EventModifyReq;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +59,10 @@ public class EventServiceImpl implements EventService{
     private final GroupRepository groupRepository;
 
     private final UserRepository userRepository;
+
+    private LocalDateTime localDateTime = null;
+    private LocalDateTime startDatetime = null;
+    private LocalDateTime endDatetime = null;
 
     @Override
     public EventSingleInfo getEvent(long id) {
@@ -204,15 +211,12 @@ public class EventServiceImpl implements EventService{
         List<EventListInfo> eventInfoList = null;
         PageRequest pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.ASC, "groundsDate"));
         Page<Event> page = null;
-        LocalDateTime startDatetime = null;
-        LocalDateTime endDatetime = null;
 
         if (eventListReq.getYear() == null && eventListReq.getUserId() == null
             && eventListReq.getPaymentType() == null && eventListReq.getToday() == null) {
             page = eventRepository.findByGroupAndStatusType(group, StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusType(group, StatusType.ACTIVE);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null) {
@@ -223,48 +227,14 @@ public class EventServiceImpl implements EventService{
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null) {
-            LocalDateTime localDateTime = null;
-            switch (eventListReq.getWeek()) {
-                case 1:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
-                break;
-                case 2:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 8, 0, 0);
-                break;
-                case 3:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 15, 0, 0);
-                    break;
-                case 4:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
-                    break;
-                case 5: case 6:
-                    boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
-                    int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
-                    break;
-
-            }
-            if (eventListReq.getWeek().equals(5)) {
-                int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
-                endDatetime = localDateTime.plusDays(plusDay);
-                startDatetime = endDatetime.minusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            } else {
-                int minusDay = localDateTime.getDayOfWeek().getValue();
-                startDatetime = localDateTime.minusDays(minusDay);
-                endDatetime = startDatetime.plusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            }
-            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> dateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null) {
@@ -274,7 +244,6 @@ public class EventServiceImpl implements EventService{
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getUserId() != null) {
@@ -288,7 +257,67 @@ public class EventServiceImpl implements EventService{
                 return eventlistInfo;
             }).collect(Collectors.toList());
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE);
+        }
+
+// TODO 수정 시작
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getUserId() != null) {
+            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+            boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
+            int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
+            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventList = page.getContent();
+            eventInfoList = eventList.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = page.getTotalElements();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getUserId() != null) {
+            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> localDateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
+            eventList = page.getContent();
+            eventInfoList = eventList.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = page.getTotalElements();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getUserId() != null) {
+            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(), 0, 0, 0);
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(),23,59, 59);
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventList = page.getContent();
+            eventInfoList = eventList.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = page.getTotalElements();
+        }
+
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getUserId() != null) {
+            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+            startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+            endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            eventList = page.getContent();
+            eventInfoList = eventList.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = page.getTotalElements();
         }
 
         if (eventListReq.getToday() != null && eventListReq.getToday().equals("true")) {
@@ -298,14 +327,12 @@ public class EventServiceImpl implements EventService{
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getPaymentType() != null) {
             page = eventRepository.findByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getPaymentType() != null) {
@@ -316,48 +343,14 @@ public class EventServiceImpl implements EventService{
             page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getPaymentType() != null) {
-            LocalDateTime localDateTime = null;
-            switch (eventListReq.getWeek()) {
-                case 1:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
-                    break;
-                case 2:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 8, 0, 0);
-                    break;
-                case 3:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 15, 0, 0);
-                    break;
-                case 4:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
-                    break;
-                case 5: case 6:
-                    boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
-                    int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
-                    break;
-
-            }
-            if (eventListReq.getWeek().equals(5)) {
-                int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
-                endDatetime = localDateTime.plusDays(plusDay);
-                startDatetime = endDatetime.minusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            } else {
-                int minusDay = localDateTime.getDayOfWeek().getValue();
-                startDatetime = localDateTime.minusDays(minusDay);
-                endDatetime = startDatetime.plusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            }
-            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> localDateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getPaymentType() != null) {
@@ -381,6 +374,42 @@ public class EventServiceImpl implements EventService{
         return ListInfo.from(totalCount, eventInfoList);
     }
 
+    private List<LocalDateTime> getWeekStartDateTimeAndEndDateTime(YearMonthWeekInfo yearMonthWeekInfo) {
+        List<LocalDateTime> localDateTimeList = new ArrayList<>();
+        switch (yearMonthWeekInfo.getWeek()) {
+            case 1:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 1, 0, 0);
+                break;
+            case 2:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 8, 0, 0);
+                break;
+            case 3:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 15, 0, 0);
+                break;
+            case 4:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 23, 0, 0);
+                break;
+            case 5: case 6:
+                boolean isLeapYear = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
+                int endDay = getEndDayOfMonth(isLeapYear, yearMonthWeekInfo.getMonth());
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), endDay, 0, 0);
+                break;
+        }
+        if (yearMonthWeekInfo.getWeek().equals(5)|| yearMonthWeekInfo.getWeek().equals(6)) {
+            int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
+            endDatetime = localDateTime.plusDays(plusDay);
+            startDatetime = endDatetime.minusDays(6);
+            localDateTimeList.add(startDatetime);
+            localDateTimeList.add(endDatetime);
+        } else {
+            int minusDay = localDateTime.getDayOfWeek().getValue();
+            startDatetime = localDateTime.minusDays(minusDay);
+            endDatetime = startDatetime.plusDays(7);
+            localDateTimeList.add(startDatetime);
+            localDateTimeList.add(endDatetime);
+        }
+        return localDateTimeList;
+    }
 
     private List<EventListInfo> getEventInfoList(Group group, Page<Event> page) {
         List<Event> eventList;
@@ -428,7 +457,7 @@ public class EventServiceImpl implements EventService{
     @Override
     public List<DayInfo> getMonthlyDayPaymentType(long groupId, MonthlyDayPaymentTypeReq mdpTreq) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
-        LocalDateTime startDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), 1, 0, 0);
+        startDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), 1, 0, 0);
         boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
         int endDay = getEndDayOfMonth(isLeapYear, mdpTreq.getMonth());
         LocalDateTime endDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), endDay, 23, 59);
@@ -465,27 +494,10 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
 
-    private List<Map<Integer, Integer>> getPaymentList(long groupId, PaymentType paymentType, int month) {
-
+    private UserAndParticipantInfo getUserAndParticipant(long userId, long groupId) {
+        User user = userRepository.findByIdAndUserType(userId, UserType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
-
-        List<Event> byPaymentTypeAndStatusType = eventRepository.findByPaymentTypeAndStatusTypeAndGroup(
-            paymentType, StatusType.ACTIVE, group);
-
-        List<Event> paymentList = byPaymentTypeAndStatusType.stream()
-            .filter(event -> event.getCreateDate().getMonthValue() == month).collect(
-                Collectors.toList());
-
-        List<Map<Integer, Integer>> paymentDayCountList = paymentList.stream().map(event -> {
-            Map<Integer, Integer> dayCount = new HashMap<>();
-            int dayOfMonth = event.getCreateDate().getDayOfMonth();
-            int count = (int) paymentList.stream().filter(y -> y.getCreateDate().getDayOfMonth() == dayOfMonth)
-                .count();
-            dayCount.put(dayOfMonth, count);
-            log.info("dayCount : {}", dayCount);
-            return dayCount;
-        }).collect(Collectors.toList());
-        return paymentDayCountList;
+        Participant participant = participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+        return new UserAndParticipantInfo(user, participant);
     }
-
 }
