@@ -163,7 +163,8 @@ public class GroupService {
                             .filter(p -> p.getStatusType().equals(StatusType.ACTIVE)).count(),true));
         }
 
-        return GetGroupListResponse.create(slice.hasNext(), groupList);
+        return GetGroupListResponse.create(participantEntityList.get(participantEntityList.size() - 1).getId(),
+                slice.hasNext(), groupList);
     }
 
     public GetNicknameResponse getMyNickname(Long userId, Long groupId) {
