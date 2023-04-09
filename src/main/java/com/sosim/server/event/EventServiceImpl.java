@@ -68,7 +68,7 @@ public class EventServiceImpl implements EventService{
 
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
+        Participant participant = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         EventSingleInfo eventSingleInfo = EventSingleInfo.from(event);
@@ -124,7 +124,7 @@ public class EventServiceImpl implements EventService{
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
         }
 
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
+        Participant participant = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         if (eventModifyReq.getUserName() != null) {
@@ -173,7 +173,7 @@ public class EventServiceImpl implements EventService{
             }
         }
 
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
+        Participant participant = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         if (paymentTypeReq.getPaymentType().equals("full")) {
@@ -187,12 +187,9 @@ public class EventServiceImpl implements EventService{
         }
 
         event.changePaymentType(paymentTypeReq);
-
         eventRepository.save(event);
-
         EventInfo eventInfo = EventInfo.from(event);
         eventInfo.setUserName(participant.getNickname());
-
         return eventInfo;
     }
 
@@ -486,7 +483,7 @@ public class EventServiceImpl implements EventService{
         eventList = page.getContent();
         eventInfoList = eventList.stream().map(x -> {
             EventListInfo eventlistInfo = EventListInfo.from(x);
-            Participant participant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+            Participant participant = participantRepository.findByUserAndGroup(x.getUser(), group).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
             eventlistInfo.setUserName(participant.getNickname());
             return eventlistInfo;
         }).collect(Collectors.toList());
@@ -566,7 +563,7 @@ public class EventServiceImpl implements EventService{
     private UserAndParticipantInfo getUserAndParticipant(long userId, long groupId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+        Participant participant = participantRepository.findByUserAndGroup(user, group).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
         return new UserAndParticipantInfo(user, participant);
     }
 }

@@ -14,9 +14,8 @@ import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
     Optional<Participant> findByNicknameAndGroupAndStatusType(String participantName, Group group, StatusType statusType);
-
     Optional<Participant> findByUserAndGroupAndStatusType(User user, Group group, StatusType statusType);
-
+    Optional<Participant> findByUserAndGroup(User user, Group group);
     Optional<Participant> findByNickname(String participantName);
 
     Slice<Participant> findByUserIdAndStatusTypeOrderByIdDesc(Long userId, StatusType statusType, Pageable pageable);
