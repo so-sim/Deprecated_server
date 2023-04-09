@@ -22,7 +22,6 @@ import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
-import com.sosim.server.type.UserType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.time.LocalDate;
@@ -565,7 +564,7 @@ public class EventServiceImpl implements EventService{
     }
 
     private UserAndParticipantInfo getUserAndParticipant(long userId, long groupId) {
-        User user = userRepository.findByIdAndUserType(userId, UserType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
         Participant participant = participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
         return new UserAndParticipantInfo(user, participant);
