@@ -247,19 +247,17 @@ public class EventServiceImpl implements EventService{
         }
 
         if (eventListReq.getUserId() != null) {
-            User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-            Participant participant = participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            page = eventRepository.findByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE, pageRequest);
+            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+            page = eventRepository.findByGroupAndUserAndStatusType(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, pageRequest);
             eventList = page.getContent();
             eventInfoList = eventList.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(participant.getNickname());
+                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
             totalCount = page.getTotalElements();
         }
 
-// TODO 수정 시작
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getUserId() != null) {
             UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
             startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
@@ -368,6 +366,18 @@ public class EventServiceImpl implements EventService{
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
             page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
+            totalCount = page.getTotalElements();
+        }
+
+        if (eventListReq.getUserId()!= null && eventListReq.getPaymentType()!= null) {
+            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+            page = eventRepository.findByGroupAndUserAndPaymentTypeAndStatusType(group, userAndParticipantInfo.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
+            eventList = page.getContent();
+            eventInfoList = eventList.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
             totalCount = page.getTotalElements();
         }
 
