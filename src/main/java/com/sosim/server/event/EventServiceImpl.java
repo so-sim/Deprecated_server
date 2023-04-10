@@ -71,7 +71,7 @@ public class EventServiceImpl implements EventService{
 
         EventSingleInfo eventSingleInfo = EventSingleInfo.from(event);
 
-        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).get();
+        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).orElse(null);
         if (activeParticipant == null) {
             eventSingleInfo.setUserName("");
         } else {
@@ -187,7 +187,7 @@ public class EventServiceImpl implements EventService{
         eventRepository.save(event);
         EventInfo eventInfo = EventInfo.from(event);
 
-        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).get();
+        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).orElse(null);
         if (activeParticipant == null) {
             eventInfo.setUserName("");
         } else {
@@ -485,7 +485,7 @@ public class EventServiceImpl implements EventService{
     private List<Event> getIndexList(List<Event> eventList, String nickname, Group group) {
         List<Event> indexList = new ArrayList<>();
         for (int i = 0; i < eventList.size(); i++) {
-            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(eventList.get(i).getUser(), group, StatusType.ACTIVE).get();
+            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(eventList.get(i).getUser(), group, StatusType.ACTIVE).orElse(null);
             if (activeParticipant != null) {
                 if (activeParticipant.getCreateDate().isBefore(eventList.get(i).getCreateDate())
                     && activeParticipant.getNickname().equals(nickname)) {
@@ -556,7 +556,7 @@ public class EventServiceImpl implements EventService{
         eventList = page.getContent();
         eventInfoList = eventList.stream().map(x -> {
             EventListInfo eventlistInfo = EventListInfo.from(x);
-            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).get();
+            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).orElse(null);
             if (activeParticipant == null) {
                 eventlistInfo.setUserName("");
             } else {
