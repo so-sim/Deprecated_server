@@ -44,7 +44,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 @Service
 @Slf4j
@@ -113,33 +112,27 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventInfo updateEvent(AuthUser authUser, long id, EventModifyReq eventModifyReq) {
 
-        if (eventModifyReq.getUserName() == null && eventModifyReq.getGroundsDate() == null && ObjectUtils.isEmpty(eventModifyReq.getPayment())
-            && eventModifyReq.getGrounds() == null && eventModifyReq.getPaymentType() == null) {
-            throw new CustomException(CodeType.INPUT_ANY_DATA);
-        }
-
         Event event = getActiveEvent(id);
 
         if (!event.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
         }
 
-        Participant participant = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
+        Participant participantWitheventId = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-
-        if (eventModifyReq.getUserName() != null) {
-            Participant participantforName = participantRepository.findByNickname(eventModifyReq.getUserName())
-                .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            User user = userRepository.findById(participantforName.getUser().getId())
-                .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-            eventModifyReq.setUser(user);
+        Participant participantWithrequest = participantRepository.findByNicknameAndGroup(eventModifyReq.getUserName(), event.getGroup())
+            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
+        if (!participantWitheventId.equals(participantWithrequest)) {
+            throw new CustomException(CodeType.INVALID_USER);
         }
+        User user = userRepository.findById(participantWithrequest.getUser().getId())
+            .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+        eventModifyReq.setUser(user);
 
         event.updateEvent(eventModifyReq);
         eventRepository.save(event);
-
         EventInfo eventInfo = EventInfo.from(event);
-        eventInfo.setUserName(participant.getNickname());
+        eventInfo.setUserName(participantWitheventId.getNickname());
 
         return eventInfo;
     }
@@ -562,7 +555,7 @@ public class EventServiceImpl implements EventService{
 
     private UserAndParticipantInfo getUserAndParticipant(long userId, long groupId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
+        Group group = groupRepository.findByIdAndStatusType(groupId, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
         Participant participant = participantRepository.findByUserAndGroup(user, group).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
         return new UserAndParticipantInfo(user, participant);
     }
