@@ -6,7 +6,6 @@ import com.sosim.server.event.dto.info.EventInfo;
 import com.sosim.server.event.dto.info.EventListInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
 import com.sosim.server.event.dto.info.ListInfo;
-import com.sosim.server.event.dto.info.UserAndParticipantInfo;
 import com.sosim.server.event.dto.info.YearMonthWeekInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
@@ -39,6 +38,8 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -67,17 +68,27 @@ public class EventServiceImpl implements EventService{
 
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
-        Participant participant = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
-            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         EventSingleInfo eventSingleInfo = EventSingleInfo.from(event);
 
+        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).get();
+        if (activeParticipant == null) {
+            eventSingleInfo.setUserName("");
+        } else {
+            eventSingleInfo.setUserName(activeParticipant.getNickname());
+        }
+        List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.DELETED);
+        for (int i = 0; i < participantList.size(); i++) {
+            if (participantList.get(i).getCreateDate().isBefore(event.getCreateDate())
+                && (participantList.get(i).getDeleteDate().isAfter(event.getCreateDate()))) {
+                eventSingleInfo.setUserName(participantList.get(i).getNickname());
+            }
+        }
         if (event.getGroup().getAdminId().equals(event.getUser().getId())) {
             eventSingleInfo.setAdminYn("true");
         } else {
             eventSingleInfo.setAdminYn("false");
         }
-        eventSingleInfo.setUserName(participant.getNickname());
         return eventSingleInfo;
     }
 
@@ -118,21 +129,17 @@ public class EventServiceImpl implements EventService{
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
         }
 
-        Participant participantWitheventId = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
+        Participant participant = participantRepository.findByNicknameAndGroup(eventModifyReq.getUserName(), event.getGroup())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-        Participant participantWithrequest = participantRepository.findByNicknameAndGroup(eventModifyReq.getUserName(), event.getGroup())
-            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-        if (!participantWitheventId.equals(participantWithrequest)) {
-            throw new CustomException(CodeType.INVALID_USER);
-        }
-        User user = userRepository.findById(participantWithrequest.getUser().getId())
+
+        User user = userRepository.findById(participant.getUser().getId())
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
         eventModifyReq.setUser(user);
 
         event.updateEvent(eventModifyReq);
         eventRepository.save(event);
         EventInfo eventInfo = EventInfo.from(event);
-        eventInfo.setUserName(participantWitheventId.getNickname());
+        eventInfo.setUserName(participant.getNickname());
 
         return eventInfo;
     }
@@ -166,9 +173,6 @@ public class EventServiceImpl implements EventService{
             }
         }
 
-        Participant participant = participantRepository.findByUserAndGroup(event.getUser(), event.getGroup())
-            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-
         if (paymentTypeReq.getPaymentType().equals("full")) {
             if (event.getPaymentType().equals(PaymentType.NON_PAYMENT)) {
                 event.setAdminNonToFull(event.getAdminNonToFull() + 1);
@@ -182,7 +186,20 @@ public class EventServiceImpl implements EventService{
         event.changePaymentType(paymentTypeReq);
         eventRepository.save(event);
         EventInfo eventInfo = EventInfo.from(event);
-        eventInfo.setUserName(participant.getNickname());
+
+        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).get();
+        if (activeParticipant == null) {
+            eventInfo.setUserName("");
+        } else {
+            eventInfo.setUserName(activeParticipant.getNickname());
+        }
+        List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.DELETED);
+        for (int i = 0; i < participantList.size(); i++) {
+            if (participantList.get(i).getCreateDate().isBefore(event.getCreateDate())
+                && (participantList.get(i).getDeleteDate().isAfter(event.getCreateDate()))) {
+                eventInfo.setUserName(participantList.get(i).getNickname());
+            }
+        }
         return eventInfo;
     }
 
@@ -196,12 +213,12 @@ public class EventServiceImpl implements EventService{
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
 
         long totalCount = 0;
-        List<Event> eventList = null;
+        List<Event> eventList;
         List<EventListInfo> eventInfoList = null;
         PageRequest pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.ASC, "groundsDate"));
         Page<Event> page = null;
 
-        if (eventListReq.getYear() == null && eventListReq.getUserId() == null
+        if (eventListReq.getYear() == null && eventListReq.getNickname() == null
             && eventListReq.getPaymentType() == null && eventListReq.getToday() == null) {
             page = eventRepository.findByGroupAndStatusType(group, StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
@@ -242,77 +259,93 @@ public class EventServiceImpl implements EventService{
             totalCount = page.getTotalElements();
         }
 
-        if (eventListReq.getUserId() != null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
-            page = eventRepository.findByGroupAndUserAndStatusType(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+        if (eventListReq.getNickname() != null && eventListReq.getYear() == null
+            && eventListReq.getToday() == null && eventListReq.getPaymentType() == null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            eventList = eventRepository.findListByGroupAndUserAndStatusType(group, participant.getUser(), StatusType.ACTIVE);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getUserId() != null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
             boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
             int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
             endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
-            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, startDatetime, endDatetime);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getUserId() != null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
             List<LocalDateTime> localDateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
-            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getUserId() != null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay()));
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getUserId() != null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.now());
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getPaymentType() != null) {
+        if (eventListReq.getPaymentType() != null && eventListReq.getYear() == null && eventListReq.getToday() == null
+            && eventListReq.getNickname() == null) {
             page = eventRepository.findByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
@@ -352,76 +385,123 @@ public class EventServiceImpl implements EventService{
             totalCount = page.getTotalElements();
         }
 
-        if (eventListReq.getUserId()!= null && eventListReq.getPaymentType()!= null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
-            page = eventRepository.findByGroupAndUserAndPaymentTypeAndStatusType(group, userAndParticipantInfo.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+        if (eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusType(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getUserId()!= null && eventListReq.getPaymentType()!= null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
             boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
             int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
             endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
-            page = eventRepository.findByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getUserId()!= null && eventListReq.getPaymentType()!= null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
             List<LocalDateTime> dateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
-            page = eventRepository.findByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1), pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getUserId()!= null && eventListReq.getPaymentType()!= null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay()));
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getUserId()!= null && eventListReq.getPaymentType()!= null) {
-            UserAndParticipantInfo userAndParticipantInfo = getUserAndParticipant(eventListReq.getUserId(), groupId);
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
             List<LocalDateTime> dateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.now());
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, userAndParticipantInfo.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1), pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
-                eventlistInfo.setUserName(userAndParticipantInfo.getParticipant().getNickname());
+                eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
+            totalCount = indexList.stream().count();
         }
         return ListInfo.from(totalCount, eventInfoList);
+    }
+
+    private List<Event> getPagedListHolderContent(List<Event> indexList, int page) {
+        PagedListHolder<Event> newPage = new PagedListHolder<>(indexList);
+        newPage.setPageSize(16);
+        newPage.setPage(page);
+        MutableSortDefinition sort = new MutableSortDefinition();
+        sort.setAscending(true);
+        sort.setProperty("groundsDate");
+        newPage.setSort(sort);
+        List<Event> content = newPage.getPageList();
+        return content;
+    }
+
+    private List<Event> getIndexList(List<Event> eventList, String nickname, Group group) {
+        List<Event> indexList = new ArrayList<>();
+        for (int i = 0; i < eventList.size(); i++) {
+            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(eventList.get(i).getUser(), group, StatusType.ACTIVE).get();
+            if (activeParticipant != null) {
+                if (activeParticipant.getCreateDate().isBefore(eventList.get(i).getCreateDate())
+                    && activeParticipant.getNickname().equals(nickname)) {
+                    indexList.add(eventList.get(i));
+                }
+            }
+            List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(eventList.get(i).getUser(), group, StatusType.DELETED);
+            for (int j = 0; j < participantList.size(); j++) {
+                if (participantList.get(j).getCreateDate().isBefore(eventList.get(i).getCreateDate())
+                    && (participantList.get(j).getDeleteDate().isAfter(eventList.get(i).getCreateDate()))
+                    && participantList.get(j).getNickname().equals(nickname)) {
+                    indexList.add(eventList.get(i));
+                }
+            }
+        }
+        return indexList;
     }
 
     private List<LocalDateTime> getDayStartDateTimeAndEndDateTime(LocalDate today) {
@@ -476,8 +556,19 @@ public class EventServiceImpl implements EventService{
         eventList = page.getContent();
         eventInfoList = eventList.stream().map(x -> {
             EventListInfo eventlistInfo = EventListInfo.from(x);
-            Participant participant = participantRepository.findByUserAndGroup(x.getUser(), group).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            eventlistInfo.setUserName(participant.getNickname());
+            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).get();
+            if (activeParticipant == null) {
+                eventlistInfo.setUserName("");
+            } else {
+                eventlistInfo.setUserName(activeParticipant.getNickname());
+            }
+            List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(x.getUser(), group, StatusType.DELETED);
+            for (int i = 0; i < participantList.size(); i++) {
+                if (participantList.get(i).getCreateDate().isBefore(x.getCreateDate())
+                    && (participantList.get(i).getDeleteDate().isAfter(x.getCreateDate()))) {
+                    eventlistInfo.setUserName(participantList.get(i).getNickname());
+                }
+            }
             return eventlistInfo;
         }).collect(Collectors.toList());
         return eventInfoList;
@@ -553,10 +644,8 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
 
-    private UserAndParticipantInfo getUserAndParticipant(long userId, long groupId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+    private Participant getParticipant(String nickname, long groupId) {
         Group group = groupRepository.findByIdAndStatusType(groupId, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
-        Participant participant = participantRepository.findByUserAndGroup(user, group).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-        return new UserAndParticipantInfo(user, participant);
+        return participantRepository.findByNicknameAndGroup(nickname, group).orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
 }

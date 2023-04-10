@@ -16,11 +16,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findByIdAndStatusType(Long id, StatusType statusType);
     List<Event> findByGroupAndStatusTypeAndGroundsDateBetween(Group group, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate);
     Page<Event> findByGroupAndStatusType(Group group, StatusType statusType, Pageable pageable);
-    Page<Event> findByGroupAndUserAndStatusType(Group group, User user, StatusType statusType, Pageable pageable);
+    List<Event> findListByGroupAndUserAndStatusType(Group group, User user, StatusType statusType);
     Page<Event> findByGroupAndPaymentTypeAndStatusType(Group group, PaymentType paymentType, StatusType statusType, Pageable pageable);
-    Page<Event> findByGroupAndUserAndPaymentTypeAndStatusType(Group group, User user, PaymentType paymentType, StatusType statusType, Pageable pageable);
+    List<Event> findListByGroupAndUserAndPaymentTypeAndStatusType(Group group, User user, PaymentType paymentType, StatusType statusType);
     Page<Event> findByGroupAndStatusTypeAndGroundsDateBetween(Group group, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-    Page<Event> findByGroupAndUserAndStatusTypeAndGroundsDateBetween(Group group, User user, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    List<Event> findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(Group group, User user, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate);
     Page<Event> findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(Group group, PaymentType paymentType, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
-    Page<Event> findByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(Group group, User user, PaymentType paymentType, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    List<Event> findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(Group group, User user, PaymentType paymentType, StatusType statusType, LocalDateTime startDate, LocalDateTime endDate);
 }
