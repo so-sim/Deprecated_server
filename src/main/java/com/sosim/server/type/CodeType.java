@@ -34,6 +34,7 @@ public enum CodeType {
     USER_ALREADY_WITHDRAWAL("3004", HttpStatus.BAD_REQUEST, "이미 탈퇴한 사용자입니다."),
     NOT_FOUND_USER("3005", HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
     INVALID_USER("3006", HttpStatus.BAD_REQUEST, "사용자 정보가 일치하지 않습니다."),
+    CANNOT_WITHDRAWAL_BY_GROUP_ADMIN("3007", HttpStatus.BAD_REQUEST,"모임의 총무는 소심한 총무 서비스 회원 탈퇴를 할 수 없습니다. 총무 역할을 위임해 주세요."),
 
     // Group - Success
     CREATE_GROUP("900", HttpStatus.CREATED, "모임이 성공적으로 생성되었습니다."),
