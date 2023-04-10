@@ -13,15 +13,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
+    Optional<Participant> findByNicknameAndGroup(String participantName, Group group);
     Optional<Participant> findByNicknameAndGroupAndStatusType(String participantName, Group group, StatusType statusType);
     Optional<Participant> findByUserAndGroupAndStatusType(User user, Group group, StatusType statusType);
     Optional<Participant> findByUserAndGroup(User user, Group group);
-    Optional<Participant> findByNickname(String participantName);
-
     Slice<Participant> findByUserIdAndStatusTypeOrderByIdDesc(Long userId, StatusType statusType, Pageable pageable);
-
     Slice<Participant> findByIdLessThanAndStatusTypeAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
-
     @Query("select p.user.id from Participant p where p.group.id = :groupId and p.nickname in (:nickname)")
     List<Long> findByGroupIdAndNicknameIn(@Param("groupId") Long groupId, @Param("nickname") List<String> nickname);
 }
