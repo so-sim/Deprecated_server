@@ -1,9 +1,13 @@
 package com.sosim.server.user;
 
 import com.sosim.server.config.exception.CustomException;
+import com.sosim.server.group.GroupRepository;
 import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
+import com.sosim.server.participant.Participant;
+import com.sosim.server.participant.ParticipantRepository;
+import com.sosim.server.participant.ParticipantService;
 import com.sosim.server.type.CodeType;
-import com.sosim.server.type.SocialType;
+import com.sosim.server.type.StatusType;
 import com.sosim.server.type.UserType;
 import com.sosim.server.type.WithdrawalGroundsType;
 import com.sosim.server.user.dto.req.UserWithdrawalReq;
@@ -21,6 +25,9 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
+    private final ParticipantRepository participantRepository;
+    private final GroupRepository groupRepository;
+    private final ParticipantService participantService;
 
     @Override
     public User save(User user, OAuth2UserInfoRequest oAuth2UserInfoRequest) {
@@ -68,8 +75,17 @@ public class UserServiceImpl implements UserService{
 
         User user = userRepository.findById(userWithdrawalReq.getUserId())
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-        if(user.getUserType().equals(UserType.WITHDRAWAL)) {
+        if (user.getUserType().equals(UserType.WITHDRAWAL)) {
             throw new CustomException(CodeType.USER_ALREADY_WITHDRAWAL);
+        }
+        if (groupRepository.findByAdminIdAndStatusType(user.getId(), StatusType.ACTIVE).isPresent()) {
+            throw new CustomException(CodeType.CANNOT_WITHDRAWAL_BY_GROUP_ADMIN);
+        }
+        List<Participant> participantList = participantRepository.findByUserAndStatusType(user, StatusType.ACTIVE);
+        if (participantList != null) {
+            for (Participant participant : participantList) {
+                participantService.deleteParticipantEntity(participant.getUser(), participant.getGroup());
+            }
         }
         user.setWithdrawalDate(LocalDateTime.now());
         user.setUserType(UserType.WITHDRAWAL);
