@@ -26,7 +26,7 @@ public class ParticipantService {
             throw new CustomException(CodeType.ALREADY_INTO_GROUP);
         }
 
-        if (participantRepository.findByNicknameAndGroupAndStatusType(nickname, groupEntity, StatusType.ACTIVE).isPresent()) {
+        if (participantRepository.findByNicknameAndGroup(nickname, groupEntity).isPresent()) {
             throw new CustomException(CodeType.ALREADY_USE_NICKNAME);
         }
 
@@ -39,8 +39,8 @@ public class ParticipantService {
     }
 
     public Participant modifyNickname(User user, Group group, ParticipantNicknameRequest participantNicknameRequest) {
-        if (participantRepository.findByNicknameAndGroupAndStatusType(participantNicknameRequest.getNickname(),
-                group, StatusType.ACTIVE).isPresent()) {
+        if (participantRepository.findByNicknameAndGroup(participantNicknameRequest.getNickname(),
+                group).isPresent()) {
             throw new CustomException(CodeType.ALREADY_USE_NICKNAME);
         }
 

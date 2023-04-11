@@ -16,6 +16,9 @@ public class UpdateGroupRequest {
     @JsonProperty("title")
     private String title;
 
+    @JsonProperty("nickname")
+    private String nickname;
+
     @NotNull
     @JsonProperty("type")
     private GroupType groupType;
