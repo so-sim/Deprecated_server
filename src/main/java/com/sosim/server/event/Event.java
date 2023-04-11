@@ -114,8 +114,8 @@ public class Event extends BaseTimeEntity {
             } else if (this.paymentType.equals(PaymentType.CONFIRMING)) {
                 this.adminConToFull++;
             }
-            this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
         }
+        this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
     }
 
     public void deleteEvent(){
