@@ -36,8 +36,9 @@ public class SecurityConfig {
 
         http
                 .authorizeRequests()
+                .antMatchers("/api/group/{groupId}").permitAll()
                 .antMatchers("/api/**").authenticated()
-                .antMatchers("/**", "/api/group/{groupId}").permitAll();
+                .antMatchers("/**").permitAll();
         // 요청에 대한 권한 체크 파트
 
         // Jwt 인증 필터
