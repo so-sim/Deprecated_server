@@ -11,4 +11,5 @@ public interface UserService {
     User getUser(OAuth2UserInfoRequest userInfo);
     List<User> getUserList();
     void withdrawalUser(UserWithdrawalReq userWithdrawalReq);
+    void withdrawInfo(Long userId);
 }

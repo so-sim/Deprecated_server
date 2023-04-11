@@ -90,6 +90,10 @@ public class GroupService {
         }
         groupEntity.update(updateGroupRequest);
 
+        if (updateGroupRequest.getNickname() != null) {
+            modifyNickname(userId, groupId, new ParticipantNicknameRequest(updateGroupRequest.getNickname()));
+        }
+
         return CreateGroupResponse.create(groupEntity);
     }
 
