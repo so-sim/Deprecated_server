@@ -22,6 +22,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     Optional<Participant> findByUserAndGroupAndStatusType(User user, Group group, StatusType statusType);
     Slice<Participant> findByUserIdAndStatusTypeOrderByIdDesc(Long userId, StatusType statusType, Pageable pageable);
     Slice<Participant> findByIdLessThanAndStatusTypeAndUserIdOrderByIdDesc(Long participantId, StatusType statusType, Long userId, Pageable pageable);
-    @Query("select p.user.id from Participant p where p.group.id = :groupId and p.nickname in (:nickname)")
+
+    @Query("select p.user.id from Participant p where p.group.id = :groupId and p.statusType = 'ACTIVE' and p.nickname in (:nickname)")
     List<Long> findByGroupIdAndNicknameIn(@Param("groupId") Long groupId, @Param("nickname") List<String> nickname);
 }
