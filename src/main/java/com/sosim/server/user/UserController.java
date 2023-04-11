@@ -18,7 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @DeleteMapping("/api/user/withdraw")
+    @PutMapping("/api/user/withdraw")
     public ResponseEntity<?> withdrawalUser(@Valid @RequestBody UserWithdrawalReq userWithdrawalReq) {
         this.userService.withdrawalUser(userWithdrawalReq);
         return new ResponseEntity<>(Response.create(CodeType.USER_WITHDRAWAL_SUCCESS, null), CodeType.USER_WITHDRAWAL_SUCCESS.getHttpStatus());
