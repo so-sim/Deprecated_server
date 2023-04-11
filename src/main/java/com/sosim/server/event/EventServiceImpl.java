@@ -6,6 +6,7 @@ import com.sosim.server.event.dto.info.EventInfo;
 import com.sosim.server.event.dto.info.EventListInfo;
 import com.sosim.server.event.dto.info.EventSingleInfo;
 import com.sosim.server.event.dto.info.ListInfo;
+import com.sosim.server.event.dto.info.YearMonthWeekInfo;
 import com.sosim.server.event.dto.req.EventCreateReq;
 import com.sosim.server.event.dto.req.EventListReq;
 import com.sosim.server.event.dto.req.EventModifyReq;
@@ -20,13 +21,13 @@ import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
-import com.sosim.server.type.UserType;
 import com.sosim.server.user.User;
 import com.sosim.server.user.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -37,12 +38,13 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 @Service
 @Slf4j
@@ -57,22 +59,36 @@ public class EventServiceImpl implements EventService{
 
     private final UserRepository userRepository;
 
+    private LocalDateTime localDateTime = null;
+    private LocalDateTime startDatetime = null;
+    private LocalDateTime endDatetime = null;
+
     @Override
     public EventSingleInfo getEvent(long id) {
 
         Event event = eventRepository.findByIdAndStatusType(id, StatusType.ACTIVE)
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
-            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
         EventSingleInfo eventSingleInfo = EventSingleInfo.from(event);
 
+        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).orElse(null);
+        if (activeParticipant == null) {
+            eventSingleInfo.setUserName("");
+        } else {
+            eventSingleInfo.setUserName(activeParticipant.getNickname());
+        }
+        List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.DELETED);
+        for (int i = 0; i < participantList.size(); i++) {
+            if (participantList.get(i).getCreateDate().isBefore(event.getCreateDate())
+                && (participantList.get(i).getDeleteDate().isAfter(event.getCreateDate()))) {
+                eventSingleInfo.setUserName(participantList.get(i).getNickname());
+            }
+        }
         if (event.getGroup().getAdminId().equals(event.getUser().getId())) {
             eventSingleInfo.setAdminYn("true");
         } else {
             eventSingleInfo.setAdminYn("false");
         }
-        eventSingleInfo.setUserName(participant.getNickname());
         return eventSingleInfo;
     }
 
@@ -107,31 +123,21 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventInfo updateEvent(AuthUser authUser, long id, EventModifyReq eventModifyReq) {
 
-        if (eventModifyReq.getUserName() == null && eventModifyReq.getGroundsDate() == null && ObjectUtils.isEmpty(eventModifyReq.getPayment())
-            && eventModifyReq.getGrounds() == null && eventModifyReq.getPaymentType() == null) {
-            throw new CustomException(CodeType.INPUT_ANY_DATA);
-        }
-
         Event event = getActiveEvent(id);
 
         if (!event.getGroup().getAdminId().equals(Long.parseLong(authUser.getId()))) {
             throw new CustomException(CodeType.INVALID_EVENT_CREATER);
         }
 
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
+        Participant participant = participantRepository.findByNicknameAndGroup(eventModifyReq.getUserName(), event.getGroup())
             .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
 
-        if (eventModifyReq.getUserName() != null) {
-            Participant participantforName = participantRepository.findByNickname(eventModifyReq.getUserName())
-                .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            User user = userRepository.findById(participantforName.getUser().getId())
-                .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-            eventModifyReq.setUser(user);
-        }
+        User user = userRepository.findById(participant.getUser().getId())
+            .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
+        eventModifyReq.setUser(user);
 
         event.updateEvent(eventModifyReq);
         eventRepository.save(event);
-
         EventInfo eventInfo = EventInfo.from(event);
         eventInfo.setUserName(participant.getNickname());
 
@@ -167,9 +173,6 @@ public class EventServiceImpl implements EventService{
             }
         }
 
-        Participant participant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE)
-            .orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-
         if (paymentTypeReq.getPaymentType().equals("full")) {
             if (event.getPaymentType().equals(PaymentType.NON_PAYMENT)) {
                 event.setAdminNonToFull(event.getAdminNonToFull() + 1);
@@ -181,12 +184,22 @@ public class EventServiceImpl implements EventService{
         }
 
         event.changePaymentType(paymentTypeReq);
-
         eventRepository.save(event);
-
         EventInfo eventInfo = EventInfo.from(event);
-        eventInfo.setUserName(participant.getNickname());
 
+        Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.ACTIVE).orElse(null);
+        if (activeParticipant == null) {
+            eventInfo.setUserName("");
+        } else {
+            eventInfo.setUserName(activeParticipant.getNickname());
+        }
+        List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(event.getUser(), event.getGroup(), StatusType.DELETED);
+        for (int i = 0; i < participantList.size(); i++) {
+            if (participantList.get(i).getCreateDate().isBefore(event.getCreateDate())
+                && (participantList.get(i).getDeleteDate().isAfter(event.getCreateDate()))) {
+                eventInfo.setUserName(participantList.get(i).getNickname());
+            }
+        }
         return eventInfo;
     }
 
@@ -200,19 +213,16 @@ public class EventServiceImpl implements EventService{
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
 
         long totalCount = 0;
-        List<Event> eventList = null;
+        List<Event> eventList;
         List<EventListInfo> eventInfoList = null;
         PageRequest pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.ASC, "groundsDate"));
         Page<Event> page = null;
-        LocalDateTime startDatetime = null;
-        LocalDateTime endDatetime = null;
 
-        if (eventListReq.getYear() == null && eventListReq.getUserId() == null
+        if (eventListReq.getYear() == null && eventListReq.getNickname() == null
             && eventListReq.getPaymentType() == null && eventListReq.getToday() == null) {
             page = eventRepository.findByGroupAndStatusType(group, StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusType(group, StatusType.ACTIVE);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null) {
@@ -223,89 +233,122 @@ public class EventServiceImpl implements EventService{
             page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null) {
-            LocalDateTime localDateTime = null;
-            switch (eventListReq.getWeek()) {
-                case 1:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
-                break;
-                case 2:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 8, 0, 0);
-                break;
-                case 3:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 15, 0, 0);
-                    break;
-                case 4:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
-                    break;
-                case 5: case 6:
-                    boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
-                    int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
-                    break;
-
-            }
-            if (eventListReq.getWeek().equals(5)) {
-                int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
-                endDatetime = localDateTime.plusDays(plusDay);
-                startDatetime = endDatetime.minusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            } else {
-                int minusDay = localDateTime.getDayOfWeek().getValue();
-                startDatetime = localDateTime.minusDays(minusDay);
-                endDatetime = startDatetime.plusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            }
-            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> dateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null) {
-            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(), 0, 0, 0);
-            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(),23,59, 59);
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay()));
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
-        if (eventListReq.getUserId() != null) {
-            User user = userRepository.findByIdAndUserType(eventListReq.getUserId(), UserType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-            Participant participant = participantRepository.findByUserAndGroupAndStatusType(user, group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            page = eventRepository.findByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE, pageRequest);
-            eventList = page.getContent();
-            eventInfoList = eventList.stream().map(x -> {
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true")) {
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.now());
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
+            eventInfoList = getEventInfoList(group, page);
+            totalCount = page.getTotalElements();
+        }
+
+        if (eventListReq.getNickname() != null && eventListReq.getYear() == null
+            && eventListReq.getToday() == null && eventListReq.getPaymentType() == null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            eventList = eventRepository.findListByGroupAndUserAndStatusType(group, participant.getUser(), StatusType.ACTIVE);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
                 EventListInfo eventlistInfo = EventListInfo.from(x);
                 eventlistInfo.setUserName(participant.getNickname());
                 return eventlistInfo;
             }).collect(Collectors.toList());
-            totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndUserAndStatusType(group, user, StatusType.ACTIVE);
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true")) {
-            startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-            endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+            boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
+            int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, startDatetime, endDatetime);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> localDateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay()));
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
-            eventInfoList = getEventInfoList(group, page);
-            totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
         }
 
-        if (eventListReq.getPaymentType() != null) {
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getNickname() != null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.now());
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+
+            eventList = eventRepository.findListByGroupAndUserAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getPaymentType() != null && eventListReq.getYear() == null && eventListReq.getToday() == null
+            && eventListReq.getNickname() == null) {
             page = eventRepository.findByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndPaymentTypeAndStatusType(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getPaymentType() != null) {
@@ -316,71 +359,196 @@ public class EventServiceImpl implements EventService{
             page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getPaymentType() != null) {
-            LocalDateTime localDateTime = null;
-            switch (eventListReq.getWeek()) {
-                case 1:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
-                    break;
-                case 2:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 8, 0, 0);
-                    break;
-                case 3:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 15, 0, 0);
-                    break;
-                case 4:
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 23, 0, 0);
-                    break;
-                case 5: case 6:
-                    boolean isLeapYear = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
-                    int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
-                    localDateTime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 0, 0);
-                    break;
-
-            }
-            if (eventListReq.getWeek().equals(5)) {
-                int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
-                endDatetime = localDateTime.plusDays(plusDay);
-                startDatetime = endDatetime.minusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            } else {
-                int minusDay = localDateTime.getDayOfWeek().getValue();
-                startDatetime = localDateTime.minusDays(minusDay);
-                endDatetime = startDatetime.plusDays(6);
-                log.info("startDateTime:{}", startDatetime);
-                log.info("endDateTime:{}", endDatetime);
-            }
-            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> localDateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
-//            totalCount = eventRepository.countByGroupAndStatusTypeAndGroundsDateBetween(group, StatusType.ACTIVE, startDatetime, endDatetime);
         }
 
         if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getPaymentType() != null) {
-            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(), 0, 0, 0);
-            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay(),23,59, 59);
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay()));
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
         }
 
         if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getPaymentType() != null) {
-            startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-            endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.now());
             pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
-            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime, pageRequest);
+            page = eventRepository.findByGroupAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1), pageRequest);
             eventInfoList = getEventInfoList(group, page);
             totalCount = page.getTotalElements();
         }
 
+        if (eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusType(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() == null && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            startDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), 1, 0, 0);
+            boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
+            int endDay = getEndDayOfMonth(isLeapYear, eventListReq.getMonth());
+            endDatetime = LocalDateTime.of(eventListReq.getYear(), eventListReq.getMonth(), endDay, 23, 59);
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, startDatetime, endDatetime);
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getWeek() != null && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            YearMonthWeekInfo yearMonthWeekInfo = new YearMonthWeekInfo(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getWeek());
+            List<LocalDateTime> dateTimeList = getWeekStartDateTimeAndEndDateTime(yearMonthWeekInfo);
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getYear() != null && eventListReq.getMonth() != null && eventListReq.getDay() != null && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            List<LocalDateTime> localDateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.of(eventListReq.getYear(), eventListReq.getMonth(), eventListReq.getDay()));
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, localDateTimeList.get(0), localDateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
+
+        if (eventListReq.getToday() != null && eventListReq.getToday().equals("true") && eventListReq.getNickname()!= null && eventListReq.getPaymentType()!= null) {
+            Participant participant = getParticipant(eventListReq.getNickname(), groupId);
+            List<LocalDateTime> dateTimeList = getDayStartDateTimeAndEndDateTime(LocalDate.now());
+            pageRequest = PageRequest.of(eventListReq.getPage(), 16, Sort.by(Direction.DESC, "createDate"));
+
+            eventList = eventRepository.findListByGroupAndUserAndPaymentTypeAndStatusTypeAndGroundsDateBetween(group, participant.getUser(), PaymentType.getType(eventListReq.getPaymentType()), StatusType.ACTIVE, dateTimeList.get(0), dateTimeList.get(1));
+            List<Event> indexList = getIndexList(eventList, eventListReq.getNickname(), group);
+            List<Event> content = getPagedListHolderContent(indexList, eventListReq.getPage());
+
+            eventInfoList = content.stream().map(x -> {
+                EventListInfo eventlistInfo = EventListInfo.from(x);
+                eventlistInfo.setUserName(participant.getNickname());
+                return eventlistInfo;
+            }).collect(Collectors.toList());
+            totalCount = indexList.stream().count();
+        }
         return ListInfo.from(totalCount, eventInfoList);
     }
 
+    private List<Event> getPagedListHolderContent(List<Event> indexList, int page) {
+        PagedListHolder<Event> newPage = new PagedListHolder<>(indexList);
+        newPage.setPageSize(16);
+        newPage.setPage(page);
+        MutableSortDefinition sort = new MutableSortDefinition();
+        sort.setAscending(true);
+        sort.setProperty("groundsDate");
+        newPage.setSort(sort);
+        List<Event> content = newPage.getPageList();
+        return content;
+    }
+
+    private List<Event> getIndexList(List<Event> eventList, String nickname, Group group) {
+        List<Event> indexList = new ArrayList<>();
+        for (int i = 0; i < eventList.size(); i++) {
+            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(eventList.get(i).getUser(), group, StatusType.ACTIVE).orElse(null);
+            if (activeParticipant != null) {
+                if (activeParticipant.getCreateDate().isBefore(eventList.get(i).getCreateDate())
+                    && activeParticipant.getNickname().equals(nickname)) {
+                    indexList.add(eventList.get(i));
+                }
+            }
+            List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(eventList.get(i).getUser(), group, StatusType.DELETED);
+            for (int j = 0; j < participantList.size(); j++) {
+                if (participantList.get(j).getCreateDate().isBefore(eventList.get(i).getCreateDate())
+                    && (participantList.get(j).getDeleteDate().isAfter(eventList.get(i).getCreateDate()))
+                    && participantList.get(j).getNickname().equals(nickname)) {
+                    indexList.add(eventList.get(i));
+                }
+            }
+        }
+        return indexList;
+    }
+
+    private List<LocalDateTime> getDayStartDateTimeAndEndDateTime(LocalDate today) {
+        List<LocalDateTime> localDateTimeList = new ArrayList<>();
+        startDatetime = LocalDateTime.of(today, LocalTime.of(0,0,0));
+        endDatetime = LocalDateTime.of(today, LocalTime.of(23,59,59));
+        localDateTimeList.add(startDatetime);
+        localDateTimeList.add(endDatetime);
+        return localDateTimeList;
+    }
+
+    private List<LocalDateTime> getWeekStartDateTimeAndEndDateTime(YearMonthWeekInfo yearMonthWeekInfo) {
+        List<LocalDateTime> localDateTimeList = new ArrayList<>();
+        switch (yearMonthWeekInfo.getWeek()) {
+            case 1:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 1, 0, 0);
+                break;
+            case 2:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 8, 0, 0);
+                break;
+            case 3:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 15, 0, 0);
+                break;
+            case 4:
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 23, 0, 0);
+                break;
+            case 5: case 6:
+                boolean isLeapYear = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), 28, 0, 0).toLocalDate().isLeapYear();
+                int endDay = getEndDayOfMonth(isLeapYear, yearMonthWeekInfo.getMonth());
+                localDateTime = LocalDateTime.of(yearMonthWeekInfo.getYear(), yearMonthWeekInfo.getMonth(), endDay, 0, 0);
+                break;
+        }
+        if (yearMonthWeekInfo.getWeek().equals(5)|| yearMonthWeekInfo.getWeek().equals(6)) {
+            int plusDay = 6 - localDateTime.getDayOfWeek().getValue();
+            endDatetime = localDateTime.plusDays(plusDay);
+            startDatetime = endDatetime.minusDays(6);
+            localDateTimeList.add(startDatetime);
+            localDateTimeList.add(endDatetime);
+        } else {
+            int minusDay = localDateTime.getDayOfWeek().getValue();
+            startDatetime = localDateTime.minusDays(minusDay);
+            endDatetime = startDatetime.plusDays(7);
+            localDateTimeList.add(startDatetime);
+            localDateTimeList.add(endDatetime);
+        }
+        return localDateTimeList;
+    }
 
     private List<EventListInfo> getEventInfoList(Group group, Page<Event> page) {
         List<Event> eventList;
@@ -388,8 +556,19 @@ public class EventServiceImpl implements EventService{
         eventList = page.getContent();
         eventInfoList = eventList.stream().map(x -> {
             EventListInfo eventlistInfo = EventListInfo.from(x);
-            Participant participant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.INVALID_USER));
-            eventlistInfo.setUserName(participant.getNickname());
+            Participant activeParticipant = participantRepository.findByUserAndGroupAndStatusType(x.getUser(), group, StatusType.ACTIVE).orElse(null);
+            if (activeParticipant == null) {
+                eventlistInfo.setUserName("");
+            } else {
+                eventlistInfo.setUserName(activeParticipant.getNickname());
+            }
+            List<Participant> participantList = participantRepository.findListByUserAndGroupAndStatusType(x.getUser(), group, StatusType.DELETED);
+            for (int i = 0; i < participantList.size(); i++) {
+                if (participantList.get(i).getCreateDate().isBefore(x.getCreateDate())
+                    && (participantList.get(i).getDeleteDate().isAfter(x.getCreateDate()))) {
+                    eventlistInfo.setUserName(participantList.get(i).getNickname());
+                }
+            }
             return eventlistInfo;
         }).collect(Collectors.toList());
         return eventInfoList;
@@ -428,7 +607,7 @@ public class EventServiceImpl implements EventService{
     @Override
     public List<DayInfo> getMonthlyDayPaymentType(long groupId, MonthlyDayPaymentTypeReq mdpTreq) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
-        LocalDateTime startDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), 1, 0, 0);
+        startDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), 1, 0, 0);
         boolean isLeapYear = startDatetime.toLocalDate().isLeapYear();
         int endDay = getEndDayOfMonth(isLeapYear, mdpTreq.getMonth());
         LocalDateTime endDatetime = LocalDateTime.of(mdpTreq.getYear(), mdpTreq.getMonth(), endDay, 23, 59);
@@ -465,27 +644,8 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_EVENT));
     }
 
-    private List<Map<Integer, Integer>> getPaymentList(long groupId, PaymentType paymentType, int month) {
-
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
-
-        List<Event> byPaymentTypeAndStatusType = eventRepository.findByPaymentTypeAndStatusTypeAndGroup(
-            paymentType, StatusType.ACTIVE, group);
-
-        List<Event> paymentList = byPaymentTypeAndStatusType.stream()
-            .filter(event -> event.getCreateDate().getMonthValue() == month).collect(
-                Collectors.toList());
-
-        List<Map<Integer, Integer>> paymentDayCountList = paymentList.stream().map(event -> {
-            Map<Integer, Integer> dayCount = new HashMap<>();
-            int dayOfMonth = event.getCreateDate().getDayOfMonth();
-            int count = (int) paymentList.stream().filter(y -> y.getCreateDate().getDayOfMonth() == dayOfMonth)
-                .count();
-            dayCount.put(dayOfMonth, count);
-            log.info("dayCount : {}", dayCount);
-            return dayCount;
-        }).collect(Collectors.toList());
-        return paymentDayCountList;
+    private Participant getParticipant(String nickname, long groupId) {
+        Group group = groupRepository.findByIdAndStatusType(groupId, StatusType.ACTIVE).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_GROUP));
+        return participantRepository.findByNicknameAndGroup(nickname, group).orElseThrow(() -> new CustomException(CodeType.NONE_PARTICIPANT));
     }
-
 }

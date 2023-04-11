@@ -20,7 +20,7 @@ public class EventListReq {
     private Integer day;
 
     // 팀원별 필터링
-    private Long userId;
+    private String nickname;
 
     // 납부 여부 필터링
     private String paymentType;

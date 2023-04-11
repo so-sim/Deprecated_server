@@ -1,11 +1,9 @@
 package com.sosim.server.event;
 
 import com.sosim.server.common.auditing.BaseTimeEntity;
-import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.event.dto.req.EventModifyReq;
 import com.sosim.server.event.dto.req.PaymentTypeReq;
 import com.sosim.server.group.Group;
-import com.sosim.server.type.CodeType;
 import com.sosim.server.type.EventType;
 import com.sosim.server.type.PaymentType;
 import com.sosim.server.type.StatusType;
@@ -34,7 +32,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.springframework.util.ObjectUtils;
 
 @Getter
 @NoArgsConstructor
@@ -102,36 +99,22 @@ public class Event extends BaseTimeEntity {
 
     public void updateEvent(EventModifyReq eventModifyReq) {
 
-        if (eventModifyReq.getUserName() != null && eventModifyReq.getUser() != null) {
-            this.user = eventModifyReq.getUser();
-        }
+        this.user = eventModifyReq.getUser();
 
-        if (eventModifyReq.getGroundsDate() != null) {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-            LocalDate localDate = LocalDate.parse(eventModifyReq.getGroundsDate(), dateTimeFormatter);
-            LocalDateTime groundsDatetime = LocalDateTime.of(localDate, LocalTime.of(0,0,0));
-            this.groundsDate = groundsDatetime;
-        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate localDate = LocalDate.parse(eventModifyReq.getGroundsDate(), dateTimeFormatter);
+        LocalDateTime groundsDatetime = LocalDateTime.of(localDate, LocalTime.of(0,0,0));
+        this.groundsDate = groundsDatetime;
+        this.payment = eventModifyReq.getPayment();
+        this.grounds = eventModifyReq.getGrounds();
 
-        if (!ObjectUtils.isEmpty(eventModifyReq.getPayment())) {
-            this.payment = eventModifyReq.getPayment();
-        }
-
-        if (eventModifyReq.getGrounds() != null) {
-            this.grounds = eventModifyReq.getGrounds();
-        }
-
-        if (eventModifyReq.getPaymentType() != null) {
-            this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
-            if (eventModifyReq.getPaymentType().equals("full")) {
-                if (this.paymentType.equals(PaymentType.NON_PAYMENT)) {
-                    this.adminNonToFull++;
-                } else if (this.paymentType.equals(PaymentType.CONFIRMING)) {
-                    this.adminConToFull++;
-                } else {
-                    throw new CustomException(CodeType.INVALID_PAYMENT_TYPE_PARAMETER);
-                }
+        if (eventModifyReq.getPaymentType().equals("full")) {
+            if (this.paymentType.equals(PaymentType.NON_PAYMENT)) {
+                this.adminNonToFull++;
+            } else if (this.paymentType.equals(PaymentType.CONFIRMING)) {
+                this.adminConToFull++;
             }
+            this.paymentType = PaymentType.getType(eventModifyReq.getPaymentType());
         }
     }
 

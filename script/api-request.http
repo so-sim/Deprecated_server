@@ -47,7 +47,7 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBY2Nlc3NUb
 Content-Type: application/json
 
 {
-  "groupId": 2,
+  "groupId": 1,
   "userName": "kkk",
   "groundsDate": "2023.03.17",
   "payment": 170000,

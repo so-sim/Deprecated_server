@@ -19,4 +19,6 @@ public class EventModifyReq {
     private String grounds;
 
     private String paymentType;
+
+    private String paymentTypeChangeYn;
 }
