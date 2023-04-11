@@ -1,6 +1,7 @@
 package com.sosim.server.user;
 
 import com.sosim.server.config.exception.CustomException;
+import com.sosim.server.group.Group;
 import com.sosim.server.group.GroupRepository;
 import com.sosim.server.oauth.dto.request.OAuth2UserInfoRequest;
 import com.sosim.server.participant.Participant;
@@ -91,5 +92,14 @@ public class UserServiceImpl implements UserService{
         user.setUserType(UserType.WITHDRAWAL);
         user.setWithdrawalGroundsType(WithdrawalGroundsType.getType(userWithdrawalReq.getWithdrawalGroundsType()));
         userRepository.save(user);
+    }
+
+    @Override
+    public void withdrawInfo(Long userId) {
+        List<Group> groupList = groupRepository.findListByAdminIdAndStatusType(userId, StatusType.ACTIVE);
+        for (Group group : groupList) {
+            if (participantRepository.findListByGroupAndStatusType(group, StatusType.ACTIVE).size() > 1)
+                throw new CustomException(CodeType.CANNOT_WITHDRAWAL_BY_GROUP_ADMIN);
+        }
     }
 }
