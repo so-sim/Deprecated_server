@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public enum CoverColorType {
     RED("#f86565"),
     ORANGE("#f89a65"),
-    YELLOW("#f8e065"),
+    YELLOW("#f1d026"),
     BLUE("#658ef8"),
     PURPLE("#9465f8");
 
