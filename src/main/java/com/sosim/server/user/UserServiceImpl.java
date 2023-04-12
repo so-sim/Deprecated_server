@@ -79,9 +79,13 @@ public class UserServiceImpl implements UserService{
         if (user.getUserType().equals(UserType.WITHDRAWAL)) {
             throw new CustomException(CodeType.USER_ALREADY_WITHDRAWAL);
         }
-        if (groupRepository.findByAdminIdAndStatusType(user.getId(), StatusType.ACTIVE).isPresent()) {
-            throw new CustomException(CodeType.CANNOT_WITHDRAWAL_BY_GROUP_ADMIN);
+
+        List<Group> groupList = groupRepository.findListByAdminIdAndStatusType(user.getId(), StatusType.ACTIVE);
+        for (Group group : groupList) {
+            if (participantRepository.findListByGroupAndStatusType(group, StatusType.ACTIVE).size() > 1)
+                throw new CustomException(CodeType.CANNOT_WITHDRAWAL_BY_GROUP_ADMIN);
         }
+
         List<Participant> participantList = participantRepository.findByUserAndStatusType(user, StatusType.ACTIVE);
         if (participantList != null) {
             for (Participant participant : participantList) {
