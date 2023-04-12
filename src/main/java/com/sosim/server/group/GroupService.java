@@ -138,7 +138,11 @@ public class GroupService {
     }
 
     public void withdrawGroup(Long userId, Long groupId) {
-        participantService.deleteParticipantEntity(userService.getUser(userId), getGroupEntity(groupId));
+        Group groupEntity = getGroupEntity(groupId);
+        participantService.deleteParticipantEntity(userService.getUser(userId), groupEntity);
+        if (groupEntity.getParticipantList().stream().noneMatch(p -> p.getStatusType().equals(StatusType.ACTIVE))) {
+            groupEntity.delete();
+        }
     }
 
     public void modifyNickname(Long userId, Long groupId, ParticipantNicknameRequest participantNicknameRequest) {
