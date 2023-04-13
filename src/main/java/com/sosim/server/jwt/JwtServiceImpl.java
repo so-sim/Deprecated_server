@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,8 +47,12 @@ public class JwtServiceImpl implements JwtService{
      */
     @Override
     public ReIssueTokenInfo verifyRefreshTokenAndReIssueAccessToken(HttpServletRequest httpServletRequest, HttpServletResponse response) {
+        Cookie[] cookies = httpServletRequest.getCookies();
+        String refreshToken = null;
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("refreshToken")) refreshToken = cookie.getValue();
+        }
 
-        String refreshToken = httpServletRequest.getHeader(SET_COOKIE);
         String id = jwtDao.getValues(refreshToken);
         log.info("refreshToken : {}, id: {}", refreshToken, id);
         User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
@@ -70,12 +75,14 @@ public class JwtServiceImpl implements JwtService{
 
     @Override
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        Cookie cookieOfResponse = new Cookie(REFRESH_TOKEN, refreshToken);
-        cookieOfResponse.setMaxAge(60 * 60 * 24);
-        cookieOfResponse.setHttpOnly(true);
-        cookieOfResponse.setSecure(true);
-        cookieOfResponse.setPath("/login/reissueToken");
+        ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(60 * 60 * 24)
+                .path("/")
+                .build();
 
-        response.addCookie(cookieOfResponse);
+        response.addHeader(SET_COOKIE, cookie.toString());
     }
 }
