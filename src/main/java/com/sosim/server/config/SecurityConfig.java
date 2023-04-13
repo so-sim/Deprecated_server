@@ -1,13 +1,13 @@
 package com.sosim.server.config;
 
 import com.sosim.server.jwt.JwtProvider;
-import com.sosim.server.jwt.JwtService;
 import com.sosim.server.security.filter.AuthenticationFilter;
 import com.sosim.server.security.filter.ExceptionHandlerFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -16,8 +16,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtService jwtService;
     private final JwtProvider jwtProvider;
+
+    @Bean
+    public WebSecurityCustomizer configure() {
+        return (web) -> web.ignoring().antMatchers("/login/**");
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -34,12 +38,12 @@ public class SecurityConfig {
         http
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+        // 요청에 대한 권한 체크 파트
         http
                 .authorizeRequests()
                 .antMatchers("/api/group/{groupId}").permitAll()
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/**").permitAll();
-        // 요청에 대한 권한 체크 파트
 
         // Jwt 인증 필터
         http
