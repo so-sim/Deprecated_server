@@ -2,6 +2,7 @@ package com.sosim.server.jwt;
 
 import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN;
 import static com.sosim.server.jwt.constant.CustomConstant.SET_COOKIE;
+import static com.sosim.server.jwt.constant.CustomConstant.NONE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sosim.server.config.exception.CustomException;
@@ -78,7 +79,7 @@ public class JwtServiceImpl implements JwtService{
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN, refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("None")
+                .sameSite(NONE)
                 .maxAge(60 * 60 * 24)
                 .path("/")
                 .build();
