@@ -30,7 +30,7 @@ public class OAuth2Controller {
 
         LoginResponse loginResponse = oAuth2Service.signUp(SocialType.getSocialType(socialType), code);
         CodeType successSignUp = CodeType.SUCCESS_SIGN_UP;
-        jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken());
+        jwtService.setCookieRefreshToken(response, loginResponse.getRefreshToken());
 
         return new ResponseEntity<>(Response.create(successSignUp, loginResponse), successSignUp.getHttpStatus());
     }
@@ -44,7 +44,7 @@ public class OAuth2Controller {
 
         LoginResponse loginResponse = oAuth2Service.login(SocialType.getSocialType(socialType), code);
         CodeType successLogin = CodeType.SUCCESS_LOGIN;
-        jwtService.setRefreshTokenHeader(response, loginResponse.getRefreshToken());
+        jwtService.setCookieRefreshToken(response, loginResponse.getRefreshToken());
 
         return new ResponseEntity<>(Response.create(successLogin, loginResponse), successLogin.getHttpStatus());
     }
