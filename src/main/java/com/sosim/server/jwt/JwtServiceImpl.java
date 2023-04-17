@@ -5,13 +5,9 @@ import static com.sosim.server.jwt.constant.CustomConstant.SET_COOKIE;
 import static com.sosim.server.jwt.constant.CustomConstant.NONE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sosim.server.config.exception.CustomException;
 import com.sosim.server.jwt.dao.JwtDao;
 import com.sosim.server.jwt.dto.ReIssueTokenInfo;
 import com.sosim.server.jwt.property.JwtProperties;
-import com.sosim.server.type.CodeType;
-import com.sosim.server.user.User;
-import com.sosim.server.user.UserRepository;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +22,6 @@ import org.springframework.stereotype.Service;
 @Getter
 @Slf4j
 public class JwtServiceImpl implements JwtService{
-    private final UserRepository userRepository;
     private final JwtProperties jwtProperties;
     private final JwtFactory jwtFactory;
     private final JwtProvider jwtProvider;
@@ -51,31 +46,20 @@ public class JwtServiceImpl implements JwtService{
         Cookie[] cookies = httpServletRequest.getCookies();
         String refreshToken = null;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refreshToken")) refreshToken = cookie.getValue();
+            if (cookie.getName().equals(REFRESH_TOKEN)) refreshToken = cookie.getValue();
         }
 
         String id = jwtDao.getValues(refreshToken);
-        log.info("refreshToken : {}, id: {}", refreshToken, id);
-        User user = userRepository.findById(Long.parseLong(id)).orElseThrow(() -> new CustomException(CodeType.NOT_FOUND_USER));
-        if(Long.parseLong(id) != user.getId()) {
-            log.info("invalid user");
-            throw new CustomException(CodeType.INVALID_USER);
+        if (jwtProvider.checkRenewRefreshToken(refreshToken)) {
+            jwtDao.deleteValues(refreshToken);
+            String reIssuedRefreshToken = reIssueRefreshToken(id);
+            setCookieRefreshToken(response, reIssuedRefreshToken);
         }
-        jwtDao.deleteValues(refreshToken);
-        String reIssuedRefreshToken = jwtProvider.reIssueRefreshToken(id);
-        sendRefreshToken(response, reIssuedRefreshToken);
         return ReIssueTokenInfo.builder().accessToken(jwtFactory.createAccessToken(id)).build();
     }
 
     @Override
-    public void sendRefreshToken(HttpServletResponse response, String refreshToken) {
-
-        setRefreshTokenHeader(response, refreshToken);
-        log.info("Refresh Token 헤더 설정 완료");
-    }
-
-    @Override
-    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+    public void setCookieRefreshToken(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_TOKEN, refreshToken)
                 .httpOnly(true)
                 .secure(true)
@@ -85,5 +69,11 @@ public class JwtServiceImpl implements JwtService{
                 .build();
 
         response.addHeader(SET_COOKIE, cookie.toString());
+    }
+
+    public String reIssueRefreshToken(String id) {
+        String reIssuedRefreshToken = jwtFactory.createRefreshToken();
+        jwtDao.setValues(reIssuedRefreshToken, id);
+        return reIssuedRefreshToken;
     }
 }
