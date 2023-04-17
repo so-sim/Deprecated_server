@@ -1,9 +1,5 @@
 package com.sosim.server.jwt;
 
-import static com.sosim.server.jwt.constant.CustomConstant.ACCESS_TOKEN_SUBJECT;
-import static com.sosim.server.jwt.constant.CustomConstant.ID;
-import static com.sosim.server.jwt.constant.CustomConstant.REFRESH_TOKEN_SUBJECT;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.sosim.server.jwt.property.JwtProperties;
@@ -21,12 +17,9 @@ public class JwtFactoryImpl implements JwtFactory {
     @Override
     public String createAccessToken(String id) {
         Date now = new Date();
-
-        return
-            JWT.create()
-            .withSubject(ACCESS_TOKEN_SUBJECT)
+        return JWT.create()
+            .withSubject(id)
             .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpirationPeriod()))
-            .withClaim(ID, id)
             .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
@@ -34,7 +27,6 @@ public class JwtFactoryImpl implements JwtFactory {
     public String createRefreshToken() {
         Date now = new Date();
         return JWT.create()
-            .withSubject(REFRESH_TOKEN_SUBJECT)
             .withExpiresAt(new Date(now.getTime() + jwtProperties.getRefreshTokenExpirationPeriod()))
             .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
