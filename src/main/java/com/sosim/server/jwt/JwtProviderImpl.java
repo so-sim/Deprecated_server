@@ -54,6 +54,6 @@ public class JwtProviderImpl implements JwtProvider {
      */
     @Override
     public String extractId(String accessToken) {
-        return decodedJWT(accessToken).getClaim(ID).asString();
+        return decodedJWT(accessToken).getSubject();
     }
 }
