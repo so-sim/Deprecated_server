@@ -24,8 +24,8 @@ public enum CodeType {
 
     // Jwt
     RE_ISSUE_TOKEN("2009", HttpStatus.OK, "AccessToken과 RefreshToken이 성공적으로 재발급 되었습니다."),
-    EXPIRE_TOKEN("2010", HttpStatus.UNAUTHORIZED, "AccessToken이 만료되었습니다."),
-    FALSIFIED_TOKEN("2011", HttpStatus.UNAUTHORIZED, "변조된 Token입니다."),
+    EXPIRE_TOKEN("2010", HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    FALSIFIED_TOKEN("2011", HttpStatus.UNAUTHORIZED, "변조된 토큰입니다."),
 
     // User
     USER_INFO_SUCCESS("3001", HttpStatus.OK, "회원 정보가 성공적으로 조회되었습니다."),
